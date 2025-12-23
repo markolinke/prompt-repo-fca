@@ -29,4 +29,3 @@ export interface Prompt {
   tags: string[];              // e.g. ["design", "validation", "shared"]
 }
 ```
-
