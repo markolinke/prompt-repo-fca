@@ -22,34 +22,6 @@ Flat Clean Architecture is a custom term for a combination of a Domain Driven De
   - `components/` (UI components, i.e. InvoiceStatusDisplay)
   - `views/` (Page-level components)
 
-## Purpose
-
-We use AI every day to accelerate feature design, architectural decisions, code generation, testing, documentation, and more.  
-This repository ensures every team member can quickly discover and reuse the best prompts instead of recreating them from scratch.
-
-## Features (Current)
-
-- Browse all shared prompts
-- Filter by category (hierarchical, e.g. `design/features/validation`)
-- Filter by tags
-- Search by title or tags
-- One-click copy of prompt template or instructions
-
-## Prompt Data Model
-
-Each prompt follows this structure (TypeScript interface):
-
-```typescript
-export interface Prompt {
-  id: string;                  // unique identifier (UUID or similar)
-  title: string;               // short, descriptive name
-  instructions: string;        // optional high-level guidance / context
-  template: string;            // the actual prompt text (with placeholders if needed)
-  category: string;            // hierarchical: e.g. "design/features/validation"
-  tags: string[];              // e.g. ["design", "validation", "shared"]
-}
-```
-
 ## Getting Started
 
 ### Prerequisites
@@ -163,14 +135,14 @@ applications/frontend-app/
 │   │   ├── customer/
 │   │   ├── payment/
 │   │   └── shared/                    # Cross-feature functionality (auth, notifications...)
-│   ├── shared/                        # Reusable UI components, utilities, hooks
+│   ├── common/                        # Reusable UI components, utilities, hooks
 │   │   ├── ui/                        # Button, Modal, DataTable...
 │   │   ├── utils/
 │   │   ├── hooks/
-│   │   └── types/
-│   ├── infrastructure/                # Global infrastructure (axios instance, auth, error handling)
-│   ├── api/                           # Optional: central API client / openapi generated clients
-│   └── types/                         # Global shared types (ID, Money, DateTime...)
+│   │   ├── types/
+│   │   ├── infrastructure/                # Global infrastructure (axios instance, auth, error handling)
+│   │   ├── api/                           # Optional: central API client / openapi generated clients
+│   │   └── types/                         # Global shared types (ID, Money, DateTime...)
 ├── public/
 ├── tests/                             # Optional: e2e / global setup
 ├── docs/                              # Project documentation
@@ -204,7 +176,8 @@ features/invoice/
 │   └── InvoiceDetailView.vue
 ├── entities/                          # Feature-specific types (if not in api/repository)
 │   └── entities.ts                    # Invoice, InvoiceItem...
-└── tests/                             # integration tests
+├── tests/                             # integration tests
+└── index.ts                           # barrel file
 ```
 
 ## Layer Responsibilities & Rules
