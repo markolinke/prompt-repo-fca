@@ -4,9 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "pnpm --filter applications/frontend-app dev",
-    "build": "pnpm --filter applications/frontend-app build"
+    "build": "pnpm --filter applications/frontend-app build",
+    "test": "pnpm --filter applications/frontend-app test",
+    "test:ui": "pnpm --filter applications/frontend-app test:ui"
   },
   "keywords": [],
   "author": "",
