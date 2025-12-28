@@ -1,25 +1,22 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-defineProps<{ msg: string }>()
-
 const count = ref(0)
+
+const api_base_url = import.meta.env.VITE_API_BASE_URL;
+
 </script>
 
 <template>
-  <h1>{{ msg }}</h1>
+  <h1>Hello World</h1>
 
-  <div class="card">
-    <button type="button" @click="count++">count is {{ count }}</button>
-    <p>
-      Edit
-      <code>app/HelloWorld.vue</code> to test HMR
-    </p>
+  <div>
+    <code>
+      API Base URL: {{ api_base_url }}
+    </code>
   </div>
 
-  <p>
-    Hello World
-  </p>
+  <button type="button" @click="count++">count is {{ count }}</button>
 </template>
 
 <style scoped>
