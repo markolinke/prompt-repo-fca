@@ -1,27 +1,11 @@
 import { Prompt } from "../entities/Prompt";
 import { PromptNotFoundError } from "../../../common/errors/DomainError";
 import { PromptRepositoryPort } from "../repositories/PromptRepositoryPort";
+import { mockData } from "../tests/PromptMockData";
 
 export class PromptRepositoryMock implements PromptRepositoryPort {
     private prompts: Prompt[];
-    private readonly _defaultPrompts: Prompt[] = [
-        Prompt.fromPlainObject({
-            id: '1',
-            title: 'Design a new feature',
-            instructions: 'Design a new feature for the product',
-            template: 'Design a new feature for the product',
-            category: 'design/features',
-            tags: ['design', 'features', 'shared']
-        }),
-        Prompt.fromPlainObject({
-            id: '2',
-            title: 'Design a new user interface',
-            instructions: 'Design a new user interface for the product',
-            template: 'Design a new user interface for the product',
-            category: 'design/ui',
-            tags: ['design', 'ui', 'shared']
-        })
-    ];
+    private readonly _defaultPrompts: Prompt[] = mockData.prompts.map(prompt => Prompt.fromPlainObject(prompt));
 
     constructor(initialPrompts: Prompt[] | undefined = undefined) {
         this.prompts = initialPrompts ?? this._defaultPrompts;
@@ -57,22 +41,3 @@ export class PromptRepositoryMock implements PromptRepositoryPort {
         return Promise.resolve();
     }
 }
-
-export const PromptMockData : Prompt[] = [
-    Prompt.fromPlainObject({
-        id: '1',
-        title: 'Design a new feature',
-        instructions: 'Design a new feature for the product',
-        template: 'Design a new feature for the product',
-        category: 'design/features',
-        tags: ['design', 'features', 'shared']
-    }),
-    Prompt.fromPlainObject({
-        id: '2',
-        title: 'Design a new user interface',
-        instructions: 'Design a new user interface for the product',
-        template: 'Design a new user interface for the product',
-        category: 'design/ui',
-        tags: ['design', 'ui', 'shared']
-    })
-];
