@@ -1,9 +1,9 @@
 import { Prompt } from "../entities/Prompt";
 import { PromptNotFoundError } from "../../../common/errors/DomainError";
-import type{ PromptRepositoryPort } from "../repositories/PromptRepositoryPort";
+import type{ PromptRepositoryPort } from "./PromptRepositoryPort";
 import { mockData } from "../tests/PromptMockData";
 
-export class PromptRepositoryMock implements PromptRepositoryPort {
+export class MockPromptRepository implements PromptRepositoryPort {
     private prompts: Prompt[];
     private readonly _defaultPrompts: Prompt[] = mockData.prompts.map(prompt => Prompt.fromPlainObject(prompt));
 
