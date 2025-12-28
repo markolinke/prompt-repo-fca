@@ -5,7 +5,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'home',
-    component: () => import('@/app/App.vue')
+    component: () => import('@/app/HelloWorld.vue')
   }
 ]
 
