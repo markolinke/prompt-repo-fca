@@ -1,5 +1,5 @@
 import { Prompt } from "../entities/Prompt";
-import { PromptRepositoryPort } from "../repositories/PromptRepositoryPort";
+import type { PromptRepositoryPort } from "../repositories/PromptRepositoryPort";
 
 export class PromptService {
     constructor(

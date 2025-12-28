@@ -1,0 +1,15 @@
+{
+  "name": "prompt-repo-fca",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "pnpm --filter applications/frontend-app dev",
+    "build": "pnpm --filter applications/frontend-app build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.26.0"
+}

@@ -65,13 +65,14 @@ export class Prompt {
 
         if (!id?.trim()) errors.push('ID is required');
         if (!title?.trim()) errors.push('Title is required');
+        if (!instructions?.trim()) errors.push('Instructions are required');
         if (!template?.trim()) errors.push('Template is required');
         if (category !== null && typeof category !== 'string') errors.push('Category must be a string or null');
 
         if (!Array.isArray(tags)) {
             errors.push('Tags must be an array');
         } else {
-            const tagSet = new Set<string>();
+            const tagSet: Set<string> = new Set();
             for (const tag of tags) {
                 if (typeof tag !== 'string') {
                     errors.push('All tags must be strings');

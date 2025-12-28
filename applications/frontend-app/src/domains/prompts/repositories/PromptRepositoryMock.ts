@@ -1,6 +1,6 @@
 import { Prompt } from "../entities/Prompt";
 import { PromptNotFoundError } from "../../../common/errors/DomainError";
-import { PromptRepositoryPort } from "../repositories/PromptRepositoryPort";
+import type{ PromptRepositoryPort } from "../repositories/PromptRepositoryPort";
 import { mockData } from "../tests/PromptMockData";
 
 export class PromptRepositoryMock implements PromptRepositoryPort {
