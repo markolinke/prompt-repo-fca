@@ -1,0 +1,1 @@
+export { bootstrapPrompts } from './bootstrap'

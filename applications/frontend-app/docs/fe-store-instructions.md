@@ -16,20 +16,38 @@ The `store/` layer uses **Pinia** to handle reactive state management for featur
 
 We use a **factory pattern** combined with **per-feature bootstrapping**:
 
-- Store is defined as a factory function `create<Feature>Store(deps)` that receives the service port.
+- Store is defined as a factory function `create<Feature>Store(deps)` that receives the service (real or mock).
 - **Feature bootstrap** (in `bootstrap.ts`, exported via `index.ts`) decides real vs. mock service and wires the store.
 - Components import the **pre-configured store** returned by the bootstrap (no deps needed at usage site).
+- We rely on **TypeScript structural typing** (duck typing) for service injection. No explicit service port/interface files are required unless a concrete need arises (e.g., multiple service variants).
 - This approach:
   - Keeps store logic framework-agnostic and portable
   - Provides explicit, type-safe DI
   - Enables environment-aware wiring (real vs. mock)
   - Excellent testability (bootstrap with mocks)
+  - Minimizes boilerplate
 
 ## Rules for Writing Store Code
 
 1. **Store Factory Only**
-   - Always export a factory function `create<Feature>Store(deps: { <feature>Service: <Feature>ServicePort })`.
+   - Always export a factory function `create<Feature>Store(deps: { <feature>Service: any })` where the service shape is defined inline or via structural typing.
    - Do **not** call `defineStore` directly in the feature barrel.
+   - Example:
+     ```typescript
+     // features/invoice/store/invoiceStore.ts
+     import { defineStore } from 'pinia'
+
+     export function createInvoiceStore({ invoiceService }: { invoiceService: any }) {
+       return defineStore('invoice', {
+         state: () => ({ /* ... */ }),
+         actions: {
+           async fetchInvoices() {
+             // Call invoiceService methods directly
+           }
+         }
+       })
+     }
+     ```
 
 2. **Bootstrapping Handles Wiring**
    - The feature's `bootstrap.ts` creates the service (real or mock) and calls the store factory.
@@ -37,8 +55,21 @@ We use a **factory pattern** combined with **per-feature bootstrapping**:
    - Example updated workflow:
      ```typescript
      // features/invoice/bootstrap.ts (internal)
+     import { createInvoiceStore } from './store/invoiceStore'
+     import { InvoiceService } from './services/InvoiceService'
+     import { MockInvoiceService } from './services/MockInvoiceService'
+     import { InvoiceRepository } from './repository/InvoiceRepository'
+     import invoiceRoutes from './routes'
+
+     const isMockEnv = import.meta.env.VITE_ENV === 'mock' || import.meta.env.MODE === 'test'
+
      export function bootstrapInvoice(options: { useMocks?: boolean } = {}) {
-       const service = options.useMocks ? new MockInvoiceService() : new InvoiceService(new InvoiceRepository())
+       const useMocks = options.useMocks ?? isMockEnv
+
+       const service = useMocks
+         ? new MockInvoiceService()
+         : new InvoiceService(new InvoiceRepository())
+
        return {
          useStore: createInvoiceStore({ invoiceService: service }),
          routes: invoiceRoutes,
@@ -75,5 +106,6 @@ We use a **factory pattern** combined with **per-feature bootstrapping**:
    - **Naming** – Actions: verb-based. Getters: noun/phrase.
    - **Centralized wiring deprecated** – do not add new stores to old `storeProviders.ts`.
    - **Every feature must export its bootstrap function** from `index.ts`.
+   - **Ports/Interfaces**: Use only for repositories (frequently swapped). For services, use duck typing to avoid unnecessary files.
 
-These guidelines keep Pinia stores clean, testable, and properly integrated into our self-bootstrapping feature module design.
+These guidelines keep Pinia stores clean, testable, minimally boilerplated, and properly integrated into our self-bootstrapping feature module design.

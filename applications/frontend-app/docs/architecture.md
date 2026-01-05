@@ -94,13 +94,12 @@ features/invoice/
 │   └── tests/
 ├── repository/                        # Data layer – maps DTO → domain model
 │   ├── InvoiceRepository.ts
-│   ├── InvoiceRepositoryPort.ts       # Optional port for DI
+│   ├── InvoiceRepositoryPort.ts       # Optional port for DI (recommended for repositories)
 │   ├── types.ts
 │   └── tests/
 ├── services/                          # Application layer – frontend business logic
 │   ├── InvoiceService.ts
 │   ├── MockInvoiceService.ts          # For testing / mock env
-│   ├── InvoiceServicePort.ts          # Service interface (port)
 │   └── tests/
 ├── store/                             # Presentation layer – Pinia store
 │   ├── invoiceStore.ts                # Factory function createInvoiceStore(deps)
@@ -145,7 +144,11 @@ router.addRoute({ path: '/', children: [...invoiceRoutes, ...customerRoutes] })
 
 ## Layer Responsibilities & Rules
 
-(Unchanged – see previous version for table)
+### Dependency Injection and Ports
+
+- Use explicit ports/interfaces **only for layers that are frequently swapped** (e.g., repositories, where we inject real vs. mock implementations into services).
+- For services, rely on TypeScript's structural typing (duck typing). Do **not** create dedicated service port files unless a concrete need arises (e.g., multiple service variants).
+- This keeps boilerplate minimal while maintaining type safety.
 
 ### Strict Rules (for developers & AI agents)
 

@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia';
 import { Prompt } from '../entities/Prompt';
-import { PromptService } from '../services/PromptService';
-import { MockPromptRepository } from '../repositories/MockPromptRepository';
 
 interface PromptsState {
     prompts: Prompt[];
@@ -9,28 +7,35 @@ interface PromptsState {
     error: string | null;
 }
 
-export const usePromptsStore = defineStore('prompts', {
-    state: (): PromptsState => ({
-        prompts: [],
-        loading: false,
-        error: null,
-    }),
+type PromptServiceShape = {
+    getPrompts(): Promise<Prompt[]>;
+    getPromptById(id: string): Promise<Prompt>;
+    createPrompt(prompt: Prompt): Promise<void>;
+    updatePrompt(prompt: Prompt): Promise<void>;
+    deletePrompt(id: string): Promise<void>;
+};
 
-    actions: {
-        async fetchPrompts(): Promise<void> {
-            this.loading = true;
-            this.error = null;
+export const createPromptsStore = (promptService: PromptServiceShape) => {
+    return defineStore('prompts', {
+        state: (): PromptsState => ({
+            prompts: [],
+            loading: false,
+            error: null,
+        }),
 
-            try {
-                const repository = new MockPromptRepository();
-                const service = new PromptService(repository);
-                this.prompts = await service.getPrompts();
-            } catch (error) {
-                this.error = error instanceof Error ? error.message : 'Failed to fetch prompts';
-            } finally {
-                this.loading = false;
-            }
+        actions: {
+            async fetchPrompts(): Promise<void> {
+                this.loading = true;
+                this.error = null;
+
+                try {
+                    this.prompts = await promptService.getPrompts();
+                } catch (error) {
+                    this.error = error instanceof Error ? error.message : 'Failed to fetch prompts';
+                } finally {
+                    this.loading = false;
+                }
+            },
         },
-    },
-});
-
+    });
+}
