@@ -1,10 +1,11 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import { HttpError, UnauthorizedError, NotFoundError, ForbiddenError, InternalServerError } from "@/common/errors/DomainError";
 import type { MyRouterPort } from "@/common/routing/MyRouterPort";
-import { inject } from "vue";
-
+import { appDependencies } from "@/common/env/AppDependencies";
 export class ApiClient {
-    private readonly myRouter: MyRouterPort = inject('myRouter') as MyRouterPort;
+    private get myRouter(): MyRouterPort {
+        return appDependencies.getMyRouter();
+    }
 
     constructor(
         private readonly baseUrl: string,

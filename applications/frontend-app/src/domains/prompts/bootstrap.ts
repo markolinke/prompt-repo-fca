@@ -2,7 +2,7 @@ import { PromptService } from './services/PromptService'
 import { MockPromptRepository } from './repositories/MockPromptRepository'
 import { HttpPromptRepository } from './repositories/HttpPromptRepository'
 import { ApiClient } from '@/common/http/HttpClient'
-import { appConfig } from '@/common/config/AppConfig'
+import { appConfig } from '@/common/env/AppConfig'
 import { createPromptsStore } from './store/PromptsStore'
 import promptsRoutes from './routes'
 
