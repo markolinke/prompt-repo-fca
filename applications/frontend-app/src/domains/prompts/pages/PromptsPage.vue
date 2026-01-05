@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import { usePromptsStore } from '../store/PromptsStore';
+import { bootstrapPrompts } from '../bootstrap';
 import PromptsList from '../components/PromptsList.vue';
 
-const promptsStore = usePromptsStore();
+const bootstrap = bootstrapPrompts();
+const promptsStore = bootstrap.useStore();
 
 onMounted(() => {
   promptsStore.fetchPrompts();

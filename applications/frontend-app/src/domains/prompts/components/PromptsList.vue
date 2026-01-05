@@ -1,32 +1,32 @@
 <script setup lang="ts">
-import { usePromptsStore } from '../store/PromptsStore';
-import { storeToRefs } from 'pinia';
+import { bootstrapPrompts } from '../bootstrap';
 
-const promptsStore = usePromptsStore();
-const { prompts, loading, error } = storeToRefs(promptsStore);
+const bootstrap = bootstrapPrompts();
+const promptsStore = bootstrap.useStore();
+
 </script>
 
 <template>
-  <div class="prompts-list">
+  <div class="max-w-80">
     <!-- Loading State -->
-    <div v-if="loading" class="text-center py-8">
+    <div v-if="promptsStore.loading" class="text-center py-8">
       <p class="text-gray-600">Loading prompts...</p>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error" class="text-center py-8">
-      <p class="text-red-600">Error: {{ error }}</p>
+    <div v-else-if="promptsStore.error" class="text-center py-8">
+      <p class="text-red-600">Error: {{ promptsStore.error }}</p>
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="prompts.length === 0" class="text-center py-8">
+    <div v-else-if="promptsStore.prompts.length === 0" class="text-center py-8">
       <p class="text-gray-600">No prompts found.</p>
     </div>
 
     <!-- Prompts List -->
     <ul v-else class="space-y-4">
       <li
-        v-for="prompt in prompts"
+        v-for="prompt in promptsStore.prompts"
         :key="prompt.id"
         class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
       >
@@ -53,10 +53,4 @@ const { prompts, loading, error } = storeToRefs(promptsStore);
     </ul>
   </div>
 </template>
-
-<style scoped>
-.prompts-list {
-  width: 100%;
-}
-</style>
 
