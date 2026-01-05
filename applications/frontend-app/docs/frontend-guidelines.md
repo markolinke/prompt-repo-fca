@@ -132,13 +132,12 @@ Each feature defines its routes in `features/<feature>/routes.ts`:
 ```typescript
 // features/prompts/routes.ts
 import { RouteRecordRaw } from 'vue-router'
-import PromptsListView from './views/PromptsListView.vue'
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/prompts',
     name: 'prompts-list',
-    component: PromptsListView,
+    component: () => import('./views/PromptsListView.vue'),
   },
 ]
 
@@ -165,10 +164,48 @@ export { bootstrapPrompts }
 
 ### Central App Wiring (Placeholder)
 
+All feature routes are registered in a single dedicated file using an **arrow function expression** assigned to a `const`.
+
+File: `src/app/bootstrap.ts`
+
 ```typescript
-// TBD: final decision on where and how to aggregate feature bootstraps
-// and add routes to the router instance
+// src/app/bootstrap.ts
+import { Router } from 'vue-router'
+import { bootstrapPrompts } from '@/features/prompts'
+
+export const bootstrapFeatures = (router: Router): void => {
+  for (const route of bootstrapPrompts().routes) {
+    router.addRoute(route)
+  }
+}
 ```
+
+Usage in `src/main.ts`:
+
+```typescript
+import { bootstrapFeatures } from './app/bootstrap'
+import router from './router'
+
+bootstrapFeatures(router)
+
+app.use(router)
+```
+
+### Conventions & Rules
+
+- Always use named routes
+- Use **arrow function expression** (`const name = (...) => {}`) for the central bootstrap function.
+- Prefer `for...of` loops when registering routes for maximum clarity.
+- New features are added by:
+  1. Importing their bootstrap
+  2. Adding a `for...of` block to register their routes
+- Route components should be lazy-loaded when appropriate:
+
+  ```typescript
+  component: () => import('./views/PromptsListView.vue')
+  ```
+
+- Features may define flat or nested routes as needed. No global root layout route is required unless decided later.
 
 ## Props, Emits, Slots, provide/inject (Placeholders)
 

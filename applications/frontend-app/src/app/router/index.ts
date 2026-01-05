@@ -6,11 +6,6 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     name: 'home',
     component: () => import('@/app/HelloWorld.vue')
-  },
-  {
-    path: '/prompts',
-    name: 'prompts',
-    component: () => import('@/domains/prompts/pages/PromptsPage.vue')
   }
 ]
 

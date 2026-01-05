@@ -1,10 +1,10 @@
-// features/invoice/bootstrap.ts (internal)
 import { PromptService } from './services/PromptService'
 import { MockPromptRepository } from './repositories/MockPromptRepository'
 import { HttpPromptRepository } from './repositories/HttpPromptRepository'
 import { ApiClient } from '@/common/http/HttpClient'
 import { appConfig } from '@/common/config/AppConfig'
 import { createPromptsStore } from './store/PromptsStore'
+import promptsRoutes from './routes'
 
 const bootstrapPrompts = () => {
     const useMocks = appConfig.isMockEnv
@@ -17,7 +17,8 @@ const bootstrapPrompts = () => {
     const service = new PromptService(repository)
   
     return {
-        useStore: createPromptsStore(service)
+        useStore: createPromptsStore(service),
+        routes: promptsRoutes
     }
 }
 

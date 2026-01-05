@@ -5,12 +5,16 @@ import router from './router'
 import { pinia } from './stores'
 import './main.css'
 import { MyRouter } from './router/MyRouter'
-const app = createApp(App)
+import { bootstrapFeatures } from './bootstrap'
 
-app.use(router)
+const app = createApp(App) // create the app
+
+bootstrapFeatures(router); // loop through the features and add the routes to the router
+
+app.use(router) // inject the router and the pinia store
 app.use(pinia)
 
-const myRouter = new MyRouter();
+const myRouter = new MyRouter();  // router port for error handling and other routing related logic
 app.provide('myRouter', myRouter)
 
-app.mount('#app')
+app.mount('#app') // mount the app to the DOM
