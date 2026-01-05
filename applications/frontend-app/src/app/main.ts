@@ -9,13 +9,18 @@ import { bootstrapFeatures } from './bootstrap'
 import { appDependencies } from '@/common/env/AppDependencies'
 
 const app = createApp(App) // create the app
+
+// 1. Register dependencies FIRST (before router needs them)
+const myRouter = new MyRouter(router);
+appDependencies.registerMyRouter(myRouter);
+app.provide('myRouter', myRouter)
+
+// 2. Add all routes BEFORE installing the router
+bootstrapFeatures(router); // Add routes to router instance
+
+// 3. NOW install the router (it will have all routes available)
 app.use(router) // inject the router and the pinia store
 app.use(pinia)
 
-const myRouter = new MyRouter(router);  // router port for error handling and other routing related logic
-app.provide('myRouter', myRouter)
-
-appDependencies.registerMyRouter(myRouter);
-bootstrapFeatures(router); // loop through the features and add the routes to the router
-
+// 4. Mount the app
 app.mount('#app') // mount the app to the DOM
