@@ -36,6 +36,25 @@ export const createPromptsStore = (promptService: PromptServiceShape) => {
                     this.loading = false;
                 }
             },
+
+            async updatePrompt(prompt: Prompt): Promise<void> {
+                this.loading = true;
+                this.error = null;
+
+                try {
+                    await promptService.updatePrompt(prompt);
+                    // Update the prompt in the local state
+                    const index = this.prompts.findIndex(p => p.id === prompt.id);
+                    if (index !== -1) {
+                        this.prompts[index] = prompt;
+                    }
+                } catch (error) {
+                    this.error = error instanceof Error ? error.message : 'Failed to update prompt';
+                    throw error;
+                } finally {
+                    this.loading = false;
+                }
+            },
         },
     });
 }
