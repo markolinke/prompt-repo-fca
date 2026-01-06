@@ -7,7 +7,7 @@ const promptsStore = bootstrap.useStore();
 </script>
 
 <template>
-  <div class="max-w-80">
+  <div class="w-full">
     <!-- Loading State -->
     <div v-if="promptsStore.loading" class="text-center py-8">
       <p class="text-gray-600">Loading prompts...</p>
@@ -24,30 +24,44 @@ const promptsStore = bootstrap.useStore();
     </div>
 
     <!-- Prompts List -->
-    <ul v-else class="space-y-4">
+    <ul v-else class="flex flex-col gap-3">
       <li
         v-for="prompt in promptsStore.prompts"
         :key="prompt.id"
-        class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+        class="flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white px-4 py-3 hover:bg-slate-50 transition-colors"
       >
-        <div class="flex flex-col gap-2">
-          <h3 class="text-lg font-semibold text-gray-900">{{ prompt.title }}</h3>
-          
-          <div v-if="prompt.category" class="text-sm text-gray-600">
-            <span class="font-medium">Category:</span> {{ prompt.category }}
-          </div>
-          
-          <div v-if="prompt.tags && prompt.tags.length > 0" class="flex flex-wrap gap-2">
+        <div class="flex min-w-0 flex-1 flex-col gap-1">
+          <h3 class="truncate text-base font-semibold text-gray-900">
+            {{ prompt.title }}
+          </h3>
+
+          <div class="flex flex-wrap items-center gap-2 text-xs text-gray-500">
+            <span v-if="prompt.category" class="font-medium">
+              {{ prompt.category }}
+            </span>
             <span
-              v-for="tag in prompt.tags"
-              :key="tag"
-              class="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full"
+              v-if="prompt.tags && prompt.tags.length > 0"
+              class="flex flex-wrap gap-1"
             >
-              {{ tag }}
+              <span
+                v-for="tag in prompt.tags"
+                :key="tag"
+                class="rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-700"
+              >
+                {{ tag }}
+              </span>
             </span>
           </div>
-          
-          <p class="text-sm text-gray-700 mt-2 line-clamp-2">{{ prompt.instructions }}</p>
+
+          <p class="mt-1 line-clamp-1 text-xs text-gray-600">
+            {{ prompt.instructions }}
+          </p>
+        </div>
+
+        <!-- Right-side placeholder for future actions/meta -->
+        <div class="hidden shrink-0 items-center gap-2 text-xs text-gray-400 sm:flex">
+          <span class="h-2 w-2 rounded-full bg-emerald-400" />
+          <span>Active</span>
         </div>
       </li>
     </ul>
