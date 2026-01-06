@@ -59,19 +59,19 @@ monorepo-root/
 applications/frontend-app/
 ├── src/
 │   ├── app/                           # Vue root: App.vue, main.ts, router, global providers
-│   ├── features/                      # Feature-Sliced Design (FSD) modules
+│   ├── domains/                       # Feature-Sliced Design (FSD) modules
 │   │   ├── invoice/                   # Example feature – self-contained module
 │   │   ├── customer/
 │   │   ├── payment/
 │   │   └── shared/                    # Cross-feature functionality (auth, notifications...)
-│   ├── shared/                        # Reusable UI components, utilities, hooks
-│   │   ├── ui/                        # Button, Modal, DataTable...
-│   │   ├── utils/
-│   │   ├── hooks/
-│   │   └── types/
-│   ├── infrastructure/                # Global infrastructure (axios instance, auth, error handling)
-│   ├── api/                           # Optional: central API client / openapi generated clients
-│   └── types/                         # Global shared types (ID, Money, DateTime...)
+│   ├── common/                        # Standardization of patterns, i.e. common errors, interfaces. NOT tied to framework!
+│   │   ├── errors/                    # Errors standardization...
+│   │   ├── http/                      # Rest client interfaces
+│   │   ├── env/                       # appDependencies, config...
+│   │   └── routing/                   # routing abstraction (i.e. vue router is implementation)
+│   ├── common-ui/                     # Global infrastructure (axios instance, auth, error handling)
+│   │   ├── components/                # Common components (buttons, links...)
+│   │   └── tests/                     # tests for the common components
 ├── public/
 ├── tests/                             # Optional: e2e / global setup
 ├── docs/                              # Project documentation
