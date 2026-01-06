@@ -37,6 +37,21 @@ export const createPromptsStore = (promptService: PromptServiceShape) => {
                 }
             },
 
+            async createPrompt(prompt: Prompt): Promise<void> {
+                this.loading = true;
+                this.error = null;
+
+                try {
+                    await promptService.createPrompt(prompt);
+                    this.prompts = await promptService.getPrompts();
+                } catch (error) {
+                    this.error = error instanceof Error ? error.message : 'Failed to create prompt';
+                    throw error;
+                } finally {
+                    this.loading = false;
+                }
+            },
+
             async updatePrompt(prompt: Prompt): Promise<void> {
                 this.loading = true;
                 this.error = null;

@@ -4,7 +4,7 @@ import { Prompt } from '../entities/Prompt';
 import { bootstrapPrompts } from '../bootstrap';
 import PromptsList from '../components/PromptsList.vue';
 import PromptDetails from '../components/PromptDetails.vue';
-import { FwbModal } from 'flowbite-vue';
+import { FwbModal, FwbButton } from 'flowbite-vue';
 
 const bootstrap = bootstrapPrompts();
 const promptsStore = bootstrap.useStore();
@@ -33,9 +33,13 @@ const handleCloseModal = () => {
   selectedPrompt.value = null;
 };
 
-const handleSave = async (updatedPrompt: Prompt) => {
+const handleSave = async (prompt: Prompt) => {
   try {
-    await promptsStore.updatePrompt(updatedPrompt);
+    if (prompt.id) {
+      await promptsStore.updatePrompt(prompt);
+    } else {
+      await promptsStore.createPrompt(prompt);
+    }
     handleCloseModal();
   } catch (error) {
     // Error is already handled in the store and displayed in error state
@@ -51,11 +55,28 @@ const handleDelete = () => {
   promptsStore.deletePrompt(selectedPrompt.value?.id ?? '');
   handleCloseModal();
 };
+
+const handleAddPrompt = () => {
+  selectedPrompt.value = Prompt.fromPlainObject({
+    id: '',
+    title: '',
+    instructions: '',
+    template: '',
+    category: '',
+    tags: []
+  });
+  isModalOpen.value = true;
+};
 </script>
 
 <template>
   <div class="container mx-auto max-w-5xl px-4 py-8">
-    <h1 class="text-3xl font-bold text-gray-900 mb-6">Prompts</h1>
+    <div class="flex justify-between items-center">
+      <h1 class="text-3xl font-bold text-gray-900 mb-6">
+        Prompts
+      </h1>
+      <fwb-button color="blue" @click="handleAddPrompt">Add Prompt</fwb-button>
+    </div>
     <PromptsList @prompt-click="handlePromptClick" />
 
     <!-- Flowbite Modal -->
