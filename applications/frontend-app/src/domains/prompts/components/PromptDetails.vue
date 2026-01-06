@@ -290,8 +290,7 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
       <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
         <fwb-button
           @click="handleCancel"
-          color="alternative"
-          outline
+          color="light"
         >
           Cancel
         </fwb-button>

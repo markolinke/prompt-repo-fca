@@ -56,6 +56,8 @@ const handleCancel = () => {
     <!-- Flowbite Modal -->
     <fwb-modal
       v-if="isModalOpen"
+      @click:outside="handleCloseModal"
+      @close="handleCloseModal"
     >
       <template #header>
         <div class="flex items-center text-lg font-semibold text-gray-900">
