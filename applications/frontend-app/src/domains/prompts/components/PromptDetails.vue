@@ -10,6 +10,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   save: [prompt: Prompt];
   cancel: [];
+  delete: [];
 }>();
 
 // Local state
@@ -89,6 +90,10 @@ const handleSave = () => {
 const handleCancel = () => {
   initializeEditState();
   emit('cancel');
+};
+
+const handleDelete = () => {
+  emit('delete');
 };
 
 const handleTagInputKeydown = (event: KeyboardEvent) => {
@@ -208,19 +213,24 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
-        <fwb-button
-          @click="handleCancel"
-          color="light"
-        >
-          Cancel
-        </fwb-button>
-        <fwb-button
-          @click="handleSave"
-          color="blue"
-        >
-          Save
-        </fwb-button>
+      <div class="flex justify-between">
+        <div>
+            <fwb-button color="red" @click="handleDelete">Delete</fwb-button>
+        </div>
+          <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+            <fwb-button
+              @click="handleCancel"
+              color="light"
+            >
+              Cancel
+            </fwb-button>
+            <fwb-button
+              @click="handleSave"
+              color="blue"
+            >
+              Save
+            </fwb-button>
+          </div>
       </div>
     </div>
   </div>

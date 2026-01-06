@@ -55,6 +55,21 @@ export const createPromptsStore = (promptService: PromptServiceShape) => {
                     this.loading = false;
                 }
             },
+
+            async deletePrompt(id: string): Promise<void> {
+                this.loading = true;
+                this.error = null;
+
+                try {
+                    await promptService.deletePrompt(id);
+                    this.prompts = await promptService.getPrompts();
+                } catch (error) {
+                    this.error = error instanceof Error ? error.message : 'Failed to delete prompt';
+                    throw error;
+                } finally {
+                    this.loading = false;
+                }
+            },
         },
     });
 }

@@ -46,6 +46,11 @@ const handleSave = async (updatedPrompt: Prompt) => {
 const handleCancel = () => {
   handleCloseModal();
 };
+
+const handleDelete = () => {
+  promptsStore.deletePrompt(selectedPrompt.value?.id ?? '');
+  handleCloseModal();
+};
 </script>
 
 <template>
@@ -79,6 +84,7 @@ const handleCancel = () => {
             })"
             @save="handleSave"
             @cancel="handleCancel"
+            @delete="handleDelete"
           />
         </div>
       </template>
