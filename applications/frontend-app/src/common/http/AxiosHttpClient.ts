@@ -3,10 +3,10 @@ import { HttpError, UnauthorizedError, NotFoundError, ForbiddenError, InternalSe
 import type { MyRouterPort } from "@/common/routing/MyRouterPort";
 import { appDependencies } from "@/common/env/AppDependencies";
 import type { HttpClientPort } from "./HttpClientPort";
+
 export class AxiosHttpClient implements HttpClientPort {
-    private get myRouter(): MyRouterPort {
-        return appDependencies.getMyRouter();
-    }
+
+    private readonly router: MyRouterPort = appDependencies.getMyRouter();
 
     constructor(
         private readonly baseUrl: string,
@@ -82,7 +82,7 @@ export class AxiosHttpClient implements HttpClientPort {
     }
 
     private navigateToError(error: Error): void {
-        this.myRouter.navigateTo({ name: 'Error', params: { error } });
+        this.router.navigateTo({ name: 'Error', params: { error } });
       }
     
     private handleError(error: any): never {
