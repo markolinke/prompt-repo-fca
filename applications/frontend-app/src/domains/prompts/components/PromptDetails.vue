@@ -101,7 +101,7 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
 </script>
 
 <template>
-  <div class="w-full">
+  <div>
     <!-- Read-only Mode -->
     <div v-if="mode === 'read-only'" class="space-y-6">
       <!-- ID -->
@@ -248,18 +248,18 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
             placeholder="Add a tag"
             @keydown="handleTagInputKeydown"
           />
-          <FwbButton
+          <fwb-button
             @click="addTag"
             color="blue"
             size="sm"
           >
             Add
-          </FwbButton>
+          </fwb-button>
         </div>
       </div>
 
       <!-- Instructions -->
-      <div>
+      <!-- <div>
         <label for="edit-instructions" class="block text-xs font-medium text-gray-700 uppercase tracking-wide mb-1">
           Instructions <span class="text-red-500">*</span>
         </label>
@@ -270,10 +270,10 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-sans resize-y"
           placeholder="Enter instructions for the prompt"
         />
-      </div>
+      </div> -->
 
       <!-- Template -->
-      <div>
+      <!-- <div>
         <label for="edit-template" class="block text-xs font-medium text-gray-700 uppercase tracking-wide mb-1">
           Template <span class="text-red-500">*</span>
         </label>
@@ -284,23 +284,23 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono resize-y"
           placeholder="Enter the prompt template"
         />
-      </div>
+      </div> -->
 
       <!-- Action Buttons -->
       <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
-        <FwbButton
+        <fwb-button
           @click="handleCancel"
           color="alternative"
           outline
         >
           Cancel
-        </FwbButton>
-        <FwbButton
+        </fwb-button>
+        <fwb-button
           @click="handleSave"
           color="blue"
         >
           Save
-        </FwbButton>
+        </fwb-button>
       </div>
     </div>
   </div>

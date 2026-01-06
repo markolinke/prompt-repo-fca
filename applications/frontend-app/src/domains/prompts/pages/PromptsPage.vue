@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { Prompt } from '../entities/Prompt';
 import { bootstrapPrompts } from '../bootstrap';
 import PromptsList from '../components/PromptsList.vue';
@@ -15,6 +15,13 @@ onMounted(() => {
 
 const isModalOpen = ref(false);
 const selectedPrompt = ref<Prompt | null>(null);
+
+// Clear selected prompt when modal closes (handles ESC and outside click)
+watch(isModalOpen, (newValue) => {
+  if (!newValue) {
+    selectedPrompt.value = null;
+  }
+});
 
 const handlePromptClick = (prompt: Prompt) => {
   selectedPrompt.value = prompt;
@@ -47,10 +54,8 @@ const handleCancel = () => {
     <PromptsList @prompt-click="handlePromptClick" />
 
     <!-- Flowbite Modal -->
-    <FwbModal
-      v-if="selectedPrompt"
-      v-model="isModalOpen"
-      size="4xl"
+    <fwb-modal
+      v-if="isModalOpen"
     >
       <template #header>
         <div class="flex items-center text-lg font-semibold text-gray-900">
@@ -76,6 +81,6 @@ const handleCancel = () => {
           />
         </div>
       </template>
-    </FwbModal>
+    </fwb-modal>
   </div>
 </template>
