@@ -1,15 +1,15 @@
 import { MyRouterPort } from "@/common/routing/MyRouterPort";
-import { RouteLocationRaw, useRouter } from "vue-router";
-
-const router = useRouter();
+import { RouteLocationRaw, Router } from "vue-router";
 
 export class MyRouter implements MyRouterPort {
+    constructor(private readonly router: Router) {}
+
     navigateTo(route: object): void {
         const routeLocation: RouteLocationRaw = route as RouteLocationRaw;
-        router.push(routeLocation);
+        this.router.push(routeLocation);
     }
 
     navigateToError(error: Error): void {
-        router.push({ name: 'Error', params: { name: error.name, message: error.message } });
+        this.router.push({ name: 'Error', params: { name: error.name, message: error.message } });
     }
 }

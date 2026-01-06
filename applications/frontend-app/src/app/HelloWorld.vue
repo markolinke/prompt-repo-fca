@@ -17,6 +17,9 @@ const api_base_url = import.meta.env.VITE_API_BASE_URL;
   </div>
 
   <button type="button" @click="count++">count is {{ count }}</button>
+  <div class="mt-4">
+    <RouterLink to="/prompts">Prompts</RouterLink>
+  </div>
 </template>
 
 <style scoped>
