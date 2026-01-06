@@ -47,6 +47,7 @@ For true end-to-end testing (browser automation, cross-browser, visual regressio
 - User interactions and their outcomes
 - Error states and edge cases from user perspective
 - Validation rules as users experience them
+- **Use `data-testid` attributes for test selectors** (see Test Selectors section below)
 
 ❌ **DON'T Test:**
 
@@ -54,6 +55,7 @@ For true end-to-end testing (browser automation, cross-browser, visual regressio
 - Store actions in isolation (tested via integration tests)
 - Implementation details (e.g., "does component call store method X")
 - Technical details that don't affect user experience
+- **NEVER use CSS class selectors or HTML structure-dependent selectors in tests** (see Test Selectors section below)
 
 ## Test Organization
 
@@ -231,7 +233,7 @@ describe('Creating Prompts', () => {
       await new Promise(resolve => setTimeout(resolve, 100));
       await wrapper.vm.$nextTick();
       
-      const initialCount = wrapper.findAll('li').length;
+      const initialCount = wrapper.findAll('[data-testid="initial-count"]').length;
 
       // When: User clicks "Add Prompt" and fills the form
       const addButton = wrapper.find('fwb-button');
@@ -245,7 +247,7 @@ describe('Creating Prompts', () => {
       await promptDetails.find('#edit-template').setValue('Test template');
       
       // Save
-      const saveButton = promptDetails.findAll('fwb-button').find(
+      const saveButton = promptDetails.findAll('[data-testid="save-button"]').find(
         btn => btn.attributes('color') === 'blue'
       );
       await saveButton?.trigger('click');
@@ -256,7 +258,7 @@ describe('Creating Prompts', () => {
 
       // Then: The prompt appears in the list
       expect(wrapper.text()).toContain('New Test Prompt');
-      expect(wrapper.findAll('li').length).toBe(initialCount + 1);
+      expect(wrapper.findAll('[data-testid="prompt-item"]').length).toBe(initialCount + 1);
     });
 
     it('should prevent creating a prompt without required fields', async () => {
@@ -271,7 +273,7 @@ describe('Creating Prompts', () => {
 
       // When: User tries to save without filling required fields
       const promptDetails = wrapper.findComponent({ name: 'PromptDetails' });
-      const saveButton = promptDetails.findAll('fwb-button').find(
+      const saveButton = promptDetails.findAll('[data-testid="save-button"]').find(
         btn => btn.attributes('color') === 'blue'
       );
       await saveButton?.trigger('click');
@@ -442,6 +444,192 @@ Each test should:
 - Real service (not mocked)
 - Mock repository only (the boundary)
 
+### 7. Use Data Attributes for Test Selectors
+
+**CRITICAL**: Always use `data-testid` attributes for selecting elements in tests. See the [Test Selectors](#test-selectors) section below for detailed guidance.
+
+## Test Selectors
+
+### Why Test Selectors Matter
+
+Test selectors are how your tests find and interact with elements in the DOM. **Using the wrong selectors creates brittle, fragile tests that break when you refactor styling or HTML structure**, even when functionality remains unchanged.
+
+### The Problem with CSS Class Selectors
+
+❌ **NEVER DO THIS**:
+
+```typescript
+// ❌ BAD: Fragile - breaks when CSS classes change
+const promptItems = wrapper.findAll('[class*="border-gray-200"]');
+const button = wrapper.find('.btn-primary');
+```
+
+**Why this is terrible:**
+
+- CSS classes are **styling concerns**, not semantic markers
+- Classes change frequently during design iterations
+- Tests break when you refactor Tailwind classes or switch CSS frameworks
+- Creates tight coupling between tests and presentation layer
+- Violates separation of concerns (tests depend on styling implementation)
+
+### The Solution: Data Attributes
+
+✅ **ALWAYS DO THIS**:
+
+```vue
+<!-- In your component template -->
+<li
+  v-for="prompt in promptsStore.prompts"
+  :key="prompt.id"
+  data-testid="prompt-item"
+  class="flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white px-4 py-3"
+  @click="handlePromptClick(prompt)"
+>
+  <!-- content -->
+</li>
+
+<button
+  data-testid="add-prompt-button"
+  class="btn btn-primary"
+  @click="handleAddPrompt"
+>
+  Add Prompt
+</button>
+```
+
+```typescript
+// In your test
+const promptItems = wrapper.findAll('[data-testid="prompt-item"]');
+const addButton = wrapper.find('[data-testid="add-prompt-button"]');
+```
+
+### Why Data Attributes Are Best Practice
+
+1. **Stable and Independent**: `data-testid` attributes are **explicitly for testing** and won't change with styling
+2. **Clear Intent**: Makes it obvious which elements are important for testing
+3. **Framework Agnostic**: Works with Vue Test Utils, Testing Library, Playwright, etc.
+4. **Industry Standard**: Recommended by Vue 3, React Testing Library, and modern testing best practices
+5. **Resilient to Refactoring**: Tests survive CSS framework changes, design system updates, and styling refactors
+
+### Naming Conventions
+
+Use descriptive, semantic names that describe the element's purpose:
+
+```vue
+<!-- ✅ GOOD: Clear and descriptive -->
+<button data-testid="submit-form-button">Submit</button>
+<input data-testid="prompt-title-input" />
+<div data-testid="prompt-list-container">
+  <li data-testid="prompt-item" v-for="prompt in prompts">
+    <h3 data-testid="prompt-title">{{ prompt.title }}</h3>
+  </li>
+</div>
+
+<!-- ❌ BAD: Vague or implementation-focused -->
+<button data-testid="btn1">Submit</button>
+<div data-testid="div-container">
+```
+
+### When to Add `data-testid` Attributes
+
+Add `data-testid` to elements that:
+
+- ✅ Are interacted with in tests (buttons, inputs, links)
+- ✅ Are counted or verified (list items, cards, rows)
+- ✅ Represent important UI states (loading indicators, error messages, empty states)
+- ✅ Are part of user workflows you're testing
+
+**Don't add `data-testid` to every element** - only those that tests need to find.
+
+### Alternative Approaches (When Appropriate)
+
+While `data-testid` is the primary approach, there are cases where alternatives make sense:
+
+1. **Semantic HTML Selectors** (when structure is stable):
+
+   ```typescript
+   // ✅ OK: Using semantic HTML when structure is unlikely to change
+   const listItems = wrapper.findAll('li'); // If you always use <li> for list items
+   const form = wrapper.find('form');
+   ```
+
+2. **Component References** (for component testing):
+
+   ```typescript
+   // ✅ OK: Finding child components
+   const promptDetails = wrapper.findComponent({ name: 'PromptDetails' });
+   ```
+
+3. **Text Content** (for user-visible content):
+
+   ```typescript
+   // ✅ OK: Testing user-visible text
+   expect(wrapper.text()).toContain('No prompts found');
+   ```
+
+**However**: Prefer `data-testid` when you need to:
+
+- Count multiple instances of the same element type
+- Interact with specific elements (not just any button, but "the add prompt button")
+- Verify element presence/absence reliably
+
+### Examples from Our Codebase
+
+**Before (Fragile)**:
+
+```typescript
+// ❌ BAD: Depends on CSS classes
+const promptItems = wrapper.findAll('[class*="border-gray-200"]');
+expect(promptItems.length).toBe(allPrompts.length);
+```
+
+**After (Stable)**:
+
+```vue
+<!-- In PromptsList.vue -->
+<li
+  v-for="prompt in promptsStore.prompts"
+  :key="prompt.id"
+  data-testid="prompt-item"
+  class="flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white px-4 py-3"
+>
+```
+
+```typescript
+// ✅ GOOD: Uses data-testid
+const promptItems = wrapper.findAll('[data-testid="prompt-item"]');
+expect(promptItems.length).toBe(allPrompts.length);
+```
+
+### Migration Checklist
+
+When updating existing tests:
+
+- [ ] Identify all CSS class selectors in tests
+- [ ] Add `data-testid` attributes to corresponding template elements
+- [ ] Update test selectors to use `data-testid`
+- [ ] Verify tests still pass
+- [ ] Consider if semantic HTML selectors are appropriate (use sparingly)
+
+### Summary: Test Selector Rules
+
+✅ **DO:**
+
+- Use `data-testid` attributes for test selectors
+- Use descriptive, semantic names
+- Add `data-testid` to elements that tests interact with or verify
+- Use semantic HTML selectors only when structure is stable and unlikely to change
+- Use component references for finding child components
+
+❌ **DON'T:**
+
+- Use CSS class selectors (`[class*="..."]`, `.btn-primary`, etc.)
+- Use HTML structure-dependent selectors that break on refactoring
+- Use IDs for styling (IDs should be for form labels, not test selectors)
+- Add `data-testid` to every element (only those needed by tests)
+
+**Remember**: Tests should verify **functionality**, not styling. Using `data-testid` keeps your tests focused on what matters: whether features work for users.
+
 ## Test Isolation and Reducing Flakiness
 
 ### Critical Rules for Test Isolation
@@ -574,6 +762,7 @@ Each test should:
 3. **Timing Issues**: Not waiting for async operations or Vue updates
 4. **Test Order Dependencies**: Tests that depend on previous test state
 5. **Global State Leaks**: Modifying global objects that persist between tests
+6. **Fragile Selectors**: Using CSS class selectors that break when styling changes
 
 ### Isolation Checklist
 
@@ -586,6 +775,7 @@ Before writing a test, ensure:
 - [ ] Async operations are properly awaited
 - [ ] Tests don't depend on execution order
 - [ ] No global state modifications
+- [ ] Test selectors use `data-testid` attributes (not CSS classes)
 
 ## What NOT to Test
 
@@ -595,6 +785,7 @@ Before writing a test, ensure:
 - **Store state structure** (tested via user workflows)
 - **Service method signatures** (tested in unit tests)
 - **Internal implementation details**
+- **CSS classes or styling** (use `data-testid` for selectors, not CSS classes)
 
 ### Separate Concerns
 
@@ -670,5 +861,6 @@ The integration tests verify that all layers work together correctly, which is t
 - **Focus on user workflows** from acceptance criteria
 - **Keep tests independent** and maintainable
 - **Separate unit tests** (service layer) from **integration tests** (use cases)
+- **Use `data-testid` attributes for test selectors** - never use CSS class selectors
 
 This approach ensures tests provide real value: confidence that features work for users, not just that code executes.
