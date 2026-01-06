@@ -1,7 +1,7 @@
 import { appDependencies } from "@/common/env/AppDependencies";
 import type { AppConfig } from "@/common/env/AppDependencies";
 import { MyRouter } from "../router/MyRouter";
-import { AxiosHttpClient } from "@/common/http/HttpClient";
+import { AxiosHttpClient } from "@/common/http/AxiosHttpClient";
 import { Router } from 'vue-router'
 
 export const bootstrapDependencies = (router: Router) : void => {
