@@ -20,6 +20,7 @@ We follow a **Flat Clean Architecture** approach:
 - Single responsibility per file/folder
 - Clear boundaries between layers
 - Easy to mock and test
+- **100% test coverage** — All code should have comprehensive test coverage
 - Minimal cognitive load for developers and AI agents
 - **Features are self-sufficient modules** with a single public entry point
 
@@ -127,6 +128,7 @@ applications/frontend-app/
 - This replaces centralized wiring and makes features plug-and-play.
 
 Example bootstrap signature (from `domains/prompts/bootstrap.ts`):
+
 ```typescript
 import { PromptService } from './services/PromptService'
 import { MockPromptRepository } from './repositories/MockPromptRepository'
@@ -156,6 +158,7 @@ export { bootstrapPrompts }
 ```
 
 The root application aggregates features in `src/app/bootstrap/bootstrapFeatures.ts`:
+
 ```typescript
 // src/app/bootstrap/bootstrapFeatures.ts
 import { Router } from 'vue-router'
@@ -196,7 +199,13 @@ Global dependencies (e.g., router) are bootstrapped in `src/app/bootstrap/bootst
    - Repositories: Provide `Mock<Feature>Repository` for tests and mock env.
    - Services: Test against mock repositories.
    - HTTP: [TO BE DECIDED] for global MSW vs. per-feature.
-7. **Tests** → colocated in each layer's `tests/` folder (e.g., `domains/prompts/tests/PromptService.test.ts` using Vitest).
+7. **Tests**:
+   - **100% test coverage** is the target for all code
+   - Tests are colocated in each feature's `tests/` folder (e.g., `domains/prompts/tests/`)
+   - Use Vitest for unit tests (service layer) and integration tests (use case level)
+   - Integration tests use real components + real store + real service + mock repository
+   - Tests are organized by use case/user story, not by component
+   - See `testing.md` for detailed testing guidelines and patterns
 8. **Errors**: Generic errors in `common/errors/DomainError.ts`; feature-specific in the feature (e.g., entities or repositories).
 9. **Validation**: Basic in entities; heavy on backend.
 10. **DTOs**: Place in appropriate layer (e.g., repositories for API payloads); [TO BE DECIDED] for conventions.
@@ -209,4 +218,4 @@ Global dependencies (e.g., router) are bootstrapped in `src/app/bootstrap/bootst
 - **Testing**: Vitest + `@testing-library/vue`
 - **Type safety**: TypeScript (strict mode)
 
-This structure ensures features are modular, environment-aware, highly testable, and easy to onboard or extract. See `domain-core-layers.md` for entities/repositories/services details, `common-layer.md` for common infrastructure, and `frontend-store.md` for store guidelines.
+This structure ensures features are modular, environment-aware, highly testable, and easy to onboard or extract. See `domain-core-layers.md` for entities/repositories/services details, `common-layer.md` for common infrastructure, `frontend-store.md` for store guidelines, and `testing.md` for comprehensive testing strategy and patterns.

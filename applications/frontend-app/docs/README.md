@@ -21,3 +21,7 @@ Pinia store layer guidelines. Explains reactive state management, dependency inj
 ### [vue-application.md](./vue-application.md)
 
 Vue 3 component development guidelines. Covers component structure, store integration patterns, routing, template conventions, lifecycle hooks, and composition API best practices. Defines the presentation layer rules and what components should and should not do.
+
+### [testing.md](./testing.md)
+
+Testing guidelines and best practices. Describes our use case-based integration testing approach, test organization patterns, bootstrap mocking for test isolation, and strategies for reducing flakiness. Covers both unit tests (service layer) and integration tests (user workflows) with real components, stores, and services using mock repositories.
