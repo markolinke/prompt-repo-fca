@@ -77,7 +77,6 @@ const handleCancel = () => {
               category: selectedPrompt.category,
               tags: [...selectedPrompt.tags]
             })"
-            mode="edit"
             @save="handleSave"
             @cancel="handleCancel"
           />

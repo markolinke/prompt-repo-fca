@@ -5,7 +5,6 @@ import { FwbButton } from 'flowbite-vue';
 
 const props = defineProps<{
   prompt: Prompt;
-  mode: 'edit' | 'read-only';
 }>();
 
 const emit = defineEmits<{
@@ -13,7 +12,7 @@ const emit = defineEmits<{
   cancel: [];
 }>();
 
-// Local state for edit mode
+// Local state
 const editTitle = ref<string>('');
 const editInstructions = ref<string>('');
 const editTemplate = ref<string>('');
@@ -102,75 +101,7 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
 
 <template>
   <div>
-    <!-- Read-only Mode -->
-    <div v-if="mode === 'read-only'" class="space-y-6">
-      <!-- ID -->
-      <div>
-        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-          ID
-        </label>
-        <p class="text-sm text-gray-900 font-mono bg-gray-50 px-3 py-2 rounded border border-gray-200">
-          {{ prompt.id }}
-        </p>
-      </div>
-
-      <!-- Title -->
-      <div>
-        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-          Title
-        </label>
-        <p class="text-base font-semibold text-gray-900">
-          {{ prompt.title }}
-        </p>
-      </div>
-
-      <!-- Category -->
-      <div v-if="prompt.category">
-        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-          Category
-        </label>
-        <p class="text-sm text-gray-700 font-medium">
-          {{ prompt.category }}
-        </p>
-      </div>
-
-      <!-- Tags -->
-      <div v-if="prompt.tags && prompt.tags.length > 0">
-        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-          Tags
-        </label>
-        <div class="flex flex-wrap gap-2">
-          <span
-            v-for="tag in prompt.tags"
-            :key="tag"
-            class="rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700"
-          >
-            {{ tag }}
-          </span>
-        </div>
-      </div>
-
-      <!-- Instructions -->
-      <div>
-        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-          Instructions
-        </label>
-        <p class="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 px-4 py-3 rounded-lg border border-gray-200">
-          {{ prompt.instructions }}
-        </p>
-      </div>
-
-      <!-- Template -->
-      <div>
-        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-          Template
-        </label>
-        <pre class="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 px-4 py-3 rounded-lg border border-gray-200 font-sans overflow-x-auto">{{ prompt.template }}</pre>
-      </div>
-    </div>
-
-    <!-- Edit Mode -->
-    <div v-else class="space-y-6">
+    <div class="space-y-6">
       <!-- Validation Errors -->
       <div v-if="validationErrors.length > 0" class="rounded-lg border border-red-200 bg-red-50 p-4">
         <ul class="list-disc list-inside space-y-1">
@@ -178,16 +109,6 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
             {{ error }}
           </li>
         </ul>
-      </div>
-
-      <!-- ID (read-only in edit mode) -->
-      <div>
-        <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-          ID
-        </label>
-        <p class="text-sm text-gray-500 font-mono bg-gray-100 px-3 py-2 rounded border border-gray-300">
-          {{ prompt.id }}
-        </p>
       </div>
 
       <!-- Title -->
@@ -266,7 +187,7 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
         <textarea
           id="edit-instructions"
           v-model="editInstructions"
-          rows="6"
+          rows="3"
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-sans resize-y"
           placeholder="Enter instructions for the prompt"
         />
@@ -280,7 +201,7 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
         <textarea
           id="edit-template"
           v-model="editTemplate"
-          rows="12"
+          rows="3"
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono resize-y"
           placeholder="Enter the prompt template"
         />
