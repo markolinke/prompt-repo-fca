@@ -6,4 +6,5 @@ export interface PromptRepositoryPort {
     createPrompt(prompt: Prompt): Promise<void>;
     updatePrompt(prompt: Prompt): Promise<void>;
     deletePrompt(id: string): Promise<void>;
+    searchPrompts(query: string): Promise<Prompt[]>;
 }

@@ -26,4 +26,8 @@ export class HttpPromptRepository implements PromptRepositoryPort {
     deletePrompt(id: string): Promise<void> {
         return this.apiClient.delete(`/prompts/${id}`);
     }
+
+    searchPrompts(query: string): Promise<Prompt[]> {
+        return this.apiClient.get(`/prompts/search?query=${query}`);
+    }
 }
