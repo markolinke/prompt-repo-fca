@@ -82,7 +82,7 @@ describe('PromptService', () => {
     describe('createPrompt', () => {
         it('should successfully create prompt', async () => {
             const newPrompt = new Prompt(
-                '3',
+                '5',
                 'New Prompt',
                 'Test instructions',
                 'Test template',
@@ -92,7 +92,7 @@ describe('PromptService', () => {
             
             await service.createPrompt(newPrompt);
             
-            const createdPrompt = await service.getPromptById('3');
+            const createdPrompt = await service.getPromptById('5');
             expect(createdPrompt).toEqual(newPrompt);
         });
 
