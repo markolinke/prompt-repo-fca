@@ -1,15 +1,14 @@
 import { PromptService } from './services/PromptService'
 import { MockPromptRepository } from './repositories/MockPromptRepository'
 import { HttpPromptRepository } from './repositories/HttpPromptRepository'
-import { ApiClient } from '@/common/http/HttpClient'
-import { appConfig } from '@/common/env/AppConfig'
 import { createPromptsStore } from './store/PromptsStore'
 import promptsRoutes from './routes'
+import { appDependencies } from "@/common/env/AppDependencies";
 
 const bootstrapPrompts = () => {
-    const useMocks = appConfig.isMockEnv
+    const useMocks = appDependencies.getAppConfig().isMockEnv
 
-    const apiClient = new ApiClient(appConfig.baseUrl);
+    const apiClient = appDependencies.getHttpClient();
     const repository = useMocks
         ? new MockPromptRepository()
         : new HttpPromptRepository(apiClient)

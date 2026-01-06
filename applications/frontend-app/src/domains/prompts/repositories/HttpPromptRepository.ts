@@ -1,10 +1,10 @@
-import { ApiClient } from "@/common/http/HttpClient";
+import type { HttpClientPort } from "@/common/http/HttpClientPort";
 import { Prompt } from "../entities/Prompt";
 import type { PromptRepositoryPort } from "./PromptRepositoryPort";
 
 export class HttpPromptRepository implements PromptRepositoryPort {
     constructor(
-        private readonly apiClient: ApiClient
+        private readonly apiClient: HttpClientPort
     ) {}
 
     getPrompts(): Promise<Prompt[]> {

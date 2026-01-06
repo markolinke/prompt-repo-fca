@@ -2,7 +2,8 @@ import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import { HttpError, UnauthorizedError, NotFoundError, ForbiddenError, InternalServerError } from "@/common/errors/DomainError";
 import type { MyRouterPort } from "@/common/routing/MyRouterPort";
 import { appDependencies } from "@/common/env/AppDependencies";
-export class ApiClient {
+import type { HttpClientPort } from "./HttpClientPort";
+export class AxiosHttpClient implements HttpClientPort {
     private get myRouter(): MyRouterPort {
         return appDependencies.getMyRouter();
     }
