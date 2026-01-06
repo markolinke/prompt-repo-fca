@@ -15,10 +15,7 @@ export class Prompt {
         template: string,
         category: string | null,
         tags: string[]
-    ) {
-        // Validate and assign properties
-        this.validate(id, title, instructions, template, category, tags);
-        
+    ) {        
         this.id = id;
         this.title = title;
         this.instructions = instructions;
@@ -53,27 +50,21 @@ export class Prompt {
      * Validates prompt properties according to domain rules.
      * @throws {ValidationError} if validation fails
      */
-    private validate(
-        id: string,
-        title: string,
-        instructions: string,
-        template: string,
-        category: string | null,
-        tags: string[]
+    public validate(
     ): void {
         const errors: string[] = [];
 
-        if (!id?.trim()) errors.push('ID is required');
-        if (!title?.trim()) errors.push('Title is required');
-        if (!instructions?.trim()) errors.push('Instructions are required');
-        if (!template?.trim()) errors.push('Template is required');
-        if (category !== null && typeof category !== 'string') errors.push('Category must be a string or null');
+        if (!this.id?.trim()) errors.push('ID is required');
+        if (!this.title?.trim()) errors.push('Title is required');
+        if (!this.instructions?.trim()) errors.push('Instructions are required');
+        if (!this.template?.trim()) errors.push('Template is required');
+        if (this.category !== null && typeof this.category !== 'string') errors.push('Category must be a string or null');
 
-        if (!Array.isArray(tags)) {
+        if (!Array.isArray(this.tags)) {
             errors.push('Tags must be an array');
         } else {
             const tagSet: Set<string> = new Set();
-            for (const tag of tags) {
+            for (const tag of this.tags) {
                 if (typeof tag !== 'string') {
                     errors.push('All tags must be strings');
                     break;

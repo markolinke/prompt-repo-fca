@@ -1,8 +1,17 @@
 <script setup lang="ts">
+import { Prompt } from '../entities/Prompt';
 import { bootstrapPrompts } from '../bootstrap';
 
 const bootstrap = bootstrapPrompts();
 const promptsStore = bootstrap.useStore();
+
+const emit = defineEmits<{
+  promptClick: [prompt: Prompt];
+}>();
+
+const handlePromptClick = (prompt: Prompt) => {
+  emit('promptClick', prompt);
+};
 
 </script>
 
@@ -28,7 +37,8 @@ const promptsStore = bootstrap.useStore();
       <li
         v-for="prompt in promptsStore.prompts"
         :key="prompt.id"
-        class="flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white px-4 py-3 hover:bg-slate-50 transition-colors"
+        class="flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white px-4 py-3 hover:bg-slate-50 transition-colors cursor-pointer"
+        @click="handlePromptClick(prompt as Prompt)"
       >
         <div class="flex min-w-0 flex-1 flex-col gap-1">
           <h3 class="truncate text-base font-semibold text-gray-900">
