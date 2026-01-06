@@ -59,60 +59,64 @@ monorepo-root/
 applications/frontend-app/
 ├── src/
 │   ├── app/                           # Vue root: App.vue, main.ts, router, global providers
-│   ├── domains/                       # Feature-Sliced Design (FSD) modules
-│   │   ├── invoice/                   # Example feature – self-contained module
-│   │   ├── customer/
-│   │   ├── payment/
-│   │   └── shared/                    # Cross-feature functionality (auth, notifications...)
-│   ├── common/                        # Standardization of patterns, i.e. common errors, interfaces. NOT tied to framework!
-│   │   ├── errors/                    # Errors standardization...
-│   │   ├── http/                      # Rest client interfaces
-│   │   ├── env/                       # appDependencies, config...
-│   │   └── routing/                   # routing abstraction (i.e. vue router is implementation)
-│   ├── common-ui/                     # Global infrastructure (axios instance, auth, error handling)
-│   │   ├── components/                # Common components (buttons, links...)
-│   │   └── tests/                     # tests for the common components
+│   │   ├── App.vue
+│   │   ├── HelloWorld.vue
+│   │   ├── bootstrap/
+│   │   │   ├── bootstrapDependencies.ts
+│   │   │   └── bootstrapFeatures.ts
+│   │   ├── main.css
+│   │   ├── main.ts
+│   │   ├── router/
+│   │   │   ├── MyRouter.ts
+│   │   │   └── index.ts
+│   │   ├── stores/
+│   │   │   └── index.ts
+│   │   └── style.css
+│   ├── common/                        # Cross-cutting infrastructure (framework-agnostic)
+│   │   ├── env/
+│   │   │   └── AppDependencies.ts
+│   │   ├── errors/
+│   │   │   └── DomainError.ts
+│   │   ├── http/
+│   │   │   ├── AxiosHttpClient.ts
+│   │   │   └── HttpClientPort.ts
+│   │   └── routing/
+│   │       └── MyRouterPort.ts
+│   └── domains/                       # Feature-Sliced Design (FSD) modules
+│       └── prompts/                   # Example feature – self-contained module
+│           ├── bootstrap.ts
+│           ├── components/
+│           │   └── PromptsList.vue
+│           ├── docs/
+│           │   └── README.md
+│           ├── entities/
+│           │   └── Prompt.ts
+│           ├── index.ts
+│           ├── pages/
+│           │   └── PromptsPage.vue
+│           ├── repositories/
+│           │   ├── HttpPromptRepository.ts
+│           │   ├── MockPromptRepository.ts
+│           │   └── PromptRepositoryPort.ts
+│           ├── routes.ts
+│           ├── services/
+│           │   └── PromptService.ts
+│           ├── store/
+│           │   └── PromptsStore.ts
+│           └── tests/
+│               ├── PromptMockData.ts
+│               └── PromptService.test.ts
 ├── public/
-├── tests/                             # Optional: e2e / global setup
-├── docs/                              # Project documentation
-└── package.json
-```
-
-## Feature Structure (Flat Clean Architecture + Self-Bootstrapping)
-
-Each feature is a **self-sufficient module** with a single public entry point: the barrel file `index.ts`.
-
-Example: `features/invoice/`
-
-```text
-features/invoice/
-├── index.ts                           # Public barrel – single entry point for the feature
-├── bootstrap.ts                       # Internal: bootstraps the feature based on env/config
-├── api/                               # HTTP layer – raw DTOs
-│   ├── invoiceApi.ts
-│   ├── types.ts
-│   └── tests/
-├── repository/                        # Data layer – maps DTO → domain model
-│   ├── InvoiceRepository.ts
-│   ├── InvoiceRepositoryPort.ts       # Optional port for DI (recommended for repositories)
-│   ├── types.ts
-│   └── tests/
-├── services/                          # Application layer – frontend business logic
-│   ├── InvoiceService.ts
-│   ├── MockInvoiceService.ts          # For testing / mock env
-│   └── tests/
-├── store/                             # Presentation layer – Pinia store
-│   ├── invoiceStore.ts                # Factory function createInvoiceStore(deps)
-│   └── tests/
-├── components/                        # Feature-specific Vue components
-│   └── InvoiceItem.vue
-├── views/                             # Page-level components
-│   ├── InvoiceListView.vue
-│   └── InvoiceDetailView.vue
-├── routes.ts                          # Feature routes (optional separate file)
-├── entities/                          # Feature-specific domain types (if needed)
-│   └── entities.ts
-└── tests/                             # Feature integration tests
+│   ├── favicon.svg
+│   └── vite.svg
+├── index.html
+├── docs/
+│   ├── README.md
+│   ├── architecture.md
+│   ├── domain-core-layers.md
+│   ├── frontend-store.md
+│   └── vue-application.md
+└── README.md
 ```
 
 ### Feature Bootstrapping
@@ -120,57 +124,89 @@ features/invoice/
 - Each feature **must** provide a `bootstrap<Feature>()` function exported from its `index.ts`.
 - The bootstrap function wires the feature's dependencies (real vs. mock) based on environment or explicit options.
 - It returns configured artifacts (e.g., pre-wired `useStore`, `routes`).
-- This replaces centralized wiring (e.g., old `storeProviders.ts`) and makes features plug-and-play.
+- This replaces centralized wiring and makes features plug-and-play.
 
-Example bootstrap signature:
+Example bootstrap signature (from `domains/prompts/bootstrap.ts`):
 ```typescript
-export function bootstrapInvoice(options?: { useMocks?: boolean }): {
-  useStore: () => PiniaStore
-  routes: RouteRecordRaw[]
+import { PromptService } from './services/PromptService'
+import { MockPromptRepository } from './repositories/MockPromptRepository'
+import { HttpPromptRepository } from './repositories/HttpPromptRepository'
+import { AxiosHttpClient } from '@/common/http/AxiosHttpClient'
+import { appConfig } from '@/common/env/AppConfig'  // If using separate config; otherwise via AppDependencies
+import { createPromptsStore } from './store/PromptsStore'
+import promptsRoutes from './routes'
+
+const bootstrapPrompts = () => {
+    const useMocks = appConfig.isMockEnv  // Or via env detection
+
+    const apiClient = new AxiosHttpClient(appConfig.baseUrl);
+    const repository = useMocks
+        ? new MockPromptRepository()
+        : new HttpPromptRepository(apiClient)
+
+    const service = new PromptService(repository)
+  
+    return {
+        useStore: createPromptsStore(service),
+        routes: promptsRoutes
+    }
+}
+
+export { bootstrapPrompts }
+```
+
+The root application aggregates features in `src/app/bootstrap/bootstrapFeatures.ts`:
+```typescript
+// src/app/bootstrap/bootstrapFeatures.ts
+import { Router } from 'vue-router'
+import { bootstrapPrompts } from '@/domains/prompts'
+
+export const bootstrapFeatures = (router: Router) : void => {   
+    console.log('bootstrapFeatures, router: ', router);
+    for (const route of bootstrapPrompts().routes) {
+        console.log('bootstrapFeatures, adding route: ', route.name);
+        router.addRoute(route);
+    }
 }
 ```
 
-The root application aggregates features in `src/main.ts` or a dedicated `src/app/bootstrap.ts`:
-```typescript
-import { bootstrapInvoice } from '@/features/invoice'
-import { bootstrapCustomer } from '@/features/customer'
-
-const { useStore: useInvoiceStore, routes: invoiceRoutes } = bootstrapInvoice()
-const { useStore: useCustomerStore, routes: customerRoutes } = bootstrapCustomer()
-
-app.use(createPinia())
-router.addRoute({ path: '/', children: [...invoiceRoutes, ...customerRoutes] })
-```
+Global dependencies (e.g., router) are bootstrapped in `src/app/bootstrap/bootstrapDependencies.ts` and registered via `AppDependencies`.
 
 ## Layer Responsibilities & Rules
 
 ### Dependency Injection and Ports
 
-- Use explicit ports/interfaces **only for layers that are frequently swapped** (e.g., repositories, where we inject real vs. mock implementations into services).
-- For services, rely on TypeScript's structural typing (duck typing). Do **not** create dedicated service port files unless a concrete need arises (e.g., multiple service variants).
+- Use explicit ports/interfaces **only for layers that are frequently swapped** (e.g., repositories with `<Feature>RepositoryPort.ts`, HTTP client with `HttpClientPort.ts`).
+- For services, rely on TypeScript's structural typing (duck typing). Do **not** create dedicated service port files unless a concrete need arises.
+- Global dependencies (e.g., router, HTTP client config) are managed via `AppDependencies` singleton in `common/env/`.
 - This keeps boilerplate minimal while maintaining type safety.
 
 ### Strict Rules (for developers & AI agents)
 
-1. **No direct HTTP calls** from components, views, or stores → always go through `repository/`
-2. **No domain logic** in `api/` or `store/` → only in `services/` or `repository/`
-3. **All data access** must be done through a repository
-4. **Pinia stores** may only call injected application services (never repositories directly)
+1. **No direct HTTP calls** from components, pages, stores, or services → always go through repositories (e.g., `Http<Feature>Repository` using `AxiosHttpClient` from `common/http/`).
+2. **No domain logic** in repositories or stores → only in services or entities.
+3. **All data access** must be done through a repository (implements port, with mock and HTTP variants).
+4. **Pinia stores** may only call injected application services (never repositories directly).
 5. **Feature bootstrapping**:
    - Every feature must export `bootstrap<Feature>()` from its barrel (`index.ts`)
    - Bootstrapping decides real vs. mock implementations based on `import.meta.env` or options
    - Central app only imports from feature barrels
+   - Barrel (`index.ts`) exposes only what's intended externally (e.g., bootstrap function; [TO BE DECIDED] for types/services).
 6. **Mocking**:
-   - `api/` → use MSW
-   - `repository/` and `services/` → mock entire classes via bootstrap options or test factories
-7. **Tests** → colocated in each layer's `tests/` folder
+   - Repositories: Provide `Mock<Feature>Repository` for tests and mock env.
+   - Services: Test against mock repositories.
+   - HTTP: [TO BE DECIDED] for global MSW vs. per-feature.
+7. **Tests** → colocated in each layer's `tests/` folder (e.g., `domains/prompts/tests/PromptService.test.ts` using Vitest).
+8. **Errors**: Generic errors in `common/errors/DomainError.ts`; feature-specific in the feature (e.g., entities or repositories).
+9. **Validation**: Basic in entities; heavy on backend.
+10. **DTOs**: Place in appropriate layer (e.g., repositories for API payloads); [TO BE DECIDED] for conventions.
 
 ## Recommended Tools
 
 - **State management**: Pinia (with factory-based DI)
-- **HTTP client**: Axios (central instance in `infrastructure/`)
-- **API mocking**: MSW
+- **HTTP client**: Axios (via `AxiosHttpClient` in `common/http/`)
+- **API mocking**: MSW or per-feature mock repositories
 - **Testing**: Vitest + `@testing-library/vue`
 - **Type safety**: TypeScript (strict mode)
 
-This structure ensures features are modular, environment-aware, highly testable, and easy to onboard or extract.
+This structure ensures features are modular, environment-aware, highly testable, and easy to onboard or extract. See `domain-core-layers.md` for entities/repositories/services details, `common-layer.md` for common infrastructure, and `frontend-store.md` for store guidelines.
