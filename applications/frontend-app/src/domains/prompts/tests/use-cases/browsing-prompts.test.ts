@@ -1,26 +1,12 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
-import PromptsPage from '../../pages/PromptsPage.vue';
-import { PromptService } from '../../services/PromptService';
-import { MockPromptRepository } from '../../repositories/MockPromptRepository';
-import { createPromptsStore } from '../../store/PromptsStore';
-import { mockData } from '../PromptMockData';
+import { mockBootstrapPrompts } from '../testHelpers';
 
-// Mock bootstrap to ensure test isolation
-vi.mock('../../bootstrap', () => {
-  return {
-    bootstrapPrompts: () => {
-      const repository = new MockPromptRepository();
-      const service = new PromptService(repository);
-      const store = createPromptsStore(service);
-      return {
-        useStore: store,
-        routes: [],
-      };
-    },
-  };
-});
+mockBootstrapPrompts(); // Must be called before importing components
+
+import PromptsPage from '../../pages/PromptsPage.vue';
+import { mockData } from '../PromptMockData';
 
 describe('Browsing Prompts', () => {
   beforeEach(() => {
