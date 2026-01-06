@@ -25,6 +25,7 @@ Acceptance Criteria:
 
 - Given the user is on the prompts repository page, when they navigate to the browse section without applying any filters or search, then they should see a list of all prompts displayed.
 - Given the user is on the prompts list page, when they enter a filter/search term, then only prompts whose title or category contains that term are displayed.
+- There is a delay for filtering of 500 milliseconds while user is typing
 - Each listed prompt should display its title, category (showing the full hierarchical path, e.g., "design/features/validation"), and tags.
 - The list should include a preview or truncated view of the instructions and template for quick scanning.
 - Prompts should be sortable by title, category, or most recent (default to title alphabetical).

@@ -9,6 +9,8 @@ import { FwbModal, FwbButton } from 'flowbite-vue';
 const bootstrap = bootstrapPrompts();
 const promptsStore = bootstrap.useStore();
 
+const searchQuery = ref('');
+
 onMounted(() => {
   promptsStore.fetchPrompts();
 });
@@ -67,6 +69,12 @@ const handleAddPrompt = () => {
   });
   isModalOpen.value = true;
 };
+
+const handleSearch = () => {
+  setTimeout(() => {
+    promptsStore.searchPrompts(searchQuery.value);
+  }, 500);
+};
 </script>
 
 <template>
@@ -75,7 +83,13 @@ const handleAddPrompt = () => {
       <h1 class="text-3xl font-bold text-gray-900 mb-6">
         Prompts
       </h1>
-      <fwb-button color="blue" @click="handleAddPrompt">Add Prompt</fwb-button>
+      <div class="flex items-center gap-2">
+        <div>
+          <input type="text" v-model="searchQuery" placeholder="Search prompts" class="border border-gray-300 placeholder-gray-400 rounded-md p-2" @input="handleSearch" />
+        </div>
+
+        <fwb-button color="blue" @click="handleAddPrompt">Add Prompt</fwb-button>
+      </div>
     </div>
     <PromptsList @prompt-click="handlePromptClick" />
 
