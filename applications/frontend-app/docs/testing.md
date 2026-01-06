@@ -236,20 +236,18 @@ describe('Creating Prompts', () => {
       const initialCount = wrapper.findAll('[data-testid="initial-count"]').length;
 
       // When: User clicks "Add Prompt" and fills the form
-      const addButton = wrapper.find('fwb-button');
+      const addButton = wrapper.find('[data-testid="add-button"]');
       await addButton.trigger('click');
       await wrapper.vm.$nextTick();
 
       // Fill form
       const promptDetails = wrapper.findComponent({ name: 'PromptDetails' });
-      await promptDetails.find('#edit-title').setValue('New Test Prompt');
-      await promptDetails.find('#edit-instructions').setValue('Test instructions');
-      await promptDetails.find('#edit-template').setValue('Test template');
+      await promptDetails.find('[data-testid="title-field"]').setValue('New Test Prompt');
+      await promptDetails.find('[data-testid="instructions-field"]').setValue('Test instructions');
+      await promptDetails.find('[data-testid="template-field"]').setValue('Test template');
       
       // Save
-      const saveButton = promptDetails.findAll('[data-testid="save-button"]').find(
-        btn => btn.attributes('color') === 'blue'
-      );
+      const saveButton = promptDetails.find('[data-testid="save-button"]');
       await saveButton?.trigger('click');
       
       // Wait for async operations

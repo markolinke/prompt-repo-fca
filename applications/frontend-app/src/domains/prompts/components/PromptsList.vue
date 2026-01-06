@@ -37,6 +37,7 @@ const handlePromptClick = (prompt: Prompt) => {
       <li
         v-for="prompt in promptsStore.prompts"
         :key="prompt.id"
+        data-testid="prompt-item"
         class="flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white px-4 py-3 hover:bg-slate-50 transition-colors cursor-pointer"
         @click="handlePromptClick(prompt as Prompt)"
       >

@@ -85,7 +85,13 @@ const handleSearch = () => {
       </h1>
       <div class="flex items-center gap-2">
         <div>
-          <input type="text" v-model="searchQuery" placeholder="Search prompts" class="border border-gray-300 placeholder-gray-400 rounded-md p-2" @input="handleSearch" />
+          <input type="text" 
+          v-model="searchQuery" 
+          data-testid="search-input"
+          placeholder="Search prompts" 
+          class="border border-gray-300 placeholder-gray-400 rounded-md p-2" 
+          @input="handleSearch" 
+          />
         </div>
 
         <fwb-button color="blue" @click="handleAddPrompt">Add Prompt</fwb-button>

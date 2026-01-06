@@ -49,7 +49,7 @@ describe('Browsing Prompts', () => {
 
       // Verify the number of displayed prompts matches repository data
       // Find prompt items by their container class (user-visible styling)
-      const promptItems = wrapper.findAll('[class*="border-gray-200"]');
+      const promptItems = wrapper.findAll('[data-testid="prompt-item"]');
       expect(promptItems.length).toBe(allPrompts.length);
     });
   });
