@@ -5,6 +5,7 @@ import { createNotesStore } from './store/NotesStore'
 import notesRoutes from './routes'
 import { appDependencies } from "@/common/env/AppDependencies";
 import { createDebouncer } from '@/common/time/Debouncer';
+import { createCurrentTimeProvider } from '@/common/time/CurrentTime';
 
 const bootstrapNotes = () => {
     const useMocks = appDependencies.getAppConfig().isMockEnv
@@ -17,14 +18,11 @@ const bootstrapNotes = () => {
 
     const service = new NoteService(repository)
 
-    const createSearchDebouncer = () => {
-        return createDebouncer(timeoutClient, 500);
-    }
-  
     return {
         useStore: createNotesStore(service),
         routes: notesRoutes,
-        createSearchDebouncer
+        createSearchDebouncer: () => createDebouncer(timeoutClient, 500),
+        getCurrentTimeProvider: () => createCurrentTimeProvider(),
     }
 }
 

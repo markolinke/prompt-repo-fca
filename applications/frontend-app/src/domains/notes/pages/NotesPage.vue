@@ -64,7 +64,7 @@ const handleAddNote = () => {
     id: '',
     title: '',
     content: '',
-    last_modified_utc: new Date(),
+    last_modified_utc: bootstrap.getCurrentTimeProvider().getCurrentTime(),
     category: '',
     tags: []
   });

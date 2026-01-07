@@ -2,6 +2,10 @@
 import { ref, watch } from 'vue';
 import { Note } from '../entities/Note';
 import { FwbButton } from 'flowbite-vue';
+import { bootstrapNotes } from '../bootstrap';
+
+const bootstrap = bootstrapNotes();
+const currentTimeProvider = bootstrap.getCurrentTimeProvider();
 
 const props = defineProps<{
   note: Note;
@@ -64,7 +68,7 @@ const handleSave = () => {
   try {
     // Construct new Note instance using fromPlainObject
     // Keep existing last_modified_utc for existing notes, use current date for new notes
-    const lastModified = props.note.id ? props.note.last_modified_utc : new Date();
+    const lastModified = props.note.id ? props.note.last_modified_utc : currentTimeProvider.getCurrentTime();
     
     const updatedNote = Note.fromPlainObject({
       id: props.note.id,

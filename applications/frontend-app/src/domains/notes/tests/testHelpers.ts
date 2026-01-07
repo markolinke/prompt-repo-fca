@@ -3,6 +3,7 @@ import { NoteService } from '../services/NotesService';
 import { MockNoteRepository } from '../repositories/MockNotesRepository';
 import { createNotesStore } from '../store/NotesStore';
 import { createTestDebouncer } from '@/common/time/tests/DebouncerTestHelper';
+import { MockCurrentTime } from '@/common/time/tests/MockCurrentTime';
 
 export const { debouncer: mockSearchDebouncer, mockTimeout } = createTestDebouncer();
 
@@ -20,14 +21,11 @@ export const mockBootstrapNotes = () => {
         const service = new NoteService(repository);
         const store = createNotesStore(service);
 
-        const createSearchDebouncer = () => {
-          return mockSearchDebouncer;
-        };
-
         return {
           useStore: store,
           routes: [],
-          createSearchDebouncer,
+          createSearchDebouncer: () => mockSearchDebouncer,
+          getCurrentTimeProvider: () => new MockCurrentTime(new Date(), 'UTC'),
         };
       },
     };
