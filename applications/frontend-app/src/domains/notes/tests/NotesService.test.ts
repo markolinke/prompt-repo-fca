@@ -5,6 +5,7 @@ import { NoteService } from '../services/NotesService';
 import { MockNoteRepository } from '../repositories/MockNotesRepository';
 import { Note } from '../entities/Note';
 import { mockData } from './NotesMockData';
+import { NoteTestBuilder } from './NoteTestBuilder';
 
 describe('NoteService', () => {
     let service: NoteService;
@@ -82,14 +83,14 @@ describe('NoteService', () => {
 
     describe('createNote', () => {
         it('should successfully create note', async () => {
-            const newNote = new Note(
-                '5',
-                'New Note',
-                'Test content',
-                new Date('2024-01-20T10:00:00Z'),
-                'test/category',
-                ['test', 'tag']
-            );
+            const newNote = NoteTestBuilder.create()
+                .withId('5')
+                .withTitle('New Note')
+                .withContent('Test content')
+                .withDate(new Date('2024-01-20T10:00:00Z'))
+                .withCategory('test/category')
+                .withTags(['test', 'tag'])
+                .build();
             
             await service.createNote(newNote);
             
@@ -101,14 +102,14 @@ describe('NoteService', () => {
             const initialNotes = await service.getNotes();
             const initialCount = initialNotes.length;
             
-            const newNote = new Note(
-                '4',
-                'Another Note',
-                'Another content',
-                new Date('2024-01-21T12:00:00Z'),
-                null,
-                []
-            );
+            const newNote = NoteTestBuilder.create()
+                .withId('4')
+                .withTitle('Another Note')
+                .withContent('Another content')
+                .withDate(new Date('2024-01-21T12:00:00Z'))
+                .withNoCategory()
+                .withNoTags()
+                .build();
             
             await service.createNote(newNote);
             
@@ -117,14 +118,14 @@ describe('NoteService', () => {
         });
 
         it('should create note with all properties', async () => {
-            const newNote = new Note(
-                '5',
-                'Full Note',
-                'Full content',
-                new Date('2024-01-22T14:30:00Z'),
-                'full/category',
-                ['tag1', 'tag2']
-            );
+            const newNote = NoteTestBuilder.create()
+                .withId('5')
+                .withTitle('Full Note')
+                .withContent('Full content')
+                .withDate(new Date('2024-01-22T14:30:00Z'))
+                .withCategory('full/category')
+                .withTags(['tag1', 'tag2'])
+                .build();
             
             await service.createNote(newNote);
             
@@ -138,14 +139,13 @@ describe('NoteService', () => {
         });
 
         it('should throw ValidationError when note is invalid', async () => {
-            const invalidNote = new Note(
-                '',
-                '',
-                '',
-                new Date(),
-                'full/category',
-                ['tag1', 'tag2']
-            );
+            const invalidNote = NoteTestBuilder.create()
+                .withId('')
+                .withTitle('')
+                .withContent('')
+                .withCategory('full/category')
+                .withTags(['tag1', 'tag2'])
+                .build();
 
             await expect(service.validateNote(invalidNote)).rejects.toThrow(ValidationError);
             await expect(service.validateNote(invalidNote)).rejects.toThrow('Validation failed: ID is required; Title is required; Content is required');
@@ -155,14 +155,14 @@ describe('NoteService', () => {
     describe('updateNote', () => {
         it('should successfully update existing note', async () => {
             const existingNote = await service.getNoteById('1');
-            const updatedNote = new Note(
-                existingNote.id,
-                'Updated Title',
-                existingNote.content,
-                existingNote.last_modified_utc,
-                existingNote.category,
-                [...existingNote.tags]
-            );
+            const updatedNote = NoteTestBuilder.create()
+                .withId(existingNote.id)
+                .withTitle('Updated Title')
+                .withContent(existingNote.content)
+                .withDate(existingNote.last_modified_utc)
+                .withCategory(existingNote.category)
+                .withTags([...existingNote.tags])
+                .build();
             
             await service.updateNote(updatedNote);
             
@@ -171,14 +171,14 @@ describe('NoteService', () => {
         });
 
         it('should update all note properties', async () => {
-            const updatedNote = new Note(
-                '1',
-                'New Title',
-                'New Content',
-                new Date('2024-01-23T16:00:00Z'),
-                'new/category',
-                ['new', 'tags']
-            );
+            const updatedNote = NoteTestBuilder.create()
+                .withId('1')
+                .withTitle('New Title')
+                .withContent('New Content')
+                .withDate(new Date('2024-01-23T16:00:00Z'))
+                .withCategory('new/category')
+                .withTags(['new', 'tags'])
+                .build();
             
             await service.updateNote(updatedNote);
             
@@ -191,14 +191,14 @@ describe('NoteService', () => {
         });
 
         it('should handle update of non-existent note gracefully', async () => {
-            const nonExistentNote = new Note(
-                '999',
-                'Non-existent',
-                'Content',
-                new Date('2024-01-24T08:00:00Z'),
-                null,
-                []
-            );
+            const nonExistentNote = NoteTestBuilder.create()
+                .withId('999')
+                .withTitle('Non-existent')
+                .withContent('Content')
+                .withDate(new Date('2024-01-24T08:00:00Z'))
+                .withNoCategory()
+                .withNoTags()
+                .build();
             
             // MockNoteRepository doesn't throw on update of non-existent, it just does nothing
             await expect(service.updateNote(nonExistentNote)).resolves.not.toThrow();
