@@ -59,7 +59,9 @@ export class MockTimeout implements TimeoutPort {
     const remaining = this.scheduled.filter(task => task.runAt > this.now);
     this.scheduled = remaining;
 
-    due.forEach(task => task.callback());
+    for (const task of due) {
+      task.callback();
+    }
   }
 }
 
