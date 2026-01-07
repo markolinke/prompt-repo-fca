@@ -202,6 +202,17 @@ export const clickAddNoteButton = async (wrapper: VueWrapper): Promise<void> => 
 };
 
 /**
+ * Clicks the Cancel button to close the modal.
+ */
+export const clickCancelButton = async (wrapper: VueWrapper): Promise<void> => {
+  const noteDetails = getNoteDetailsComponent(wrapper);
+  const cancelButton = noteDetails.find('[data-testid="cancel-note-button"]');
+  expect(cancelButton.exists()).toBe(true);
+  await cancelButton.trigger('click');
+  await wrapper.vm.$nextTick();
+};
+
+/**
  * Clicks on a note item to open it in the modal.
  */
 export const clickNoteItem = async (

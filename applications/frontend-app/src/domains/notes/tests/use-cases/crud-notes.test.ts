@@ -20,6 +20,7 @@ import {
   clickDeleteButton,
   expectModalOpen,
   getNoteItems,
+  clickCancelButton,
 } from './NotesPageTestHelpers';
 
 mockBootstrapNotes();
@@ -61,6 +62,19 @@ describe('Note CRUD Operations', () => {
       );
 
       expectModalClosed(wrapper);
+    });
+
+    it('should not create a new note if user closes the modal without saving', async () => {
+      const wrapper = await mountNotesPage();
+      const initialNoteCount = getNoteItems(wrapper).length;
+      expectNotesCount(wrapper, mockData.notes.length);
+
+      await clickAddNoteButton(wrapper);
+      expectModalOpen(wrapper);
+
+      await clickCancelButton(wrapper);
+      expectModalClosed(wrapper);
+      expectNotesCount(wrapper, initialNoteCount);
     });
   });
 
