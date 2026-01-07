@@ -139,7 +139,6 @@ describe('NoteService', () => {
         });
 
         it('should throw ValidationError when note is invalid', async () => {
-            console.log('Invalid note');
             const invalidNote = new Note(
                 '',
                 '',
@@ -149,8 +148,8 @@ describe('NoteService', () => {
                 ['tag1', 'tag2']
             );
 
-            expect(service.validateNote(invalidNote)).rejects.toThrow(ValidationError);
-            expect(service.validateNote(invalidNote)).rejects.toThrow('Validation failed: ID is required; Title is required; Content is required');
+            await expect(service.validateNote(invalidNote)).rejects.toThrow(ValidationError);
+            await expect(service.validateNote(invalidNote)).rejects.toThrow('Validation failed: ID is required; Title is required; Content is required');
         });
     });
 
