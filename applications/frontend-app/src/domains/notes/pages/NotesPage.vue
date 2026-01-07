@@ -64,7 +64,7 @@ const handleAddNote = () => {
     id: '',
     title: '',
     content: '',
-    last_modified_utc: new Date(),
+    last_modified_utc: bootstrap.getCurrentTimeProvider().getCurrentTime(),
     category: '',
     tags: []
   });
@@ -95,7 +95,7 @@ const handleSearch = () => {
           />
         </div>
 
-        <fwb-button color="blue" @click="handleAddNote">Add Note</fwb-button>
+        <fwb-button color="blue" @click="handleAddNote" data-testid="add-note-button">Add Note</fwb-button>
       </div>
     </div>
     <NotesList @note-click="handleNoteClick" />
@@ -105,6 +105,7 @@ const handleSearch = () => {
       v-if="isModalOpen"
       @click:outside="handleCloseModal"
       @close="handleCloseModal"
+      data-testid="note-details-modal"
     >
       <template #header>
         <div class="flex items-center text-lg font-semibold text-gray-900">
@@ -127,6 +128,7 @@ const handleSearch = () => {
             @save="handleSave"
             @cancel="handleCancel"
             @delete="handleDelete"
+            data-testid="note-details-component"
           />
         </div>
       </template>

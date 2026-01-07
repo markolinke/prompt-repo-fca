@@ -2,16 +2,11 @@ import { vi } from 'vitest';
 import { NoteService } from '../services/NotesService';
 import { MockNoteRepository } from '../repositories/MockNotesRepository';
 import { createNotesStore } from '../store/NotesStore';
-import { createTestDebouncer } from '@/common/time/tests/DebouncerTestHelper';
+import { createTestDebouncer, MockCurrentTime } from '@/common/time';
 
 export const { debouncer: mockSearchDebouncer, mockTimeout } = createTestDebouncer();
+export const mockCurrentTime = new MockCurrentTime(new Date('2024-01-15T10:00:00Z'), 'UTC');
 
-/**
- * Mocks the bootstrapNotes function for integration tests.
- * 
- * IMPORTANT: Must be called at the top level of your test file, before any imports that use the bootstrap.
- * See common/time/README.md for usage examples.
- */
 export const mockBootstrapNotes = () => {
   vi.mock('../bootstrap', () => {
     return {
@@ -20,14 +15,11 @@ export const mockBootstrapNotes = () => {
         const service = new NoteService(repository);
         const store = createNotesStore(service);
 
-        const createSearchDebouncer = () => {
-          return mockSearchDebouncer;
-        };
-
         return {
           useStore: store,
           routes: [],
-          createSearchDebouncer,
+          createSearchDebouncer: () => mockSearchDebouncer,
+          getCurrentTimeProvider: () => mockCurrentTime,
         };
       },
     };

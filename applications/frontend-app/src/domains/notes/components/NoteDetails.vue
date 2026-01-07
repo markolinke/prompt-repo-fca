@@ -2,6 +2,10 @@
 import { ref, watch } from 'vue';
 import { Note } from '../entities/Note';
 import { FwbButton } from 'flowbite-vue';
+import { bootstrapNotes } from '../bootstrap';
+
+const bootstrap = bootstrapNotes();
+const currentTimeProvider = bootstrap.getCurrentTimeProvider();
 
 const props = defineProps<{
   note: Note;
@@ -62,15 +66,12 @@ const handleSave = () => {
   }
 
   try {
-    // Construct new Note instance using fromPlainObject
-    // Keep existing last_modified_utc for existing notes, use current date for new notes
-    const lastModified = props.note.id ? props.note.last_modified_utc : new Date();
     
     const updatedNote = Note.fromPlainObject({
       id: props.note.id,
       title: editTitle.value.trim(),
       content: editContent.value.trim(),
-      last_modified_utc: lastModified,
+      last_modified_utc: currentTimeProvider.getCurrentTime(),
       category: editCategory.value.trim() || null,
       tags: editTags.value.map(tag => tag.trim()).filter(tag => tag.length > 0),
     });
@@ -125,6 +126,7 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
           type="text"
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
           placeholder="Enter note title"
+          data-testid="edit-title-input"
         />
       </div>
 
@@ -139,6 +141,7 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
           type="text"
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
           placeholder="e.g., design/features/validation"
+          data-testid="edit-category-input"
         />
       </div>
 
@@ -171,11 +174,13 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
             class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
             placeholder="Add a tag"
             @keydown="handleTagInputKeydown"
+            data-testid="edit-tags-input"
           />
           <fwb-button
             @click="addTag"
             color="blue"
             size="sm"
+            data-testid="add-tag-button"
           >
             Add
           </fwb-button>
@@ -203,24 +208,27 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
           rows="8"
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-sans resize-y"
           placeholder="Enter note content"
+          data-testid="edit-content-input"
         />
       </div>
 
       <!-- Action Buttons -->
       <div class="flex justify-between">
         <div>
-            <fwb-button color="red" @click="handleDelete">Delete</fwb-button>
+            <fwb-button color="red" @click="handleDelete" data-testid="delete-note-button">Delete</fwb-button>
         </div>
           <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
             <fwb-button
               @click="handleCancel"
               color="light"
+              data-testid="cancel-note-button"
             >
               Cancel
             </fwb-button>
             <fwb-button
               @click="handleSave"
               color="blue"
+              data-testid="save-note-button"
             >
               Save
             </fwb-button>
