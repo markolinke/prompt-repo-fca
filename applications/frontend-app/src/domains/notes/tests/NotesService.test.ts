@@ -1,9 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { ValidationError } from '@/common/errors/DomainError';
+import { NoteNotFoundError } from '@/common/errors/DomainError';
 import { NoteService } from '../services/NotesService';
 import { MockNoteRepository } from '../repositories/MockNotesRepository';
 import { Note } from '../entities/Note';
-import { NoteNotFoundError } from '../../../common/errors/DomainError';
 import { mockData } from './NotesMockData';
+import { fail } from 'assert';
 
 describe('NoteService', () => {
     let service: NoteService;
@@ -134,6 +136,21 @@ describe('NoteService', () => {
             expect(createdNote.last_modified_utc).toEqual(new Date('2024-01-22T14:30:00Z'));
             expect(createdNote.category).toBe('full/category');
             expect(createdNote.tags).toEqual(['tag1', 'tag2']);
+        });
+
+        it('should throw ValidationError when note is invalid', async () => {
+            console.log('Invalid note');
+            const invalidNote = new Note(
+                '',
+                '',
+                '',
+                new Date(),
+                'full/category',
+                ['tag1', 'tag2']
+            );
+
+            expect(service.validateNote(invalidNote)).rejects.toThrow(ValidationError);
+            expect(service.validateNote(invalidNote)).rejects.toThrow('Validation failed: ID is required; Title is required; Content is required');
         });
     });
 
