@@ -5,7 +5,6 @@ import { NoteService } from '../services/NotesService';
 import { MockNoteRepository } from '../repositories/MockNotesRepository';
 import { Note } from '../entities/Note';
 import { mockData } from './NotesMockData';
-import { fail } from 'assert';
 
 describe('NoteService', () => {
     let service: NoteService;
