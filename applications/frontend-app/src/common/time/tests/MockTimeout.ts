@@ -1,4 +1,4 @@
-import type { TimeoutPort, TimeoutHandle } from '../TimeoutPort';
+import type { TimeoutPort, TimeoutHandle } from '../timeout/TimeoutPort';
 
 type ScheduledCallback = {
   id: TimeoutHandle;

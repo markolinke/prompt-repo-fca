@@ -1,6 +1,6 @@
 import { MockTimeout } from './MockTimeout';
-import { createDebouncer } from '../Debouncer';
-import type { TimeoutPort } from '../TimeoutPort';
+import { createDebouncer } from '../debouncer/Debouncer';
+import type { TimeoutPort } from '../timeout/TimeoutPort';
 
 /**
  * Creates a debouncer for testing that uses MockTimeout.

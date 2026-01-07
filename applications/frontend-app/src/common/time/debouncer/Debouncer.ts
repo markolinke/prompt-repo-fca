@@ -1,4 +1,4 @@
-import type { TimeoutPort, TimeoutHandle } from './TimeoutPort';
+import type { TimeoutPort, TimeoutHandle } from '../timeout/TimeoutPort';
 
 /**
  * Creates a debounced function that delays execution until after

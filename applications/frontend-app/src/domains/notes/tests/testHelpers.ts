@@ -2,8 +2,7 @@ import { vi } from 'vitest';
 import { NoteService } from '../services/NotesService';
 import { MockNoteRepository } from '../repositories/MockNotesRepository';
 import { createNotesStore } from '../store/NotesStore';
-import { createTestDebouncer } from '@/common/time/tests/DebouncerTestHelper';
-import { MockCurrentTime } from '@/common/time';
+import { createTestDebouncer, MockCurrentTime } from '@/common/time';
 
 export const { debouncer: mockSearchDebouncer, mockTimeout } = createTestDebouncer();
 

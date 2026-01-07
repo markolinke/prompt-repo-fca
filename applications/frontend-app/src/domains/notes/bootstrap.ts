@@ -4,8 +4,7 @@ import { HttpNoteRepository } from './repositories/HttpNotesRepository'
 import { createNotesStore } from './store/NotesStore'
 import notesRoutes from './routes'
 import { appDependencies } from "@/common/env/AppDependencies";
-import { createDebouncer } from '@/common/time/Debouncer';
-import { createCurrentTimeProvider } from '@/common/time/time_provider/CurrentTime';
+import { createDebouncer, createCurrentTimeProvider } from '@/common/time';
 
 const bootstrapNotes = () => {
     const useMocks = appDependencies.getAppConfig().isMockEnv

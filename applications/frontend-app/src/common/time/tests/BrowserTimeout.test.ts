@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { BrowserTimeout } from '../BrowserTimeout';
+import { BrowserTimeout } from '../timeout/BrowserTimeout';
 
 describe('BrowserTimeout', () => {
   beforeEach(() => {
