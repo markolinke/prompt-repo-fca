@@ -22,6 +22,7 @@ Before making changes, review these files in `docs/`:
 3. **[frontend-store.md](./docs/frontend-store.md)** - Pinia store guidelines
 4. **[vue-application.md](./docs/vue-application.md)** - Vue component patterns
 5. **[common-layer.md](./docs/common-layer.md)** - Infrastructure layer rules
+6. **[testing.md](./docs/testing.md)** - Testing strategy, patterns, and best practices
 
 ## Critical Rules (DO NOT VIOLATE)
 
@@ -75,6 +76,7 @@ onMounted(() => {
 ```
 
 **Never** do:
+
 - ❌ `import { usePromptsStore } from '@/domains/prompts/store/PromptsStore'`
 - ❌ Direct store imports
 - ❌ Object destructuring from bootstrap: `const { useStore } = bootstrapPrompts()`
@@ -212,11 +214,56 @@ export class Prompt {
 
 ### Testing Patterns
 
-- Tests colocated in `domains/<feature>/tests/`
-- Use Vitest
-- Test services with mock repositories
-- Test stores with real services + mock repositories
-- Mock data helpers in `tests/<Feature>MockData.ts`
+**Philosophy**: Test business value and user workflows, not technical implementation. See **[testing.md](./docs/testing.md)** for complete guidelines.
+
+**Two Types of Tests**:
+
+- **Unit tests**: Service layer with mock repositories (`<Service>.test.ts`)
+- **Integration tests**: Complete user workflows - real components + store + service + mock repository (`use-cases/<use-case>-<feature>.test.ts`)
+
+**Critical: Bootstrap Mocking (MANDATORY)**
+
+Always mock bootstrap at top level to prevent singleton state leaks:
+
+```typescript
+// ✅ MUST mock at top level before imports
+vi.mock('../bootstrap', () => {
+  return {
+    bootstrapPrompts: () => {
+      const repository = new MockPromptRepository();
+      const service = new PromptService(repository);
+      const store = createPromptsStore(service);
+      return { useStore: store, routes: [] };
+    },
+  };
+});
+```
+
+**Test Isolation Rules**:
+
+- ✅ Mock bootstrap at top level (not in `beforeEach`)
+- ✅ Reset Pinia: `setActivePinia(createPinia())` in `beforeEach`
+- ✅ Fresh repository instance per test (no shared state)
+- ✅ Wait for async: `await wrapper.vm.$nextTick()`
+- ❌ Never share store instances between tests
+
+**What to Test**:
+
+- ✅ Complete user workflows (e.g., "user can create a prompt")
+- ✅ Business processes end-to-end
+- ❌ Don't test implementation details or components in isolation
+
+**Test Organization**:
+```
+domains/<feature>/tests/
+├── <Service>.test.ts              # Unit tests
+├── <Feature>MockData.ts           # Test data
+└── use-cases/                     # Integration tests
+    ├── viewing-<feature>.test.ts
+    └── creating-<feature>.test.ts
+```
+
+**Tools**: Vitest, @vue/test-utils, jsdom
 
 ## Code Examples from Codebase
 
@@ -265,6 +312,9 @@ See: `src/domains/prompts/entities/Prompt.ts`
 - Create service port files (use duck typing)
 - Use `storeToRefs` (access store properties directly)
 - Destructure bootstrap result: `const { useStore } = bootstrap()`
+- Mock bootstrap inside `beforeEach` (must be at top level)
+- Share store instances between tests
+- Test implementation details instead of user workflows
 
 ✅ **Always**:
 - Use feature bootstrap for stores
@@ -292,13 +342,17 @@ Before submitting changes, verify:
 - [ ] Uses Tailwind classes (no scoped styles)
 - [ ] Follows naming conventions
 - [ ] Routes registered in `bootstrapFeatures.ts`
+- [ ] Tests follow use case-based organization
+- [ ] Integration tests mock bootstrap at top level
+- [ ] Tests use real components + store + service + mock repository
 
 ## Getting Help
 
 1. **Architecture questions**: See `docs/architecture.md`
 2. **Layer-specific questions**: See corresponding `docs/*.md`
-3. **Pattern examples**: Check `src/domains/prompts/` (reference implementation)
-4. **Common infrastructure**: See `src/common/` and `docs/common-layer.md`
+3. **Testing questions**: See `docs/testing.md`
+4. **Pattern examples**: Check `src/domains/prompts/` (reference implementation)
+5. **Common infrastructure**: See `src/common/` and `docs/common-layer.md`
 
 ## Key Principles Summary
 

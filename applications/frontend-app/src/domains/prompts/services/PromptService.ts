@@ -25,5 +25,9 @@ export class PromptService {
     async deletePrompt(id: string): Promise<void> {
         return this.repository.deletePrompt(id);
     }
+
+    async searchPrompts(query: string): Promise<Prompt[]> {
+        return this.repository.searchPrompts(query);
+    }
 }
 

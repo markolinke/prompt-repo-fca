@@ -13,6 +13,7 @@ type PromptServiceShape = {
     createPrompt(prompt: Prompt): Promise<void>;
     updatePrompt(prompt: Prompt): Promise<void>;
     deletePrompt(id: string): Promise<void>;
+    searchPrompts(query: string): Promise<Prompt[]>;
 };
 
 export const createPromptsStore = (promptService: PromptServiceShape) => {
@@ -81,6 +82,19 @@ export const createPromptsStore = (promptService: PromptServiceShape) => {
                 } catch (error) {
                     this.error = error instanceof Error ? error.message : 'Failed to delete prompt';
                     throw error;
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            async searchPrompts(query: string): Promise<void> {
+                this.loading = true;
+                this.error = null;
+
+                try {
+                    this.prompts = await promptService.searchPrompts(query);
+                } catch (error) {
+                    this.error = error instanceof Error ? error.message : 'Failed to search prompts';
                 } finally {
                     this.loading = false;
                 }

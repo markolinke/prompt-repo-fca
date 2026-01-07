@@ -40,4 +40,11 @@ export class MockPromptRepository implements PromptRepositoryPort {
         this.prompts = this.prompts.filter(prompt => prompt.id !== id);
         return Promise.resolve();
     }
+
+    searchPrompts(query: string): Promise<Prompt[]> {
+        if (!query) {
+            return Promise.resolve(this.prompts);
+        }
+        return Promise.resolve(this.prompts.filter(prompt => prompt.title.includes(query) || prompt.category?.includes(query)));
+    }
 }

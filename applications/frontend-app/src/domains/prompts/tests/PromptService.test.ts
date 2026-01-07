@@ -82,7 +82,7 @@ describe('PromptService', () => {
     describe('createPrompt', () => {
         it('should successfully create prompt', async () => {
             const newPrompt = new Prompt(
-                '3',
+                '5',
                 'New Prompt',
                 'Test instructions',
                 'Test template',
@@ -92,7 +92,7 @@ describe('PromptService', () => {
             
             await service.createPrompt(newPrompt);
             
-            const createdPrompt = await service.getPromptById('3');
+            const createdPrompt = await service.getPromptById('5');
             expect(createdPrompt).toEqual(newPrompt);
         });
 
@@ -227,6 +227,84 @@ describe('PromptService', () => {
             expect(updatedPrompts.length).toBe(initialCount - 1);
             // Verify other prompts still exist
             await expect(service.getPromptById('2')).resolves.toBeInstanceOf(Prompt);
+        });
+    });
+
+    describe('searchPrompts', () => {
+        it('should return all prompts when query is empty string', async () => {
+            const allPrompts = await service.getPrompts();
+            const searchResults = await service.searchPrompts('');
+            
+            expect(searchResults).toEqual(allPrompts);
+            expect(searchResults.length).toBe(allPrompts.length);
+        });
+
+        it('should return all prompts when query is null', async () => {
+            const allPrompts = await service.getPrompts();
+            const searchResults = await service.searchPrompts(null as any);
+            
+            expect(searchResults).toEqual(allPrompts);
+            expect(searchResults.length).toBe(allPrompts.length);
+        });
+
+        it('should return prompts whose title contains the search term', async () => {
+            const results = await service.searchPrompts('Design');
+            
+            expect(results.length).toBe(2);
+            expect(results.some(p => p.id === '1')).toBe(true);
+            expect(results.some(p => p.id === '2')).toBe(true);
+            results.forEach(prompt => {
+                expect(prompt.title).toContain('Design');
+            });
+        });
+
+        it('should return prompts whose category contains the search term', async () => {
+            const results = await service.searchPrompts('coding');
+            
+            expect(results.length).toBe(1);
+            expect(results[0].id).toBe('4');
+            expect(results[0].category).toContain('coding');
+        });
+
+        it('should return prompts matching either title or category', async () => {
+            // Search for 'design' (lowercase) - should match categories but not titles (which have 'Design')
+            const results = await service.searchPrompts('design');
+            
+            expect(results.length).toBe(2);
+            expect(results.some(p => p.id === '1')).toBe(true);
+            expect(results.some(p => p.id === '2')).toBe(true);
+            // Verify each result matches either title or category
+            results.forEach(prompt => {
+                const matchesTitle = prompt.title.includes('design');
+                const matchesCategory = prompt.category?.includes('design') ?? false;
+                expect(matchesTitle || matchesCategory).toBe(true);
+            });
+        });
+
+        it('should return prompts where title matches even if category is null', async () => {
+            const results = await service.searchPrompts('without');
+            
+            expect(results.length).toBe(2);
+            expect(results.some(p => p.id === '3')).toBe(true);
+            expect(results.some(p => p.id === '4')).toBe(true);
+            results.forEach(prompt => {
+                expect(prompt.title).toContain('without');
+            });
+        });
+
+        it('should return empty array when search term does not match any prompt', async () => {
+            const results = await service.searchPrompts('nonexistent-term-that-will-never-match');
+            
+            expect(results).toEqual([]);
+            expect(results.length).toBe(0);
+        });
+
+        it('should return all prompts when query is undefined', async () => {
+            const allPrompts = await service.getPrompts();
+            const searchResults = await service.searchPrompts(undefined as any);
+            
+            expect(searchResults).toEqual(allPrompts);
+            expect(searchResults.length).toBe(allPrompts.length);
         });
     });
 });

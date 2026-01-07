@@ -10,7 +10,7 @@ This prompts repository ensures every team member can quickly discover and reuse
 ## Features (Current)
 
 - Browse all shared prompts
-- Filter by category (hierarchical, e.g. `design/features/validation`)
+- Filter by title or category (hierarchical, e.g. `design/features/validation`)
 - Filter by tags
 - Search by title or tags
 - One-click copy of prompt template or instructions
@@ -23,7 +23,9 @@ When not sure of the prompt I need, I want to easily browse through all the prom
 
 Acceptance Criteria:
 
-- Given the user is on the prompts repository page, when they navigate to the browse section without applying any filters or search, then they should see a list of all shared prompts displayed.
+- Given the user is on the prompts repository page, when they navigate to the browse section without applying any filters or search, then they should see a list of all prompts displayed.
+- Given the user is on the prompts list page, when they enter a filter/search term, then only prompts whose title or category contains that term are displayed.
+- There is a delay for filtering of 500 milliseconds while user is typing
 - Each listed prompt should display its title, category (showing the full hierarchical path, e.g., "design/features/validation"), and tags.
 - The list should include a preview or truncated view of the instructions and template for quick scanning.
 - Prompts should be sortable by title, category, or most recent (default to title alphabetical).
