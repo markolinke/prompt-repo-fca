@@ -8,6 +8,7 @@ import { FwbModal, FwbButton } from 'flowbite-vue';
 
 const bootstrap = bootstrapPrompts();
 const promptsStore = bootstrap.useStore();
+const searchDebouncer = bootstrap.createSearchDebouncer();
 
 const searchQuery = ref('');
 
@@ -71,9 +72,9 @@ const handleAddPrompt = () => {
 };
 
 const handleSearch = () => {
-  setTimeout(() => {
+  searchDebouncer(() => {
     promptsStore.searchPrompts(searchQuery.value);
-  }, 500);
+  });
 };
 </script>
 
