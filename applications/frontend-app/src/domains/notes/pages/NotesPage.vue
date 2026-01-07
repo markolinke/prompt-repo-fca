@@ -63,8 +63,8 @@ const handleAddNote = () => {
   selectedNote.value = Note.fromPlainObject({
     id: '',
     title: '',
-    instructions: '',
-    template: '',
+    content: '',
+    last_modified_utc: new Date(),
     category: '',
     tags: []
   });
@@ -119,8 +119,8 @@ const handleSearch = () => {
             :note="Note.fromPlainObject({
               id: selectedNote.id,
               title: selectedNote.title,
-              instructions: selectedNote.instructions,
-              template: selectedNote.template,
+              content: selectedNote.content,
+              last_modified_utc: selectedNote.last_modified_utc,
               category: selectedNote.category,
               tags: [...selectedNote.tags]
             })"

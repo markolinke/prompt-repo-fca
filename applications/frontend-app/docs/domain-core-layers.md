@@ -75,26 +75,23 @@ import { ValidationError } from '../../../common/errors/DomainError';  // Centra
 export class Note {
     readonly id: string;
     readonly title: string;
-    readonly instructions: string;
-    readonly template: string;
+    readonly content: string;
+    readonly last_modified_utc: Date;
     readonly category: string | null;
     readonly tags: readonly string[];
 
     constructor(
         id: string,
         title: string,
-        instructions: string,
-        template: string,
+        content: string,
+        last_modified_utc: Date,
         category: string | null,
         tags: string[]
     ) {
-        // Validate and assign properties
-        this.validate(id, title, instructions, template, category, tags);
-        
         this.id = id;
         this.title = title;
-        this.instructions = instructions;
-        this.template = template;
+        this.content = content;
+        this.last_modified_utc = last_modified_utc;
         this.category = category;
         this.tags = Object.freeze([...tags]) as readonly string[];
     }
@@ -106,16 +103,22 @@ export class Note {
     static fromPlainObject(data: {
         id: string;
         title: string;
-        instructions: string;
-        template: string;
+        content: string;
+        last_modified_utc: Date | string;
         category: string | null;
         tags: string[];
     }): Note {
+        // Convert last_modified_utc from string to Date if needed
+        const lastModifiedDate = typeof data.last_modified_utc === 'string' 
+            ? new Date(data.last_modified_utc) 
+            : data.last_modified_utc;
+
+        // Don't validate at this moment, as we need empty object to pass around the application
         return new Note(
             data.id,
             data.title,
-            data.instructions,
-            data.template,
+            data.content,
+            lastModifiedDate,
             data.category,
             data.tags
         );
@@ -125,27 +128,22 @@ export class Note {
      * Validates note properties according to domain rules.
      * @throws {ValidationError} if validation fails
      */
-    private validate(
-        id: string,
-        title: string,
-        instructions: string,
-        template: string,
-        category: string | null,
-        tags: string[]
-    ): void {
+    public validate(): void {
         const errors: string[] = [];
 
-        if (!id?.trim()) errors.push('ID is required');
-        if (!title?.trim()) errors.push('Title is required');
-        if (!instructions?.trim()) errors.push('Instructions are required');
-        if (!template?.trim()) errors.push('Template is required');
-        if (category !== null && typeof category !== 'string') errors.push('Category must be a string or null');
+        if (!this.id?.trim()) errors.push('ID is required');
+        if (!this.title?.trim()) errors.push('Title is required');
+        if (!this.content?.trim()) errors.push('Content is required');
+        if (!(this.last_modified_utc instanceof Date) || isNaN(this.last_modified_utc.getTime())) {
+            errors.push('last_modified_utc must be a valid Date');
+        }
+        if (this.category !== null && typeof this.category !== 'string') errors.push('Category must be a string or null');
 
-        if (!Array.isArray(tags)) {
+        if (!Array.isArray(this.tags)) {
             errors.push('Tags must be an array');
         } else {
             const tagSet: Set<string> = new Set();
-            for (const tag of tags) {
+            for (const tag of this.tags) {
                 if (typeof tag !== 'string') {
                     errors.push('All tags must be strings');
                     break;

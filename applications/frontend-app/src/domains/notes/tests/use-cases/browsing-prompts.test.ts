@@ -32,7 +32,7 @@ describe('Browsing Notes', () => {
       const allNotes = mockData.notes;
       allNotes.forEach(note => {
         expect(wrapper.text()).toContain(note.title);
-        expect(wrapper.text()).toContain(note.instructions);
+        expect(wrapper.text()).toContain(note.content);
         
         // Verify category is displayed if present
         if (note.category) {

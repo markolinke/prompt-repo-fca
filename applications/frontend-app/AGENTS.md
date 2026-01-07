@@ -121,16 +121,11 @@ Provide both `Http<Feature>Repository` and `Mock<Feature>Repository` implementat
 
 ### 6. Entity Validation Pattern
 
-Entities **MUST** validate in constructors and provide `fromPlainObject`:
+Entities **MUST** provide `validate()` and `fromPlainObject`:
 
 ```typescript
 // domains/notes/entities/Note.ts
 export class Note {
-    constructor(/* params */) {
-        this.validate(/* params */)
-        // assign properties
-    }
-    
     static fromPlainObject(data: {...}): Note {
         return new Note(/* ... */)
     }
@@ -140,6 +135,8 @@ export class Note {
     }
 }
 ```
+
+NOTE: Do not validate on object constructor. We'll need empty object for manipulations.
 
 ### 7. Common Layer Rules
 

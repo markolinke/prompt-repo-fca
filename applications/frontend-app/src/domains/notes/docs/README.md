@@ -1,6 +1,6 @@
 # Notes
 
-Notes domain handles note templates.
+Notes domain handles notes.
 
 ## Purpose
 
@@ -12,7 +12,6 @@ The purpose of the notes domain is to keep the structured repository of notes.
 - Filter by title or category (hierarchical, e.g. `design/features/validation`)
 - Filter by tags
 - Search by title or tags
-- One-click copy of note template or instructions
 
 ## User Stories
 
@@ -26,10 +25,10 @@ Acceptance Criteria:
 - Given the user is on the notes list page, when they enter a filter/search term, then only notes whose title or category contains that term are displayed.
 - There is a delay for filtering of 500 milliseconds while user is typing
 - Each listed note should display its title, category (showing the full hierarchical path, e.g., "design/features/validation"), and tags.
-- The list should include a preview or truncated view of the instructions and template for quick scanning.
+- The list should include a preview or truncated view of the content for quick scanning.
 - Notes should be sortable by title, category, or most recent (default to title alphabetical).
 - If there are more than 20 notes, pagination should be available to load additional pages.
-- The user should be able to click on a note to view its full details, including complete instructions and template.
+- The user should be able to click on a note to view its full details, including complete content.
 - There should be no performance issues (e.g., loading time under 2 seconds) when browsing up to 100 notes.
 
 ## Note Data Model
@@ -40,8 +39,8 @@ Each note follows this structure (TypeScript interface):
 export interface Note {
   id: string;                  // unique identifier (UUID or similar)
   title: string;               // short, descriptive name
-  instructions: string;        // optional high-level guidance / context
-  template: string;            // the actual note text (with placeholders if needed)
+  content: string;             // content of the note
+  last_modified_utc: Date;     // when was the note last modified
   category: string;            // hierarchical: e.g. "design/features/validation"
   tags: string[];              // e.g. ["design", "validation", "shared"]
 }
