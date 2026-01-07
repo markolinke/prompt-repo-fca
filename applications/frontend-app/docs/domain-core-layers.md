@@ -113,7 +113,8 @@ export class Note {
             ? new Date(data.last_modified_utc) 
             : data.last_modified_utc;
 
-        const note = new Note(
+        // Don't validate at this moment, as we need empty object to pass around the application
+        return new Note(
             data.id,
             data.title,
             data.content,
@@ -121,8 +122,6 @@ export class Note {
             data.category,
             data.tags
         );
-        note.validate();
-        return note;
     }
 
     /**

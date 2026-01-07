@@ -41,7 +41,7 @@ export class Note {
             ? new Date(data.last_modified_utc) 
             : data.last_modified_utc;
 
-        const note = new Note(
+        return new Note(
             data.id,
             data.title,
             data.content,
@@ -49,8 +49,6 @@ export class Note {
             data.category,
             data.tags
         );
-        note.validate();
-        return note;
     }
 
     /**
