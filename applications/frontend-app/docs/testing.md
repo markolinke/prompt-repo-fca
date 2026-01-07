@@ -840,6 +840,40 @@ domains/invoices/tests/
     └── discounting-items.test.ts   # Apply discount (business process)
 ```
 
+## Running Coverage Reports
+
+```bash
+# Generate coverage report (runs tests once)
+pnpm test:coverage
+
+# Generate coverage report with watch mode
+pnpm test:coverage:watch
+
+# View HTML coverage report (after running coverage)
+open coverage/index.html
+```
+
+### Coverage Scripts
+
+- `pnpm test:coverage` - Run tests once and generate coverage report
+- `pnpm test:coverage:watch` - Run tests in watch mode with coverage
+- `pnpm test` - Run tests without coverage (faster for development)
+
+## Understanding Coverage Metrics
+
+Coverage reports show four key metrics:
+
+1. **Statements** (`% Stmts`): Percentage of executable statements covered
+2. **Branches** (`% Branch`): Percentage of conditional branches covered (if/else, ternary, etc.)
+3. **Functions** (`% Funcs`): Percentage of functions/methods called
+4. **Lines** (`% Lines`): Percentage of lines executed
+
+### What Each Metric Tells You
+
+- **High Statements/Lines, Low Branches**: Code is executed but error paths and edge cases aren't tested
+- **High Functions, Low Statements**: Functions are called but not all code paths within them are tested
+- **Low Branches**: Critical - means error handling, validation, and conditional logic aren't fully tested
+
 ## Alignment with Architecture
 
 This testing approach aligns with our Flat Clean Architecture:
