@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
-import { mockBootstrapPrompts } from '../testHelpers';
+import { mockBootstrapPrompts, mockTimeout } from '../testHelpers';
 
 mockBootstrapPrompts(); // Must be called before importing components
 
@@ -11,6 +11,8 @@ import { mockData } from '../PromptMockData';
 describe('Filtering Prompts', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
+    // Reset mock timeout to ensure test isolation
+    mockTimeout.reset();
   });
 
   describe('When entering a filter/search term', () => {
@@ -18,8 +20,7 @@ describe('Filtering Prompts', () => {
       // Given: User is on prompts list page with all prompts loaded
       const wrapper = mount(PromptsPage);
 
-      // Wait for initial data load
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Wait for initial data load (component mount)
       await wrapper.vm.$nextTick();
 
       // Verify all prompts are displayed initially
@@ -32,8 +33,8 @@ describe('Filtering Prompts', () => {
       const searchInput = wrapper.find('[data-testid="search-input"]');
       await searchInput.setValue('Design');
       
-      // Wait for debounce delay (500ms) + Vue updates
-      await new Promise(resolve => setTimeout(resolve, 550));
+      // Advance time to trigger debounce (500ms)
+      mockTimeout.advanceBy(500);
       await wrapper.vm.$nextTick();
 
       // Then: Only matching prompts are displayed
@@ -49,15 +50,14 @@ describe('Filtering Prompts', () => {
     it('should filter by category when search term matches category', async () => {
       // Given: User is on prompts list page
       const wrapper = mount(PromptsPage);
-      await new Promise(resolve => setTimeout(resolve, 100));
       await wrapper.vm.$nextTick();
 
       // When: User enters a search term that matches category
       const searchInput = wrapper.find('[data-testid="search-input"]');
       await searchInput.setValue('coding');
       
-      // Wait for debounce delay
-      await new Promise(resolve => setTimeout(resolve, 550));
+      // Advance time to trigger debounce (500ms)
+      mockTimeout.advanceBy(500);
       await wrapper.vm.$nextTick();
 
       // Then: Only prompt with matching category is displayed
@@ -73,15 +73,14 @@ describe('Filtering Prompts', () => {
     it('should show empty state when search term matches nothing', async () => {
       // Given: User is on prompts list page
       const wrapper = mount(PromptsPage);
-      await new Promise(resolve => setTimeout(resolve, 100));
       await wrapper.vm.$nextTick();
 
       // When: User enters a search term that doesn't match any prompt
       const searchInput = wrapper.find('[data-testid="search-input"]');
       await searchInput.setValue('nonexistent-search-term');
       
-      // Wait for debounce delay
-      await new Promise(resolve => setTimeout(resolve, 550));
+      // Advance time to trigger debounce (500ms)
+      mockTimeout.advanceBy(500);
       await wrapper.vm.$nextTick();
 
       // Then: Empty state is shown
@@ -93,7 +92,6 @@ describe('Filtering Prompts', () => {
     it('should wait 500ms before applying the filter', async () => {
       // Given: User is on prompts list page
       const wrapper = mount(PromptsPage);
-      await new Promise(resolve => setTimeout(resolve, 100));
       await wrapper.vm.$nextTick();
 
       const allPrompts = mockData.prompts;
@@ -105,13 +103,13 @@ describe('Filtering Prompts', () => {
       await searchInput.setValue('Design');
 
       // Then: Results should NOT change immediately (before 500ms)
-      await new Promise(resolve => setTimeout(resolve, 100));
+      mockTimeout.advanceBy(499); // Advance by less than debounce delay
       await wrapper.vm.$nextTick();
       const beforeDelayCount = wrapper.findAll('[data-testid="prompt-item"]').length;
       expect(beforeDelayCount).toBe(initialCount); // Still showing all prompts
 
-      // When: Wait for debounce delay (500ms)
-      await new Promise(resolve => setTimeout(resolve, 450)); // Total 550ms from typing
+      // When: Advance time to complete debounce delay (500ms total)
+      mockTimeout.advanceBy(1); // Complete the remaining 1ms
       await wrapper.vm.$nextTick();
 
       // Then: Results should change after delay
@@ -123,13 +121,12 @@ describe('Filtering Prompts', () => {
     it('should show all prompts when search is cleared', async () => {
       // Given: User is on prompts list page with a search applied
       const wrapper = mount(PromptsPage);
-      await new Promise(resolve => setTimeout(resolve, 100));
       await wrapper.vm.$nextTick();
 
       // Apply a search
       const searchInput = wrapper.find('[data-testid="search-input"]');
       await searchInput.setValue('Design');
-      await new Promise(resolve => setTimeout(resolve, 550));
+      mockTimeout.advanceBy(500); // Trigger debounce
       await wrapper.vm.$nextTick();
 
       // Verify search is applied
@@ -139,8 +136,8 @@ describe('Filtering Prompts', () => {
       // When: User clears the search
       await searchInput.setValue('');
       
-      // Wait for debounce delay
-      await new Promise(resolve => setTimeout(resolve, 550));
+      // Advance time to trigger debounce (500ms)
+      mockTimeout.advanceBy(500);
       await wrapper.vm.$nextTick();
 
       // Then: All prompts are displayed again
@@ -158,7 +155,6 @@ describe('Filtering Prompts', () => {
     it('should match prompts by either title or category', async () => {
       // Given: User is on prompts list page
       const wrapper = mount(PromptsPage);
-      await new Promise(resolve => setTimeout(resolve, 100));
       await wrapper.vm.$nextTick();
 
       // When: User enters a search term that could match either title or category
@@ -166,8 +162,8 @@ describe('Filtering Prompts', () => {
       const searchInput = wrapper.find('[data-testid="search-input"]');
       await searchInput.setValue('design');
       
-      // Wait for debounce delay
-      await new Promise(resolve => setTimeout(resolve, 550));
+      // Advance time to trigger debounce (500ms)
+      mockTimeout.advanceBy(500);
       await wrapper.vm.$nextTick();
 
       // Then: Prompts matching either title or category are displayed

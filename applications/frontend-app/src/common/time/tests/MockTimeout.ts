@@ -44,6 +44,16 @@ export class MockTimeout implements TimeoutPort {
     }
   }
 
+  /**
+   * Resets the mock timeout to its initial state.
+   * Useful for test isolation between test cases.
+   */
+  reset(): void {
+    this.now = 0;
+    this.nextId = 1;
+    this.scheduled = [];
+  }
+
   private flushDue(): void {
     const due = this.scheduled.filter(task => task.runAt <= this.now);
     const remaining = this.scheduled.filter(task => task.runAt > this.now);
