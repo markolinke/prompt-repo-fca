@@ -4,7 +4,7 @@ import { HttpPromptRepository } from './repositories/HttpPromptRepository'
 import { createPromptsStore } from './store/PromptsStore'
 import promptsRoutes from './routes'
 import { appDependencies } from "@/common/env/AppDependencies";
-import type { TimeoutHandle } from '@/common/time/TimeoutPort';
+import { createDebouncer } from '@/common/time/Debouncer';
 
 const bootstrapPrompts = () => {
     const useMocks = appDependencies.getAppConfig().isMockEnv
@@ -18,18 +18,7 @@ const bootstrapPrompts = () => {
     const service = new PromptService(repository)
 
     const createSearchDebouncer = () => {
-        let handle: TimeoutHandle | null = null
-
-        return (callback: () => void) => {
-            if (handle !== null) {
-                timeoutClient.clearTimeout(handle)
-            }
-
-            handle = timeoutClient.setTimeout(() => {
-                callback()
-                handle = null
-            }, 500)
-        }
+        return createDebouncer(timeoutClient, 500);
     }
   
     return {

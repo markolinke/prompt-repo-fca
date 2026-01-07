@@ -2,15 +2,14 @@ import { vi } from 'vitest';
 import { PromptService } from '../services/PromptService';
 import { MockPromptRepository } from '../repositories/MockPromptRepository';
 import { createPromptsStore } from '../store/PromptsStore';
-import { MockTimeout } from '@/common/time/tests/MockTimeout';
-import type { TimeoutHandle } from '@/common/time/TimeoutPort';
+import { createTestDebouncer } from '@/common/time/tests/DebouncerTestHelper';
 
 /**
- * Mock timeout instance used in tests for manual control of time-based operations.
+ * Mock timeout instance and debouncer used in tests for manual control of time-based operations.
  * Tests can use mockTimeout.advanceBy(ms) or mockTimeout.runAll() to control
  * when callbacks execute, making tests deterministic and fast.
  */
-export const mockTimeout = new MockTimeout();
+export const { debouncer: mockSearchDebouncer, mockTimeout } = createTestDebouncer();
 
 /**
  * Mocks the bootstrapPrompts function for integration tests.
@@ -46,18 +45,7 @@ export const mockBootstrapPrompts = () => {
         const store = createPromptsStore(service);
 
         const createSearchDebouncer = () => {
-          let handle: TimeoutHandle | null = null;
-
-          return (callback: () => void) => {
-            if (handle !== null) {
-              mockTimeout.clearTimeout(handle);
-            }
-
-            handle = mockTimeout.setTimeout(() => {
-              callback();
-              handle = null;
-            }, 500);
-          };
+          return mockSearchDebouncer;
         };
 
         return {
