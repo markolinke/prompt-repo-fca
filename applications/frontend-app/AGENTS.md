@@ -250,6 +250,13 @@ vi.mock('../bootstrap', () => {
 - ✅ Business processes end-to-end
 - ❌ Don't test implementation details or components in isolation
 
+**Test Guidelines**:
+
+- ✅ For Test Selectors in component testing, ALWAYS use the `data-testid`attribute
+- ✅ Avoid code duplication and hard to read patterns
+- ✅ Tests are documentation, so they should be as readable as possible
+- ❌ NEVER create test selectors that rely on html structure, implementation etc.
+
 **Test Organization**:
 ```
 domains/<feature>/tests/

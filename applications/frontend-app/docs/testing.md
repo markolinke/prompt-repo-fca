@@ -47,7 +47,7 @@ For true end-to-end testing (browser automation, cross-browser, visual regressio
 - User interactions and their outcomes
 - Error states and edge cases from user perspective
 - Validation rules as users experience them
-- **Use `data-testid` attributes for test selectors** (see Test Selectors section below)
+- **ALWAYS use `data-testid` attributes for test selectors** (see Test Selectors section below)
 
 ❌ **DON'T Test:**
 
