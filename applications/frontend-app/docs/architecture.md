@@ -91,8 +91,7 @@ applications/frontend-app/
 │               ├── NoteMockData.ts
 │               └── NoteService.test.ts
 ├── public/
-│   ├── favicon.svg
-│   └── vite.svg
+│   └── favicon.svg
 ├── index.html
 ├── docs/
 │   ├── README.md
