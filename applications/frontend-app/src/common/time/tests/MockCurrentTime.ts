@@ -1,4 +1,4 @@
-import type { CurrentTimeProviderPort } from '../CurrentTimeProviderPort';
+import type { CurrentTimeProviderPort } from '../time_provider/CurrentTimeProviderPort';
 
 export class MockCurrentTime implements CurrentTimeProviderPort {
     private now: number;

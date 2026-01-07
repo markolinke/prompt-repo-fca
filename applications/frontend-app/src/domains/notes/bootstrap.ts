@@ -5,7 +5,7 @@ import { createNotesStore } from './store/NotesStore'
 import notesRoutes from './routes'
 import { appDependencies } from "@/common/env/AppDependencies";
 import { createDebouncer } from '@/common/time/Debouncer';
-import { createCurrentTimeProvider } from '@/common/time/CurrentTime';
+import { createCurrentTimeProvider } from '@/common/time/time_provider/CurrentTime';
 
 const bootstrapNotes = () => {
     const useMocks = appDependencies.getAppConfig().isMockEnv
