@@ -37,23 +37,6 @@ Layers (from inner to outer):
 | **Application**    | Use cases / services (frontend-specific logic, calculations)                   | Plain TS functions or classes            | Yes       |
 | **Presentation**   | UI components, views, state management                                         | Vue 3 components, Pinia, Composables     | Yes       |
 
-## Project Structure (Monorepo)
-
-```text
-monorepo-root/
-├── applications/
-│   └── frontend-app/                  # Vue 3 frontend application
-│       └── ... (see below)
-├── services/
-│   ├── auth-service/                  # Python backend microservices
-│   ├── invoice-service/
-│   └── ...
-├── packages/
-│   └── shared-types/                  # Optional: shared TS types between FE & BE
-└── docs/
-    └── architecture.md                # This file
-```
-
 ## Frontend Application Structure
 
 ```text
@@ -84,29 +67,29 @@ applications/frontend-app/
 │   │   └── routing/
 │   │       └── MyRouterPort.ts
 │   └── domains/                       # Feature-Sliced Design (FSD) modules
-│       └── prompts/                   # Example feature – self-contained module
+│       └── notes/                   # Example feature – self-contained module
 │           ├── bootstrap.ts
 │           ├── components/
-│           │   └── PromptsList.vue
+│           │   └── NotesList.vue
 │           ├── docs/
 │           │   └── README.md
 │           ├── entities/
-│           │   └── Prompt.ts
+│           │   └── Note.ts
 │           ├── index.ts
 │           ├── pages/
-│           │   └── PromptsPage.vue
+│           │   └── NotesPage.vue
 │           ├── repositories/
-│           │   ├── HttpPromptRepository.ts
-│           │   ├── MockPromptRepository.ts
-│           │   └── PromptRepositoryPort.ts
+│           │   ├── HttpNoteRepository.ts
+│           │   ├── MockNoteRepository.ts
+│           │   └── NoteRepositoryPort.ts
 │           ├── routes.ts
 │           ├── services/
-│           │   └── PromptService.ts
+│           │   └── NoteService.ts
 │           ├── store/
-│           │   └── PromptsStore.ts
+│           │   └── NotesStore.ts
 │           └── tests/
-│               ├── PromptMockData.ts
-│               └── PromptService.test.ts
+│               ├── NoteMockData.ts
+│               └── NoteService.test.ts
 ├── public/
 │   ├── favicon.svg
 │   └── vite.svg
@@ -127,34 +110,34 @@ applications/frontend-app/
 - It returns configured artifacts (e.g., pre-wired `useStore`, `routes`).
 - This replaces centralized wiring and makes features plug-and-play.
 
-Example bootstrap signature (from `domains/prompts/bootstrap.ts`):
+Example bootstrap signature (from `domains/notes/bootstrap.ts`):
 
 ```typescript
-import { PromptService } from './services/PromptService'
-import { MockPromptRepository } from './repositories/MockPromptRepository'
-import { HttpPromptRepository } from './repositories/HttpPromptRepository'
+import { NoteService } from './services/NoteService'
+import { MockNoteRepository } from './repositories/MockNoteRepository'
+import { HttpNoteRepository } from './repositories/HttpNoteRepository'
 import { AxiosHttpClient } from '@/common/http/AxiosHttpClient'
 import { appConfig } from '@/common/env/AppConfig'  // If using separate config; otherwise via AppDependencies
-import { createPromptsStore } from './store/PromptsStore'
-import promptsRoutes from './routes'
+import { createNotesStore } from './store/NotesStore'
+import notesRoutes from './routes'
 
-const bootstrapPrompts = () => {
+const bootstrapNotes = () => {
     const useMocks = appConfig.isMockEnv  // Or via env detection
 
     const apiClient = new AxiosHttpClient(appConfig.baseUrl);
     const repository = useMocks
-        ? new MockPromptRepository()
-        : new HttpPromptRepository(apiClient)
+        ? new MockNoteRepository()
+        : new HttpNoteRepository(apiClient)
 
-    const service = new PromptService(repository)
+    const service = new NoteService(repository)
   
     return {
-        useStore: createPromptsStore(service),
-        routes: promptsRoutes
+        useStore: createNotesStore(service),
+        routes: notesRoutes
     }
 }
 
-export { bootstrapPrompts }
+export { bootstrapNotes }
 ```
 
 The root application aggregates features in `src/app/bootstrap/bootstrapFeatures.ts`:
@@ -162,11 +145,11 @@ The root application aggregates features in `src/app/bootstrap/bootstrapFeatures
 ```typescript
 // src/app/bootstrap/bootstrapFeatures.ts
 import { Router } from 'vue-router'
-import { bootstrapPrompts } from '@/domains/prompts'
+import { bootstrapNotes } from '@/domains/notes'
 
 export const bootstrapFeatures = (router: Router) : void => {   
     console.log('bootstrapFeatures, router: ', router);
-    for (const route of bootstrapPrompts().routes) {
+    for (const route of bootstrapNotes().routes) {
         console.log('bootstrapFeatures, adding route: ', route.name);
         router.addRoute(route);
     }
@@ -201,7 +184,7 @@ Global dependencies (e.g., router) are bootstrapped in `src/app/bootstrap/bootst
    - HTTP: [TO BE DECIDED] for global MSW vs. per-feature.
 7. **Tests**:
    - **100% test coverage** is the target for all code
-   - Tests are colocated in each feature's `tests/` folder (e.g., `domains/prompts/tests/`)
+   - Tests are colocated in each feature's `tests/` folder (e.g., `domains/notes/tests/`)
    - Use Vitest for unit tests (service layer) and integration tests (use case level)
    - Integration tests use real components + real store + real service + mock repository
    - Tests are organized by use case/user story, not by component

@@ -1,1 +1,0 @@
-export { bootstrapPrompts } from './bootstrap'

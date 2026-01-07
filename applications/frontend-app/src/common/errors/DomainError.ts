@@ -12,17 +12,17 @@ export class ValidationError extends DomainError {
     }
 }
 
-export class PromptNotFoundError extends DomainError {
+export class NoteNotFoundError extends DomainError {
     constructor(id: string) {
-        super(`Prompt with id ${id} not found`);
-        this.name = 'PromptNotFoundError';
+        super(`Note with id ${id} not found`);
+        this.name = 'NoteNotFoundError';
     }
 }
 
-export class DuplicatePromptError extends DomainError {
+export class DuplicateNoteError extends DomainError {
     constructor(id: string) {
-        super(`Prompt with id ${id} already exists`);
-        this.name = 'DuplicatePromptError';
+        super(`Note with id ${id} already exists`);
+        this.name = 'DuplicateNoteError';
     }
 }
 

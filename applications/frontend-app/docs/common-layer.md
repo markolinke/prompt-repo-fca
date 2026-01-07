@@ -5,6 +5,7 @@
 The `src/common/` layer contains **pure, framework-agnostic infrastructure** that is shared across all features and the entire application. It is written exclusively in **plain TypeScript** — no Vue, Pinia, DOM APIs, or any other frontend framework dependencies are allowed.
 
 The purpose of this layer is to:
+
 - Standardize recurring cross-cutting concerns (HTTP client, routing abstraction, error types, dependency registry, configuration, etc.).
 - Provide a stable, reusable foundation that features can depend on.
 - Enable easy swapping, mocking, and testing of infrastructure components.
@@ -193,7 +194,7 @@ export class AxiosHttpClient implements HttpClientPort {
 
 **Only generic, cross-cutting errors** belong in `common/errors/`.
 
-Feature-specific errors (e.g., `PromptNotFoundError`, `DuplicatePromptError`) **must** live in the owning feature (e.g., `domains/prompts/entities/` or `repositories/`).
+Feature-specific errors (e.g., `NoteNotFoundError`, `DuplicateNoteError`) **must** live in the owning feature (e.g., `domains/notes/entities/` or `repositories/`).
 
 ### Example: `src/common/errors/DomainError.ts`
 

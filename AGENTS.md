@@ -28,7 +28,7 @@ Think in terms of **features first**, **layers second**. Each app is a thin shel
   - Entities, services, and repositories are **plain TypeScript** with no framework imports.
   - Application/framework concerns stay in app/bootstrap/router/store/component layers.
 
-When unsure, follow the patterns used in `applications/frontend-app/src/domains/prompts/` and generalize them.
+When unsure, follow the patterns used in `applications/frontend-app/src/domains/notes/` and generalize them.
 
 ### Clean Code (How to Write Code Here)
 

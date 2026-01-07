@@ -1,7 +1,7 @@
-# Team Prompt Repository (FCA)
+# Team Note Repository (FCA)
 
-A shared library of high-quality, reusable AI prompts for our SaaS product team.  
-Helps us work faster and more consistently in the age of AI by centralizing proven prompts for design, architecture, coding, validation, and more.
+A shared library of high-quality, reusable AI notes for our SaaS product team.  
+Helps us work faster and more consistently in the age of AI by centralizing proven notes for design, architecture, coding, validation, and more.
 
 ## Flat Clean Architecture (FCA)
 
@@ -18,6 +18,7 @@ For detailed frontend guidelines, see `docs/architecture.md`, `docs/domain-core-
 ## Monorepo Design and Principles
 
 ### Design
+
 - **Monorepo Benefits**: Single repository for all codebases enables shared tooling, consistent CI/CD, easier refactoring across services, and simplified dependency management.
 - **Structure Overview**:
   - `applications/`: Contains frontend applications (e.g., `frontend-app/` with Vue codebase).
@@ -25,8 +26,26 @@ For detailed frontend guidelines, see `docs/architecture.md`, `docs/domain-core-
   - `packages/`: Shared packages (e.g., `shared-types/` for TypeScript types reusable between FE and BE).
   - `docs/`: Central documentation for architecture, guidelines, and more.
 
+#### Files Directory structure
+
+```text
+monorepo-root/
+├── applications/
+│   └── frontend-app/                  # Vue 3 frontend application
+│       └── ... (see below)
+├── services/
+│   ├── auth-service/                  # Python backend microservices
+│   ├── invoice-service/
+│   └── ...
+├── packages/
+│   └── shared-types/                  # Optional: shared TS types between FE & BE
+└── docs/
+    └── architecture.md                # This file
+```
+
 ### Principles
-- **Modularity**: Slice by domains/features (e.g., `domains/prompts/` in frontend) to keep concerns isolated and scalable.
+
+- **Modularity**: Slice by domains/features (e.g., `domains/notes/` in frontend) to keep concerns isolated and scalable.
 - **Separation of Concerns**: Backend owns data-heavy logic and validation; frontend handles UI and lightweight orchestration.
 - **Dependency Direction**: Inner layers (entities, repositories) are framework-agnostic; outer layers (stores, components) depend on them.
 - **Testability**: Mandate mocks (e.g., repositories) and aim for high coverage.
@@ -43,14 +62,15 @@ For detailed frontend guidelines, see `docs/architecture.md`, `docs/domain-core-
 ### Installation
 
 ```bash
-git clone https://github.com/your-org/team-prompt-repo.git
-cd team-prompt-repo
+git clone https://github.com/your-org/team-note-repo.git
+cd team-note-repo
 pnpm install  # Installs frontend and shared packages; for backend, navigate to each service and run pip install
 ```
 
 ### Development
 
 For frontend:
+
 ```bash
 cd applications/frontend-app
 pnpm dev
@@ -59,23 +79,24 @@ pnpm dev
 Open http://localhost:3000 (or your configured port).
 
 For backend services:
+
 - Navigate to a service (e.g., `cd services/auth-service`)
 - Run development server (e.g., `python main.py` or as per service docs).
 
-### Adding Prompts (Coming Soon)
+### Adding Notes (Coming Soon)
 
-(Planned: simple form to add new prompts with title, category, tags, template, and instructions.)
+(Planned: simple form to add new notes with title, category, tags, template, and instructions.)
 
 ## Folder Structure (Example)
 
-```
-team-prompt-repo/
+```text
+team-note-repo/
 ├── applications/
 │   └── frontend-app/                  # Vue frontend application
 │       ├── src/
 │       │   ├── app/                   # Vue root and bootstrap
 │       │   ├── common/                # Shared infrastructure (HTTP, errors, etc.)
-│       │   └── domains/               # Feature domains (e.g., prompts/)
+│       │   └── domains/               # Feature domains (e.g., notes/)
 │       ├── public/
 │       ├── docs/                      # Frontend-specific docs
 │       └── README.md

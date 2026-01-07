@@ -34,19 +34,19 @@ We use a **factory pattern** combined with **per-feature bootstrapping**:
    - Do **not** call `defineStore` directly in the feature barrel.
    - Example:
      ```typescript
-     // features/prompts/store/promptsStore.ts
+     // features/notes/store/notesStore.ts
      import { defineStore } from 'pinia'
 
-     type PromptServiceShape = {
-       getPrompts(): Promise<Prompt[]>
+     type NoteServiceShape = {
+       getNotes(): Promise<Note[]>
      }
 
-     export function createPromptsStore({ promptService }: { promptService: PromptServiceShape }) {
-       return defineStore('prompts', {
+     export function createNotesStore({ noteService }: { noteService: NoteServiceShape }) {
+       return defineStore('notes', {
          state: () => ({ /* ... */ }),
          actions: {
-           async fetchPrompts() {
-             // Call promptService methods directly
+           async fetchNotes() {
+             // Call noteService methods directly
            }
          }
        })
@@ -58,53 +58,53 @@ We use a **factory pattern** combined with **per-feature bootstrapping**:
    - It returns a pre-configured `use<Feature>Store` function (and optionally routes).
    - Example updated workflow (primary: repository-level mocking with global config and dependencies):
      ```typescript
-     // features/prompts/bootstrap.ts (internal)
-     import { PromptService } from './services/PromptService'
-     import { MockPromptRepository } from './repositories/MockPromptRepository'
-     import { HttpPromptRepository } from './repositories/HttpPromptRepository'
+     // features/notes/bootstrap.ts (internal)
+     import { NoteService } from './services/NoteService'
+     import { MockNoteRepository } from './repositories/MockNoteRepository'
+     import { HttpNoteRepository } from './repositories/HttpNoteRepository'
      import { ApiClient } from '@/common/http/HttpClient'
      import { appConfig } from '@/common/config/AppConfig'
-     import { createPromptsStore } from './store/promptsStore'
-     import promptsRoutes from './routes'
+     import { createNotesStore } from './store/notesStore'
+     import notesRoutes from './routes'
 
-     const bootstrapPrompts = () => {
+     const bootstrapNotes = () => {
          const useMocks = appConfig.isMockEnv
 
          const apiClient = new ApiClient(appConfig.baseUrl);
          const repository = useMocks
-             ? new MockPromptRepository()
-             : new HttpPromptRepository(apiClient)
+             ? new MockNoteRepository()
+             : new HttpNoteRepository(apiClient)
 
-         const service = new PromptService(repository)
+         const service = new NoteService(repository)
        
          return {
-             useStore: createPromptsStore({ promptService: service }),
-             routes: promptsRoutes ?? [],
+             useStore: createNotesStore({ noteService: service }),
+             routes: notesRoutes ?? [],
          }
      }
 
-     export { bootstrapPrompts }
+     export { bootstrapNotes }
 
-     // features/prompts/index.ts (barrel)
-     export { bootstrapPrompts } from './bootstrap'
+     // features/notes/index.ts (barrel)
+     export { bootstrapNotes } from './bootstrap'
      ```
 
 3. **Using the Store from a Component** (Unchanged)
    ```vue
    <script setup lang="ts">
-   import { usePromptsStore } from '@/features/prompts'  // Now comes from bootstrap
-   const store = usePromptsStore()
+   import { useNotesStore } from '@/features/notes'  // Now comes from bootstrap
+   const store = useNotesStore()
    </script>
    ```
 
 4. **Automated Testing of the Store**
    - Use the feature bootstrap with repository mocks to test the real service logic.
    ```typescript
-   it('fetches prompts using mock repository data', async () => {
+   it('fetches notes using mock repository data', async () => {
      // For tests, temporarily override appConfig or pass options if extended
-     const { useStore } = bootstrapPrompts()  // Assuming mock env detected
+     const { useStore } = bootstrapNotes()  // Assuming mock env detected
      const store = useStore()
-     await store.fetchPrompts()
+     await store.fetchNotes()
      // assertions on real service behavior with mock data...
    })
    ```

@@ -28,23 +28,23 @@ This design enables:
 
 ## Usage in Components
 
-### Example: PromptsPage.vue
+### Example: NotesPage.vue
 
 Components obtain the debouncer through their domain's bootstrap function:
 
 ```vue
 <script setup lang="ts">
-import { bootstrapPrompts } from '../bootstrap';
+import { bootstrapNotes } from '../bootstrap';
 
-const bootstrap = bootstrapPrompts();
-const promptsStore = bootstrap.useStore();
+const bootstrap = bootstrapNotes();
+const notesStore = bootstrap.useStore();
 const searchDebouncer = bootstrap.createSearchDebouncer();
 
 const searchQuery = ref('');
 
 const handleSearch = () => {
   searchDebouncer(() => {
-    promptsStore.searchPrompts(searchQuery.value);
+    notesStore.searchNotes(searchQuery.value);
   });
 };
 </script>
@@ -53,7 +53,7 @@ const handleSearch = () => {
   <input 
     v-model="searchQuery" 
     @input="handleSearch" 
-    placeholder="Search prompts" 
+    placeholder="Search notes" 
   />
 </template>
 ```
@@ -67,7 +67,7 @@ const handleSearch = () => {
 
 ## Usage in Testing
 
-### Example: filtering-prompts.test.ts
+### Example: filtering-notes.test.ts
 
 Tests use `MockTimeout` to control time manually, making tests fast and deterministic:
 
@@ -75,20 +75,20 @@ Tests use `MockTimeout` to control time manually, making tests fast and determin
 import { describe, it, expect, beforeEach } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
-import { mockBootstrapPrompts, mockTimeout } from '../testHelpers';
+import { mockBootstrapNotes, mockTimeout } from '../testHelpers';
 
-mockBootstrapPrompts(); // Must be called before importing components
+mockBootstrapNotes(); // Must be called before importing components
 
-import PromptsPage from '../../pages/PromptsPage.vue';
+import NotesPage from '../../pages/NotesPage.vue';
 
-describe('Filtering Prompts', () => {
+describe('Filtering Notes', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
     mockTimeout.reset(); // Reset for test isolation
   });
 
-  it('should filter prompts after debounce delay', async () => {
-    const wrapper = mount(PromptsPage);
+  it('should filter notes after debounce delay', async () => {
+    const wrapper = mount(NotesPage);
     await flushPromises();
     await wrapper.vm.$nextTick();
 
@@ -105,12 +105,12 @@ describe('Filtering Prompts', () => {
     mockTimeout.advanceBy(499); // Advance by less than delay
     await flushPromises();
     await wrapper.vm.$nextTick();
-    expect(wrapper.findAll('[data-testid="prompt-item"]').length).toBe(4); // Still unfiltered
+    expect(wrapper.findAll('[data-testid="note-item"]').length).toBe(4); // Still unfiltered
 
     mockTimeout.advanceBy(1); // Complete the delay
     await flushPromises();
     await wrapper.vm.$nextTick();
-    expect(wrapper.findAll('[data-testid="prompt-item"]').length).toBe(2); // Filtered
+    expect(wrapper.findAll('[data-testid="note-item"]').length).toBe(2); // Filtered
   });
 });
 ```
@@ -125,7 +125,7 @@ describe('Filtering Prompts', () => {
 
 ## Production Bootstrapping
 
-### Example: domains/prompts/bootstrap.ts
+### Example: domains/notes/bootstrap.ts
 
 Domain bootstraps create debouncers using the common utility and inject the timeout client:
 
@@ -133,7 +133,7 @@ Domain bootstraps create debouncers using the common utility and inject the time
 import { appDependencies } from "@/common/env/AppDependencies";
 import { createDebouncer } from '@/common/time/Debouncer';
 
-const bootstrapPrompts = () => {
+const bootstrapNotes = () => {
     const timeoutClient = appDependencies.getTimeoutClient(); // Gets BrowserTimeout
     
     const createSearchDebouncer = () => {
@@ -141,13 +141,13 @@ const bootstrapPrompts = () => {
     }
   
     return {
-        useStore: createPromptsStore(service),
-        routes: promptsRoutes,
+        useStore: createNotesStore(service),
+        routes: notesRoutes,
         createSearchDebouncer // Exposed to components
     }
 }
 
-export { bootstrapPrompts }
+export { bootstrapNotes }
 ```
 
 **Key Points:**
@@ -159,7 +159,7 @@ export { bootstrapPrompts }
 
 ## Test Bootstrapping
 
-### Example: domains/prompts/tests/testHelpers.ts
+### Example: domains/notes/tests/testHelpers.ts
 
 Test helpers create debouncers using `MockTimeout` for manual control:
 
@@ -173,11 +173,11 @@ import { createTestDebouncer } from '@/common/time/tests/DebouncerTestHelper';
  */
 export const { debouncer: mockSearchDebouncer, mockTimeout } = createTestDebouncer();
 
-export const mockBootstrapPrompts = () => {
+export const mockBootstrapNotes = () => {
   vi.mock('../bootstrap', () => {
     return {
-      bootstrapPrompts: () => {
-        const store = createPromptsStore(service);
+      bootstrapNotes: () => {
+        const store = createNotesStore(service);
 
         const createSearchDebouncer = () => {
           return mockSearchDebouncer; // Uses MockTimeout internally
@@ -305,5 +305,5 @@ beforeEach(() => {
 
 - `common/env/AppDependencies.ts` - Dependency injection container
 - `app/bootstrap/bootstrapDependencies.ts` - App-level dependency registration
-- Domain-specific bootstrap files (e.g., `domains/prompts/bootstrap.ts`)
-- Domain-specific test helpers (e.g., `domains/prompts/tests/testHelpers.ts`)
+- Domain-specific bootstrap files (e.g., `domains/notes/bootstrap.ts`)
+- Domain-specific test helpers (e.g., `domains/notes/tests/testHelpers.ts`)

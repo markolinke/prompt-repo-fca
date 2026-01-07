@@ -1,0 +1,1 @@
+export { bootstrapNotes } from './bootstrap'
