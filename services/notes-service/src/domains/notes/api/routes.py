@@ -21,6 +21,12 @@ def create_notes_router(service: NotesService) -> APIRouter:
         # Pydantic models serialize automatically, but explicit is clearer
         return [note.model_dump() for note in notes]
     
+    @router.get("/search", response_model=list[NoteResponseSchema])
+    async def search_notes(query: str):
+        """Search notes by query string."""
+        notes = await service.search_notes(query)
+        return [note.model_dump() for note in notes]
+    
     @router.get("/{note_id}", response_model=NoteResponseSchema)
     async def get_note_by_id(note_id: str):
         """Get a note by ID."""
@@ -84,11 +90,5 @@ def create_notes_router(service: NotesService) -> APIRouter:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=str(e)
             )
-    
-    @router.get("/search", response_model=list[NoteResponseSchema])
-    async def search_notes(query: str):
-        """Search notes by query string."""
-        notes = await service.search_notes(query)
-        return [note.model_dump() for note in notes]
     
     return router
