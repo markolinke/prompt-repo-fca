@@ -40,8 +40,8 @@ Each note follows this structure (TypeScript interface):
 export interface Note {
   id: string;                  // unique identifier (UUID or similar)
   title: string;               // short, descriptive name
-  instructions: string;        // optional high-level guidance / context
-  template: string;            // the actual note text (with placeholders if needed)
+  content: string;             // content of the note
+  last_modified_utc: Date;     // when was the note last modified
   category: string;            // hierarchical: e.g. "design/features/validation"
   tags: string[];              // e.g. ["design", "validation", "shared"]
 }
