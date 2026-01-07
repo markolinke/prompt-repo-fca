@@ -27,9 +27,19 @@ export const mockBootstrapPrompts = () => {
         const repository = new MockPromptRepository();
         const service = new PromptService(repository);
         const store = createPromptsStore(service);
+
+        const createSearchDebouncer = () => {
+          return (callback: () => void) => {
+            setTimeout(() => {
+              callback();
+            }, 500);
+          };
+        };
+
         return {
           useStore: store,
           routes: [],
+          createSearchDebouncer,
         };
       },
     };
