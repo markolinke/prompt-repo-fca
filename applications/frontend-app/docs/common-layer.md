@@ -193,7 +193,7 @@ export class AxiosHttpClient implements HttpClientPort {
 
 **Only generic, cross-cutting errors** belong in `common/errors/`.
 
-Feature-specific errors (e.g., `PromptNotFoundError`, `DuplicatePromptError`) **must** live in the owning feature (e.g., `domains/prompts/entities/` or `repositories/`).
+Feature-specific errors (e.g., `NoteNotFoundError`, `DuplicateNoteError`) **must** live in the owning feature (e.g., `domains/notes/entities/` or `repositories/`).
 
 ### Example: `src/common/errors/DomainError.ts`
 

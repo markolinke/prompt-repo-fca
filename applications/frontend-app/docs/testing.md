@@ -15,7 +15,7 @@ For true end-to-end testing (browser automation, cross-browser, visual regressio
 
 ## Core Principles
 
-- **Test Business Processes**: Test whether "creating a prompt" works, not whether a component renders
+- **Test Business Processes**: Test whether "creating a note" works, not whether a component renders
 - **Integration Over Isolation**: Test the full stack within the domain (components → store → service → repository)
 - **Use Case Organization**: Organize tests by user story/use case, not by component or technical layer
 - **Single Mock Boundary**: Mock only at the repository level (the data boundary)
@@ -30,19 +30,19 @@ For true end-to-end testing (browser automation, cross-browser, visual regressio
    - Test services with mock repositories
    - Verify business logic and error handling
    - Located in `domains/<feature>/tests/<Service>.test.ts`
-   - Example: `PromptService.test.ts`
+   - Example: `NoteService.test.ts`
 
 2. **Integration Tests** (Use Case Level)
    - Test complete user workflows
    - Real components + real store + real service + mock repository
    - Located in `domains/<feature>/tests/use-cases/`
-   - Example: `creating-prompts.test.ts`, `viewing-prompts.test.ts`
+   - Example: `creating-notes.test.ts`, `viewing-notes.test.ts`
 
 ### What We Test
 
 ✅ **DO Test:**
 
-- Complete user workflows (e.g., "user can create a prompt")
+- Complete user workflows (e.g., "user can create a note")
 - Business processes end-to-end (UI → Store → Service → Repository)
 - User interactions and their outcomes
 - Error states and edge cases from user perspective
@@ -74,9 +74,9 @@ domains/<feature>/tests/
 
 ### Naming Convention
 
-- **Unit tests**: `<Service>.test.ts` (e.g., `PromptService.test.ts`)
-- **Integration tests**: `<use-case>-<feature>.test.ts` (e.g., `creating-prompts.test.ts`)
-- **Test descriptions**: Use user story format (e.g., "As a user, I can create a prompt")
+- **Unit tests**: `<Service>.test.ts` (e.g., `NoteService.test.ts`)
+- **Integration tests**: `<use-case>-<feature>.test.ts` (e.g., `creating-notes.test.ts`)
+- **Test descriptions**: Use user story format (e.g., "As a user, I can create a note")
 
 ## Integration Test Setup
 
@@ -95,26 +95,26 @@ We use **bootstrap mocking** to bypass `appDependencies` singleton and ensure co
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
-import PromptsPage from '../pages/PromptsPage.vue';
-import { PromptService } from '../services/PromptService';
-import { MockPromptRepository } from '../repositories/MockPromptRepository';
-import { createPromptsStore } from '../store/PromptsStore';
+import NotesPage from '../pages/NotesPage.vue';
+import { NoteService } from '../services/NoteService';
+import { MockNoteRepository } from '../repositories/MockNoteRepository';
+import { createNotesStore } from '../store/NotesStore';
 
 // Mock bootstrap to bypass appDependencies singleton
 vi.mock('../bootstrap', () => {
-  const repository = new MockPromptRepository();
-  const service = new PromptService(repository);
-  const store = createPromptsStore(service);
+  const repository = new MockNoteRepository();
+  const service = new NoteService(repository);
+  const store = createNotesStore(service);
   
   return {
-    bootstrapPrompts: () => ({
+    bootstrapNotes: () => ({
       useStore: store,
       routes: [],
     }),
   };
 });
 
-describe('Creating Prompts', () => {
+describe('Creating Notes', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
   });
@@ -137,9 +137,9 @@ For reusable setup, create test helpers that set up the mocked bootstrap:
 ```typescript
 // tests/testHelpers.ts
 import { setActivePinia, createPinia } from 'pinia';
-import { PromptService } from '../services/PromptService';
-import { MockPromptRepository } from '../repositories/MockPromptRepository';
-import { createPromptsStore } from '../store/PromptsStore';
+import { NoteService } from '../services/NoteService';
+import { MockNoteRepository } from '../repositories/MockNoteRepository';
+import { createNotesStore } from '../store/NotesStore';
 import { vi } from 'vitest';
 
 /**
@@ -155,17 +155,17 @@ import { vi } from 'vitest';
  * import { mockBootstrap } from './testHelpers';
  * mockBootstrap(); // Call at top level
  * 
- * import PromptsPage from '../pages/PromptsPage.vue'; // Now safe to import
+ * import NotesPage from '../pages/NotesPage.vue'; // Now safe to import
  * ```
  */
 export const mockBootstrap = () => {
   vi.mock('../bootstrap', () => {
     // Return a factory that creates fresh instances for each call
     return {
-      bootstrapPrompts: () => {
-        const repository = new MockPromptRepository();
-        const service = new PromptService(repository);
-        const store = createPromptsStore(service);
+      bootstrapNotes: () => {
+        const repository = new MockNoteRepository();
+        const service = new NoteService(repository);
+        const store = createNotesStore(service);
         return {
           useStore: store,
           routes: [],
@@ -179,12 +179,12 @@ export const mockBootstrap = () => {
  * Creates a test store with custom repository data.
  * Useful for testing edge cases (empty state, error states, etc.).
  */
-export const createTestStoreWithData = (initialPrompts: Prompt[] = []) => {
+export const createTestStoreWithData = (initialNotes: Note[] = []) => {
   setActivePinia(createPinia());
   
-  const repository = new MockPromptRepository(initialPrompts);
-  const service = new PromptService(repository);
-  const store = createPromptsStore(service);
+  const repository = new MockNoteRepository(initialNotes);
+  const service = new NoteService(repository);
+  const store = createNotesStore(service);
   
   return { repository, service, store };
 };
@@ -192,42 +192,42 @@ export const createTestStoreWithData = (initialPrompts: Prompt[] = []) => {
 
 ## Example: Use Case-Based Integration Test
 
-### Test File: `tests/use-cases/creating-prompts.test.ts`
+### Test File: `tests/use-cases/creating-notes.test.ts`
 
 ```typescript
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
-import PromptsPage from '../pages/PromptsPage.vue';
-import { PromptService } from '../services/PromptService';
-import { MockPromptRepository } from '../repositories/MockPromptRepository';
-import { createPromptsStore } from '../store/PromptsStore';
-import { Prompt } from '../entities/Prompt';
-import { mockData } from '../PromptMockData';
+import NotesPage from '../pages/NotesPage.vue';
+import { NoteService } from '../services/NoteService';
+import { MockNoteRepository } from '../repositories/MockNoteRepository';
+import { createNotesStore } from '../store/NotesStore';
+import { Note } from '../entities/Note';
+import { mockData } from '../NoteMockData';
 
 // Mock bootstrap to ensure test isolation
 vi.mock('../bootstrap', () => {
-  const repository = new MockPromptRepository();
-  const service = new PromptService(repository);
-  const store = createPromptsStore(service);
+  const repository = new MockNoteRepository();
+  const service = new NoteService(repository);
+  const store = createNotesStore(service);
   
   return {
-    bootstrapPrompts: () => ({
+    bootstrapNotes: () => ({
       useStore: store,
       routes: [],
     }),
   };
 });
 
-describe('Creating Prompts', () => {
+describe('Creating Notes', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
   });
 
-  describe('As a user, I can create a new prompt', () => {
-    it('should create and display a prompt after filling the form', async () => {
-      // Given: User is on prompts page
-      const wrapper = mount(PromptsPage);
+  describe('As a user, I can create a new note', () => {
+    it('should create and display a note after filling the form', async () => {
+      // Given: User is on notes page
+      const wrapper = mount(NotesPage);
       
       // Wait for initial load
       await new Promise(resolve => setTimeout(resolve, 100));
@@ -235,33 +235,33 @@ describe('Creating Prompts', () => {
       
       const initialCount = wrapper.findAll('[data-testid="initial-count"]').length;
 
-      // When: User clicks "Add Prompt" and fills the form
+      // When: User clicks "Add Note" and fills the form
       const addButton = wrapper.find('[data-testid="add-button"]');
       await addButton.trigger('click');
       await wrapper.vm.$nextTick();
 
       // Fill form
-      const promptDetails = wrapper.findComponent({ name: 'PromptDetails' });
-      await promptDetails.find('[data-testid="title-field"]').setValue('New Test Prompt');
-      await promptDetails.find('[data-testid="instructions-field"]').setValue('Test instructions');
-      await promptDetails.find('[data-testid="template-field"]').setValue('Test template');
+      const noteDetails = wrapper.findComponent({ name: 'NoteDetails' });
+      await noteDetails.find('[data-testid="title-field"]').setValue('New Test Note');
+      await noteDetails.find('[data-testid="instructions-field"]').setValue('Test instructions');
+      await noteDetails.find('[data-testid="template-field"]').setValue('Test template');
       
       // Save
-      const saveButton = promptDetails.find('[data-testid="save-button"]');
+      const saveButton = noteDetails.find('[data-testid="save-button"]');
       await saveButton?.trigger('click');
       
       // Wait for async operations
       await new Promise(resolve => setTimeout(resolve, 100));
       await wrapper.vm.$nextTick();
 
-      // Then: The prompt appears in the list
-      expect(wrapper.text()).toContain('New Test Prompt');
-      expect(wrapper.findAll('[data-testid="prompt-item"]').length).toBe(initialCount + 1);
+      // Then: The note appears in the list
+      expect(wrapper.text()).toContain('New Test Note');
+      expect(wrapper.findAll('[data-testid="note-item"]').length).toBe(initialCount + 1);
     });
 
-    it('should prevent creating a prompt without required fields', async () => {
+    it('should prevent creating a note without required fields', async () => {
       // Given: User opens create form
-      const wrapper = mount(PromptsPage);
+      const wrapper = mount(NotesPage);
       await new Promise(resolve => setTimeout(resolve, 100));
       await wrapper.vm.$nextTick();
       
@@ -270,8 +270,8 @@ describe('Creating Prompts', () => {
       await wrapper.vm.$nextTick();
 
       // When: User tries to save without filling required fields
-      const promptDetails = wrapper.findComponent({ name: 'PromptDetails' });
-      const saveButton = promptDetails.findAll('[data-testid="save-button"]').find(
+      const noteDetails = wrapper.findComponent({ name: 'NoteDetails' });
+      const saveButton = noteDetails.findAll('[data-testid="save-button"]').find(
         btn => btn.attributes('color') === 'blue'
       );
       await saveButton?.trigger('click');
@@ -286,58 +286,58 @@ describe('Creating Prompts', () => {
 });
 ```
 
-### Test File: `tests/use-cases/viewing-prompts.test.ts`
+### Test File: `tests/use-cases/viewing-notes.test.ts`
 
 ```typescript
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
-import PromptsPage from '../pages/PromptsPage.vue';
-import { PromptService } from '../services/PromptService';
-import { MockPromptRepository } from '../repositories/MockPromptRepository';
-import { createPromptsStore } from '../store/PromptsStore';
-import { mockData } from '../PromptMockData';
+import NotesPage from '../pages/NotesPage.vue';
+import { NoteService } from '../services/NoteService';
+import { MockNoteRepository } from '../repositories/MockNoteRepository';
+import { createNotesStore } from '../store/NotesStore';
+import { mockData } from '../NoteMockData';
 
 // Mock bootstrap to ensure test isolation
 vi.mock('../bootstrap', () => {
-  const repository = new MockPromptRepository();
-  const service = new PromptService(repository);
-  const store = createPromptsStore(service);
+  const repository = new MockNoteRepository();
+  const service = new NoteService(repository);
+  const store = createNotesStore(service);
   
   return {
-    bootstrapPrompts: () => ({
+    bootstrapNotes: () => ({
       useStore: store,
       routes: [],
     }),
   };
 });
 
-describe('Viewing Prompts', () => {
+describe('Viewing Notes', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
   });
 
-  describe('As a user, I can view all my prompts', () => {
-    it('should display all prompts when I open the page', async () => {
-      // Given: User navigates to prompts page
-      const wrapper = mount(PromptsPage);
+  describe('As a user, I can view all my notes', () => {
+    it('should display all notes when I open the page', async () => {
+      // Given: User navigates to notes page
+      const wrapper = mount(NotesPage);
       
       // When: Page loads
       await new Promise(resolve => setTimeout(resolve, 100));
       await wrapper.vm.$nextTick();
 
-      // Then: All prompts are displayed
-      expect(wrapper.text()).toContain(mockData.prompts[0].title);
-      expect(wrapper.text()).toContain(mockData.prompts[1].title);
+      // Then: All notes are displayed
+      expect(wrapper.text()).toContain(mockData.notes[0].title);
+      expect(wrapper.text()).toContain(mockData.notes[1].title);
     });
 
-    it('should show empty state when I have no prompts', async () => {
-      // Given: Repository has no prompts
+    it('should show empty state when I have no notes', async () => {
+      // Given: Repository has no notes
       // Override the mock to use an empty repository
-      vi.mocked(await import('../bootstrap')).bootstrapPrompts = () => {
-        const emptyRepository = new MockPromptRepository([]);
-        const service = new PromptService(emptyRepository);
-        const store = createPromptsStore(service);
+      vi.mocked(await import('../bootstrap')).bootstrapNotes = () => {
+        const emptyRepository = new MockNoteRepository([]);
+        const service = new NoteService(emptyRepository);
+        const store = createNotesStore(service);
         return {
           useStore: store,
           routes: [],
@@ -345,15 +345,15 @@ describe('Viewing Prompts', () => {
       };
       
       // When: User opens page
-      const wrapper = mount(PromptsPage);
+      const wrapper = mount(NotesPage);
       await new Promise(resolve => setTimeout(resolve, 100));
       await wrapper.vm.$nextTick();
 
       // Then: Empty state is shown
-      expect(wrapper.text()).toContain('No prompts found');
+      expect(wrapper.text()).toContain('No notes found');
     });
 
-    it('should show loading state while fetching prompts', async () => {
+    it('should show loading state while fetching notes', async () => {
       // This test would require more sophisticated mocking to control async timing
       // Implementation depends on specific requirements
     });
@@ -367,7 +367,7 @@ describe('Viewing Prompts', () => {
 
 ```typescript
 export const mockData = {
-  prompts: [
+  notes: [
     {
       id: '1',
       title: 'Design a new feature',
@@ -391,35 +391,35 @@ export const mockData = {
 ### Using Mock Data in Tests
 
 ```typescript
-import { mockData } from './PromptMockData';
-import { Prompt } from '../entities/Prompt';
+import { mockData } from './NoteMockData';
+import { Note } from '../entities/Note';
 
 // Convert to domain entities
-const prompts = mockData.prompts.map(p => Prompt.fromPlainObject(p));
+const notes = mockData.notes.map(p => Note.fromPlainObject(p));
 
 // Use in repository
-const repository = new MockPromptRepository(prompts);
+const repository = new MockNoteRepository(notes);
 ```
 
 ## Best Practices
 
 ### 1. Test User Workflows, Not Implementation
 
-❌ **Bad**: "Component calls store.fetchPrompts()"
+❌ **Bad**: "Component calls store.fetchNotes()"
 
-✅ **Good**: "User can view all prompts when opening the page"
+✅ **Good**: "User can view all notes when opening the page"
 
 ### 2. Use Descriptive Test Names
 
 ❌ **Bad**: `it('works correctly', ...)`
 
-✅ **Good**: `it('should create and display a prompt after filling the form', ...)`
+✅ **Good**: `it('should create and display a note after filling the form', ...)`
 
 ### 3. Organize by Use Case
 
-❌ **Bad**: `PromptsList.test.ts`, `PromptsStore.test.ts`
+❌ **Bad**: `NotesList.test.ts`, `NotesStore.test.ts`
 
-✅ **Good**: `viewing-prompts.test.ts`, `creating-prompts.test.ts`
+✅ **Good**: `viewing-notes.test.ts`, `creating-notes.test.ts`
 
 ### 4. Test Complete Flows
 
@@ -458,7 +458,7 @@ Test selectors are how your tests find and interact with elements in the DOM. **
 
 ```typescript
 // ❌ BAD: Fragile - breaks when CSS classes change
-const promptItems = wrapper.findAll('[class*="border-gray-200"]');
+const noteItems = wrapper.findAll('[class*="border-gray-200"]');
 const button = wrapper.find('.btn-primary');
 ```
 
@@ -477,28 +477,28 @@ const button = wrapper.find('.btn-primary');
 ```vue
 <!-- In your component template -->
 <li
-  v-for="prompt in promptsStore.prompts"
-  :key="prompt.id"
-  data-testid="prompt-item"
+  v-for="note in notesStore.notes"
+  :key="note.id"
+  data-testid="note-item"
   class="flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white px-4 py-3"
-  @click="handlePromptClick(prompt)"
+  @click="handleNoteClick(note)"
 >
   <!-- content -->
 </li>
 
 <button
-  data-testid="add-prompt-button"
+  data-testid="add-note-button"
   class="btn btn-primary"
-  @click="handleAddPrompt"
+  @click="handleAddNote"
 >
-  Add Prompt
+  Add Note
 </button>
 ```
 
 ```typescript
 // In your test
-const promptItems = wrapper.findAll('[data-testid="prompt-item"]');
-const addButton = wrapper.find('[data-testid="add-prompt-button"]');
+const noteItems = wrapper.findAll('[data-testid="note-item"]');
+const addButton = wrapper.find('[data-testid="add-note-button"]');
 ```
 
 ### Why Data Attributes Are Best Practice
@@ -516,10 +516,10 @@ Use descriptive, semantic names that describe the element's purpose:
 ```vue
 <!-- ✅ GOOD: Clear and descriptive -->
 <button data-testid="submit-form-button">Submit</button>
-<input data-testid="prompt-title-input" />
-<div data-testid="prompt-list-container">
-  <li data-testid="prompt-item" v-for="prompt in prompts">
-    <h3 data-testid="prompt-title">{{ prompt.title }}</h3>
+<input data-testid="note-title-input" />
+<div data-testid="note-list-container">
+  <li data-testid="note-item" v-for="note in notes">
+    <h3 data-testid="note-title">{{ note.title }}</h3>
   </li>
 </div>
 
@@ -555,20 +555,20 @@ While `data-testid` is the primary approach, there are cases where alternatives 
 
    ```typescript
    // ✅ OK: Finding child components
-   const promptDetails = wrapper.findComponent({ name: 'PromptDetails' });
+   const noteDetails = wrapper.findComponent({ name: 'NoteDetails' });
    ```
 
 3. **Text Content** (for user-visible content):
 
    ```typescript
    // ✅ OK: Testing user-visible text
-   expect(wrapper.text()).toContain('No prompts found');
+   expect(wrapper.text()).toContain('No notes found');
    ```
 
 **However**: Prefer `data-testid` when you need to:
 
 - Count multiple instances of the same element type
-- Interact with specific elements (not just any button, but "the add prompt button")
+- Interact with specific elements (not just any button, but "the add note button")
 - Verify element presence/absence reliably
 
 ### Examples from Our Codebase
@@ -577,26 +577,26 @@ While `data-testid` is the primary approach, there are cases where alternatives 
 
 ```typescript
 // ❌ BAD: Depends on CSS classes
-const promptItems = wrapper.findAll('[class*="border-gray-200"]');
-expect(promptItems.length).toBe(allPrompts.length);
+const noteItems = wrapper.findAll('[class*="border-gray-200"]');
+expect(noteItems.length).toBe(allNotes.length);
 ```
 
 **After (Stable)**:
 
 ```vue
-<!-- In PromptsList.vue -->
+<!-- In NotesList.vue -->
 <li
-  v-for="prompt in promptsStore.prompts"
-  :key="prompt.id"
-  data-testid="prompt-item"
+  v-for="note in notesStore.notes"
+  :key="note.id"
+  data-testid="note-item"
   class="flex items-center justify-between gap-4 rounded-xl border border-gray-200 bg-white px-4 py-3"
 >
 ```
 
 ```typescript
 // ✅ GOOD: Uses data-testid
-const promptItems = wrapper.findAll('[data-testid="prompt-item"]');
-expect(promptItems.length).toBe(allPrompts.length);
+const noteItems = wrapper.findAll('[data-testid="note-item"]');
+expect(noteItems.length).toBe(allNotes.length);
 ```
 
 ### Migration Checklist
@@ -638,7 +638,7 @@ When updating existing tests:
    // ✅ GOOD: Mock at top level before any imports
    vi.mock('../bootstrap', () => { /* ... */ });
    
-   import PromptsPage from '../pages/PromptsPage.vue';
+   import NotesPage from '../pages/NotesPage.vue';
    ```
 
    ```typescript
@@ -656,11 +656,11 @@ When updating existing tests:
    vi.mock('../bootstrap', () => {
      // Create factory function, not instance
      return {
-       bootstrapPrompts: () => {
+       bootstrapNotes: () => {
          // Fresh instance for each call
-         const repository = new MockPromptRepository();
-         const service = new PromptService(repository);
-         const store = createPromptsStore(service);
+         const repository = new MockNoteRepository();
+         const service = new NoteService(repository);
+         const store = createNotesStore(service);
          return { useStore: store, routes: [] };
        },
      };
@@ -681,8 +681,8 @@ When updating existing tests:
    // ✅ GOOD: Each test gets its own repository instance
    vi.mock('../bootstrap', () => {
      return {
-       bootstrapPrompts: () => {
-         const repository = new MockPromptRepository(); // Fresh data
+       bootstrapNotes: () => {
+         const repository = new MockNoteRepository(); // Fresh data
          // ...
        },
      };
@@ -691,12 +691,12 @@ When updating existing tests:
 
    ```typescript
    // ❌ BAD: Shared repository instance
-   const sharedRepository = new MockPromptRepository();
+   const sharedRepository = new MockNoteRepository();
    vi.mock('../bootstrap', () => {
      return {
-       bootstrapPrompts: () => {
+       bootstrapNotes: () => {
          // Uses shared instance - state leaks between tests!
-         const service = new PromptService(sharedRepository);
+         const service = new NoteService(sharedRepository);
          // ...
        },
      };
@@ -709,8 +709,8 @@ When updating existing tests:
    // ✅ GOOD: No shared variables
    vi.mock('../bootstrap', () => {
      return {
-       bootstrapPrompts: () => {
-         const repository = new MockPromptRepository(); // Created fresh
+       bootstrapNotes: () => {
+         const repository = new MockNoteRepository(); // Created fresh
          // ...
        },
      };
@@ -722,10 +722,10 @@ When updating existing tests:
    let sharedStore; // State leaks between tests!
    vi.mock('../bootstrap', () => {
      if (!sharedStore) {
-       sharedStore = createPromptsStore(/* ... */);
+       sharedStore = createNotesStore(/* ... */);
      }
      return {
-       bootstrapPrompts: () => ({ useStore: sharedStore }),
+       bootstrapNotes: () => ({ useStore: sharedStore }),
      };
    });
    ```

@@ -1,6 +1,6 @@
 
 export const mockData = {
-    prompts: [
+    notes: [
         {
             id: '1',
             title: 'Design a new feature',
@@ -19,17 +19,17 @@ export const mockData = {
         },
         {
             id: '3',
-            title: 'Prompt without category',
-            instructions: 'This prompt has no category but has tags',
-            template: 'Template for prompt without category',
+            title: 'Note without category',
+            instructions: 'This note has no category but has tags',
+            template: 'Template for note without category',
             category: null,
             tags: ['testing', 'example']
         },
         {
             id: '4',
-            title: 'Prompt without tags',
-            instructions: 'This prompt has no tags but has a category',
-            template: 'Template for prompt without tags',
+            title: 'Note without tags',
+            instructions: 'This note has no tags but has a category',
+            template: 'Template for note without tags',
             category: 'coding/review',
             tags: []
         }

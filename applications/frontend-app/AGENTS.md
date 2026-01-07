@@ -41,18 +41,18 @@ Before making changes, review these files in `docs/`:
 Every domain **MUST** export a `bootstrap<Feature>()` function from its `index.ts`:
 
 ```typescript
-// domains/prompts/bootstrap.ts
-const bootstrapPrompts = () => {
+// domains/notes/bootstrap.ts
+const bootstrapNotes = () => {
     const useMocks = appDependencies.getAppConfig().isMockEnv
     const apiClient = appDependencies.getHttpClient()
     const repository = useMocks
-        ? new MockPromptRepository()
-        : new HttpPromptRepository(apiClient)
-    const service = new PromptService(repository)
+        ? new MockNoteRepository()
+        : new HttpNoteRepository(apiClient)
+    const service = new NoteService(repository)
     
     return {
-        useStore: createPromptsStore(service),
-        routes: promptsRoutes
+        useStore: createNotesStore(service),
+        routes: notesRoutes
     }
 }
 ```
@@ -63,41 +63,41 @@ Components **MUST** use feature bootstrap to access stores:
 
 ```vue
 <script setup lang="ts">
-import { bootstrapPrompts } from '@/domains/prompts'
+import { bootstrapNotes } from '@/domains/notes'
 import { onMounted } from 'vue'
 
-const bootstrap = bootstrapPrompts()
-const promptsStore = bootstrap.useStore()
+const bootstrap = bootstrapNotes()
+const notesStore = bootstrap.useStore()
 
 onMounted(() => {
-  promptsStore.fetchPrompts()
+  notesStore.fetchNotes()
 })
 </script>
 ```
 
 **Never** do:
 
-- ❌ `import { usePromptsStore } from '@/domains/prompts/store/PromptsStore'`
+- ❌ `import { useNotesStore } from '@/domains/notes/store/NotesStore'`
 - ❌ Direct store imports
-- ❌ Object destructuring from bootstrap: `const { useStore } = bootstrapPrompts()`
+- ❌ Object destructuring from bootstrap: `const { useStore } = bootstrapNotes()`
 
 ### 4. Store Factory Pattern (MANDATORY)
 
 Stores **MUST** be created via factory functions:
 
 ```typescript
-// domains/prompts/store/PromptsStore.ts
-type PromptServiceShape = {
-    getPrompts(): Promise<Prompt[]>
+// domains/notes/store/NotesStore.ts
+type NoteServiceShape = {
+    getNotes(): Promise<Note[]>
     // ... other methods
 }
 
-export const createPromptsStore = (promptService: PromptServiceShape) => {
-    return defineStore('prompts', {
+export const createNotesStore = (noteService: NoteServiceShape) => {
+    return defineStore('notes', {
         state: () => ({ /* ... */ }),
         actions: {
-            async fetchPrompts() {
-                this.prompts = await promptService.getPrompts()
+            async fetchNotes() {
+                this.notes = await noteService.getNotes()
             }
         }
     })
@@ -109,10 +109,10 @@ export const createPromptsStore = (promptService: PromptServiceShape) => {
 Every repository **MUST** have a port interface:
 
 ```typescript
-// domains/prompts/repositories/PromptRepositoryPort.ts
-export interface PromptRepositoryPort {
-    getPrompts(): Promise<Prompt[]>
-    getPromptById(id: string): Promise<Prompt>
+// domains/notes/repositories/NoteRepositoryPort.ts
+export interface NoteRepositoryPort {
+    getNotes(): Promise<Note[]>
+    getNoteById(id: string): Promise<Note>
     // ... other methods
 }
 ```
@@ -124,15 +124,15 @@ Provide both `Http<Feature>Repository` and `Mock<Feature>Repository` implementat
 Entities **MUST** validate in constructors and provide `fromPlainObject`:
 
 ```typescript
-// domains/prompts/entities/Prompt.ts
-export class Prompt {
+// domains/notes/entities/Note.ts
+export class Note {
     constructor(/* params */) {
         this.validate(/* params */)
         // assign properties
     }
     
-    static fromPlainObject(data: {...}): Prompt {
-        return new Prompt(/* ... */)
+    static fromPlainObject(data: {...}): Note {
+        return new Note(/* ... */)
     }
     
     private validate(/* params */): void {
@@ -229,10 +229,10 @@ Always mock bootstrap at top level to prevent singleton state leaks:
 // ✅ MUST mock at top level before imports
 vi.mock('../bootstrap', () => {
   return {
-    bootstrapPrompts: () => {
-      const repository = new MockPromptRepository();
-      const service = new PromptService(repository);
-      const store = createPromptsStore(service);
+    bootstrapNotes: () => {
+      const repository = new MockNoteRepository();
+      const service = new NoteService(repository);
+      const store = createNotesStore(service);
       return { useStore: store, routes: [] };
     },
   };
@@ -249,7 +249,7 @@ vi.mock('../bootstrap', () => {
 
 **What to Test**:
 
-- ✅ Complete user workflows (e.g., "user can create a prompt")
+- ✅ Complete user workflows (e.g., "user can create a note")
 - ✅ Business processes end-to-end
 - ❌ Don't test implementation details or components in isolation
 
@@ -268,28 +268,28 @@ domains/<feature>/tests/
 ## Code Examples from Codebase
 
 ### Complete Feature Bootstrap
-See: `src/domains/prompts/bootstrap.ts`
+See: `src/domains/notes/bootstrap.ts`
 
 ### Complete Store Factory
-See: `src/domains/prompts/store/PromptsStore.ts`
+See: `src/domains/notes/store/NotesStore.ts`
 
 ### Complete Component
-See: `src/domains/prompts/pages/PromptsPage.vue`
+See: `src/domains/notes/pages/NotesPage.vue`
 
 ### Complete Service
-See: `src/domains/prompts/services/PromptService.ts`
+See: `src/domains/notes/services/NoteService.ts`
 
 ### Complete Entity
-See: `src/domains/prompts/entities/Prompt.ts`
+See: `src/domains/notes/entities/Note.ts`
 
 ## File Naming Conventions
 
-- **Components**: PascalCase (e.g., `PromptsList.vue`)
-- **Entities**: PascalCase (e.g., `Prompt.ts`)
-- **Services**: PascalCase (e.g., `PromptService.ts`)
-- **Repositories**: PascalCase (e.g., `HttpPromptRepository.ts`)
-- **Ports**: PascalCase with `Port` suffix (e.g., `PromptRepositoryPort.ts`)
-- **Stores**: PascalCase (e.g., `PromptsStore.ts`)
+- **Components**: PascalCase (e.g., `NotesList.vue`)
+- **Entities**: PascalCase (e.g., `Note.ts`)
+- **Services**: PascalCase (e.g., `NoteService.ts`)
+- **Repositories**: PascalCase (e.g., `HttpNoteRepository.ts`)
+- **Ports**: PascalCase with `Port` suffix (e.g., `NoteRepositoryPort.ts`)
+- **Stores**: PascalCase (e.g., `NotesStore.ts`)
 - **Bootstrap**: camelCase (e.g., `bootstrap.ts`)
 - **Routes**: camelCase (e.g., `routes.ts`)
 
@@ -351,7 +351,7 @@ Before submitting changes, verify:
 1. **Architecture questions**: See `docs/architecture.md`
 2. **Layer-specific questions**: See corresponding `docs/*.md`
 3. **Testing questions**: See `docs/testing.md`
-4. **Pattern examples**: Check `src/domains/prompts/` (reference implementation)
+4. **Pattern examples**: Check `src/domains/notes/` (reference implementation)
 5. **Common infrastructure**: See `src/common/` and `docs/common-layer.md`
 
 ## Key Principles Summary
@@ -365,4 +365,4 @@ Before submitting changes, verify:
 
 ---
 
-**Remember**: When in doubt, check the `prompts` domain (`src/domains/prompts/`) - it's the reference implementation for all patterns.
+**Remember**: When in doubt, check the `notes` domain (`src/domains/notes/`) - it's the reference implementation for all patterns.

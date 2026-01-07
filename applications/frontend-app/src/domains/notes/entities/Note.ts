@@ -1,6 +1,6 @@
 import { ValidationError } from '../../../common/errors/DomainError';
 
-export class Prompt {
+export class Note {
     readonly id: string;
     readonly title: string;
     readonly instructions: string;
@@ -25,7 +25,7 @@ export class Prompt {
     }
 
     /**
-     * Creates a Prompt instance from a plain object (for deserialization).
+     * Creates a Note instance from a plain object (for deserialization).
      * @throws {ValidationError} if validation fails
      */
     static fromPlainObject(data: {
@@ -35,8 +35,8 @@ export class Prompt {
         template: string;
         category: string | null;
         tags: string[];
-    }): Prompt {
-        return new Prompt(
+    }): Note {
+        return new Note(
             data.id,
             data.title,
             data.instructions,
@@ -47,7 +47,7 @@ export class Prompt {
     }
 
     /**
-     * Validates prompt properties according to domain rules.
+     * Validates note properties according to domain rules.
      * @throws {ValidationError} if validation fails
      */
     public validate(

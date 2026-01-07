@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { Prompt } from '../entities/Prompt';
+import { Note } from '../entities/Note';
 import { FwbButton } from 'flowbite-vue';
 
 const props = defineProps<{
-  prompt: Prompt;
+  note: Note;
 }>();
 
 const emit = defineEmits<{
-  save: [prompt: Prompt];
+  save: [note: Note];
   cancel: [];
   delete: [];
 }>();
@@ -22,19 +22,19 @@ const editTags = ref<string[]>([]);
 const newTag = ref<string>('');
 const validationErrors = ref<string[]>([]);
 
-// Initialize local state from prompt prop
+// Initialize local state from note prop
 const initializeEditState = () => {
-  editTitle.value = props.prompt.title;
-  editInstructions.value = props.prompt.instructions;
-  editTemplate.value = props.prompt.template;
-  editCategory.value = props.prompt.category ?? '';
-  editTags.value = [...props.prompt.tags];
+  editTitle.value = props.note.title;
+  editInstructions.value = props.note.instructions;
+  editTemplate.value = props.note.template;
+  editCategory.value = props.note.category ?? '';
+  editTags.value = [...props.note.tags];
   newTag.value = '';
   validationErrors.value = [];
 };
 
-// Watch prompt prop to sync local state when it changes
-watch(() => props.prompt, initializeEditState, { immediate: true });
+// Watch note prop to sync local state when it changes
+watch(() => props.note, initializeEditState, { immediate: true });
 
 const addTag = () => {
   const tag = newTag.value.trim();
@@ -67,9 +67,9 @@ const handleSave = () => {
   }
 
   try {
-    // Construct new Prompt instance using fromPlainObject
-    const updatedPrompt = Prompt.fromPlainObject({
-      id: props.prompt.id,
+    // Construct new Note instance using fromPlainObject
+    const updatedNote = Note.fromPlainObject({
+      id: props.note.id,
       title: editTitle.value.trim(),
       instructions: editInstructions.value.trim(),
       template: editTemplate.value.trim(),
@@ -77,12 +77,12 @@ const handleSave = () => {
       tags: editTags.value.map(tag => tag.trim()).filter(tag => tag.length > 0),
     });
 
-    emit('save', updatedPrompt);
+    emit('save', updatedNote);
   } catch (error) {
     if (error instanceof Error) {
       validationErrors.value.push(error.message);
     } else {
-      validationErrors.value.push('Failed to create prompt');
+      validationErrors.value.push('Failed to create note');
     }
   }
 };
@@ -126,7 +126,7 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
           v-model="editTitle"
           type="text"
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-          placeholder="Enter prompt title"
+          placeholder="Enter note title"
         />
       </div>
 
@@ -194,7 +194,7 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
           v-model="editInstructions"
           rows="3"
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-sans resize-y"
-          placeholder="Enter instructions for the prompt"
+          placeholder="Enter instructions for the note"
         />
       </div>
 
@@ -208,7 +208,7 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
           v-model="editTemplate"
           rows="3"
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono resize-y"
-          placeholder="Enter the prompt template"
+          placeholder="Enter the note template"
         />
       </div>
 

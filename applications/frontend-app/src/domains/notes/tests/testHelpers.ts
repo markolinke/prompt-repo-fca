@@ -1,24 +1,24 @@
 import { vi } from 'vitest';
-import { PromptService } from '../services/PromptService';
-import { MockPromptRepository } from '../repositories/MockPromptRepository';
-import { createPromptsStore } from '../store/PromptsStore';
+import { NoteService } from '../services/NotesService';
+import { MockNoteRepository } from '../repositories/MockNotesRepository';
+import { createNotesStore } from '../store/NotesStore';
 import { createTestDebouncer } from '@/common/time/tests/DebouncerTestHelper';
 
 export const { debouncer: mockSearchDebouncer, mockTimeout } = createTestDebouncer();
 
 /**
- * Mocks the bootstrapPrompts function for integration tests.
+ * Mocks the bootstrapNotes function for integration tests.
  * 
  * IMPORTANT: Must be called at the top level of your test file, before any imports that use the bootstrap.
  * See common/time/README.md for usage examples.
  */
-export const mockBootstrapPrompts = () => {
+export const mockBootstrapNotes = () => {
   vi.mock('../bootstrap', () => {
     return {
-      bootstrapPrompts: () => {
-        const repository = new MockPromptRepository();
-        const service = new PromptService(repository);
-        const store = createPromptsStore(service);
+      bootstrapNotes: () => {
+        const repository = new MockNoteRepository();
+        const service = new NoteService(repository);
+        const store = createNotesStore(service);
 
         const createSearchDebouncer = () => {
           return mockSearchDebouncer;

@@ -26,7 +26,7 @@ We build components this way to:
 - **Views** (page-level, routed components): `features/<feature>/views/`
 - **Feature-specific components**: `features/<feature>/components/`
 - **Reusable UI components**: `src/common/ui/` (e.g., Button.vue, Card.vue, Input.vue)
-- File naming: **PascalCase** for `.vue` files (e.g., `PromptsListView.vue`)
+- File naming: **PascalCase** for `.vue` files (e.g., `NotesListView.vue`)
 
 ## Rules for Writing Component Code
 
@@ -50,17 +50,17 @@ Inside `<script setup>`:
 #### Store Integration (Mandatory Pattern)
 
 ```typescript
-import { bootstrapPrompts } from '@/features/prompts'
+import { bootstrapNotes } from '@/features/notes'
 import { onMounted } from 'vue'
 
-const bootstrapResult = bootstrapPrompts()
-const usePromptsStore = bootstrapResult.useStore
+const bootstrapResult = bootstrapNotes()
+const useNotesStore = bootstrapResult.useStore
 
-const promptsStore = usePromptsStore()
+const notesStore = useNotesStore()
 
 // Fetch data on mount (standard pattern – placeholder for refinement)
 onMounted(() => {
-  promptsStore.fetchPrompts()
+  notesStore.fetchNotes()
 })
 ```
 
@@ -68,13 +68,13 @@ onMounted(() => {
 
 ```vue
 <ul>
-  <li v-for="prompt in promptsStore.prompts" :key="prompt.id">
-    {{ prompt.title }}
+  <li v-for="note in notesStore.notes" :key="note.id">
+    {{ note.title }}
   </li>
 </ul>
 
-<div v-if="promptsStore.loading">Loading...</div>
-<div v-if="promptsStore.error">Error: {{ promptsStore.error }}</div>
+<div v-if="notesStore.loading">Loading...</div>
+<div v-if="notesStore.error">Error: {{ notesStore.error }}</div>
 ```
 
 #### Props and Emits (Placeholder – to be refined)
@@ -98,7 +98,7 @@ onUnmounted(() => { /* ... */ })
 
 - Use Tailwind CSS utility classes **directly** in the template
 - Keep markup declarative and readable
-- Use store-prefixed state access (e.g., `promptsStore.prompts`)
+- Use store-prefixed state access (e.g., `notesStore.notes`)
 - Standard structure for loading/error/empty states (placeholder – to be defined)
 
 ```vue
@@ -108,12 +108,12 @@ onUnmounted(() => { /* ... */ })
     
     <ul v-else class="space-y-4">
       <li
-        v-for="prompt in promptsStore.prompts"
-        :key="prompt.id"
+        v-for="note in notesStore.notes"
+        :key="note.id"
         class="border border-gray-300 rounded-lg p-4"
       >
-        <h3 class="text-lg font-bold">{{ prompt.title }}</h3>
-        <p class="text-sm text-gray-600">{{ prompt.instructions }}</p>
+        <h3 class="text-lg font-bold">{{ note.title }}</h3>
+        <p class="text-sm text-gray-600">{{ note.instructions }}</p>
       </li>
     </ul>
   </div>
@@ -130,14 +130,14 @@ We rely exclusively on Tailwind utility classes applied directly in templates.
 Each feature defines its routes in `features/<feature>/routes.ts`:
 
 ```typescript
-// features/prompts/routes.ts
+// features/notes/routes.ts
 import { RouteRecordRaw } from 'vue-router'
 
 const routes: RouteRecordRaw[] = [
   {
-    path: '/prompts',
-    name: 'prompts-list',
-    component: () => import('./views/PromptsListView.vue'),
+    path: '/notes',
+    name: 'notes-list',
+    component: () => import('./views/NotesListView.vue'),
   },
 ]
 
@@ -147,19 +147,19 @@ export default routes
 ### Feature Bootstrap Returns Routes
 
 ```typescript
-// features/prompts/bootstrap.ts (excerpt)
-import promptsRoutes from './routes'
+// features/notes/bootstrap.ts (excerpt)
+import notesRoutes from './routes'
 
-const bootstrapPrompts = () => {
+const bootstrapNotes = () => {
   // ... wiring logic ...
 
   return {
-    useStore: createPromptsStore({ promptService: service }),
-    routes: promptsRoutes,
+    useStore: createNotesStore({ noteService: service }),
+    routes: notesRoutes,
   }
 }
 
-export { bootstrapPrompts }
+export { bootstrapNotes }
 ```
 
 ### Central App Wiring (Placeholder)
@@ -171,10 +171,10 @@ File: `src/app/bootstrap.ts`
 ```typescript
 // src/app/bootstrap.ts
 import { Router } from 'vue-router'
-import { bootstrapPrompts } from '@/features/prompts'
+import { bootstrapNotes } from '@/features/notes'
 
 export const bootstrapFeatures = (router: Router): void => {
-  for (const route of bootstrapPrompts().routes) {
+  for (const route of bootstrapNotes().routes) {
     router.addRoute(route)
   }
 }
@@ -202,7 +202,7 @@ app.use(router)
 - Route components should be lazy-loaded when appropriate:
 
   ```typescript
-  component: () => import('./views/PromptsListView.vue')
+  component: () => import('./views/NotesListView.vue')
   ```
 
 - Features may define flat or nested routes as needed. No global root layout route is required unless decided later.
@@ -232,7 +232,7 @@ Standard patterns for loading, error, empty states, global error handling, and t
 
 ## What NOT to Do
 
-- No object destructuring (e.g., `{ useStore: usePromptsStore } = ...`)
+- No object destructuring (e.g., `{ useStore: useNotesStore } = ...`)
 - No `<style scoped>`
 - No direct store imports – always via feature bootstrap
 - No `storeToRefs`
@@ -242,33 +242,33 @@ Standard patterns for loading, error, empty states, global error handling, and t
 
 ## Examples
 
-### Minimal Prompts List View
+### Minimal Notes List View
 
 ```vue
 <script setup lang="ts">
-import { bootstrapPrompts } from '@/features/prompts'
+import { bootstrapNotes } from '@/features/notes'
 import { onMounted } from 'vue'
 
-const bootstrapResult = bootstrapPrompts()
-const usePromptsStore = bootstrapResult.useStore
-const promptsStore = usePromptsStore()
+const bootstrapResult = bootstrapNotes()
+const useNotesStore = bootstrapResult.useStore
+const notesStore = useNotesStore()
 
 onMounted(() => {
-  promptsStore.fetchPrompts()
+  notesStore.fetchNotes()
 })
 </script>
 
 <template>
   <div class="p-8">
-    <h1 class="text-2xl font-bold mb-6">Prompts</h1>
+    <h1 class="text-2xl font-bold mb-6">Notes</h1>
     
     <ul class="space-y-4">
       <li
-        v-for="prompt in promptsStore.prompts"
-        :key="prompt.id"
+        v-for="note in notesStore.notes"
+        :key="note.id"
         class="border border-gray-300 rounded-lg p-4"
       >
-        <h3 class="font-semibold">{{ prompt.title }}</h3>
+        <h3 class="font-semibold">{{ note.title }}</h3>
       </li>
     </ul>
   </div>
@@ -278,8 +278,8 @@ onMounted(() => {
 ### Feature Barrel (index.ts)
 
 ```typescript
-// features/prompts/index.ts
-export { bootstrapPrompts } from './bootstrap'
+// features/notes/index.ts
+export { bootstrapNotes } from './bootstrap'
 ```
 
 This document will evolve as we refine placeholders and add new sections (slots, composables, testing, etc.). Follow these rules strictly to maintain consistency across the codebase.

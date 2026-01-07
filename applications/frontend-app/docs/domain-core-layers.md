@@ -22,26 +22,26 @@ Business logic stays on the backend where possible (zone of trust). Frontend ser
 - **Validation**: Basic checks in entities (e.g., required fields) to avoid embarrassing UI errors; heavy validation on backend.
 - **Error Handling**: [TO BE DECIDED] for full patterns (e.g., wrapping vs. propagating). Recommend type-safe, centralized errors extending a base `DomainError` for now.
 - **DTOs and Value Objects**: Place in appropriate layers (e.g., raw API payloads in repositories if used for mapping). [TO BE DECIDED] for exact conventions; for now, use plain objects or types near where they're consumed.
-- **Naming and Placement**: Consistent suffixes (e.g., `Port` for interfaces). Flexible feature naming (e.g., `features/prompt/` singular or `features/prompts/` plural based on context like "library of prompts").
+- **Naming and Placement**: Consistent suffixes (e.g., `Port` for interfaces). Flexible feature naming (e.g., `features/note/` singular or `features/notes/` plural based on context like "library of notes").
 - **Barrel Files (`index.ts`)**: Expose only what's intended for external use (e.g., bootstrap function, types if needed). [TO BE DECIDED] for exact rules; principle: controlled exposure to enforce single-entry-point.
 
 ## Folder Structure within a Feature
 
-Core layers live inside each feature folder (e.g., `features/prompts/` or `domains/prompts/` for flexibility). Example structure (adapted from provided tree):
+Core layers live inside each feature folder (e.g., `features/notes/` or `domains/notes/` for flexibility). Example structure (adapted from provided tree):
 
 ```
-features/prompts/
+features/notes/
 ├── entities/
-│   └── Prompt.ts                  # Domain entities
+│   └── Note.ts                  # Domain entities
 ├── repositories/
-│   ├── PromptRepositoryPort.ts    # Mandated port/interface
-│   ├── HttpPromptRepository.ts    # Real HTTP implementation
-│   └── MockPromptRepository.ts    # Mock for tests/dev
+│   ├── NoteRepositoryPort.ts    # Mandated port/interface
+│   ├── HttpNoteRepository.ts    # Real HTTP implementation
+│   └── MockNoteRepository.ts    # Mock for tests/dev
 ├── services/
-│   └── PromptService.ts           # Use cases
+│   └── NoteService.ts           # Use cases
 ├── tests/                         # Feature-level tests (e.g., integration)
-│   ├── PromptMockData.ts          # Mock data helpers
-│   └── PromptService.test.ts      # Service tests
+│   ├── NoteMockData.ts          # Mock data helpers
+│   └── NoteService.test.ts      # Service tests
 ├── bootstrap.ts                   # Wires layers (real vs. mock)
 ├── index.ts                       # Barrel: exports bootstrap, types if needed
 └── ... (other layers like store/, components/)
@@ -66,13 +66,13 @@ Always in a dedicated `features/<feature>/entities/` folder.
 - Throw centralized errors extending `DomainError` for validation failures.
 - Keep simple: No complex logic; push to backend.
 
-### Example: `features/prompts/entities/Prompt.ts`
+### Example: `features/notes/entities/Note.ts`
 This example includes validation and a factory method. Copy-paste and adapt for your entity.
 
 ```typescript
 import { ValidationError } from '../../../common/errors/DomainError';  // Centralized base error
 
-export class Prompt {
+export class Note {
     readonly id: string;
     readonly title: string;
     readonly instructions: string;
@@ -100,7 +100,7 @@ export class Prompt {
     }
 
     /**
-     * Creates a Prompt instance from a plain object (for deserialization).
+     * Creates a Note instance from a plain object (for deserialization).
      * @throws {ValidationError} if validation fails
      */
     static fromPlainObject(data: {
@@ -110,8 +110,8 @@ export class Prompt {
         template: string;
         category: string | null;
         tags: string[];
-    }): Prompt {
-        return new Prompt(
+    }): Note {
+        return new Note(
             data.id,
             data.title,
             data.instructions,
@@ -122,7 +122,7 @@ export class Prompt {
     }
 
     /**
-     * Validates prompt properties according to domain rules.
+     * Validates note properties according to domain rules.
      * @throws {ValidationError} if validation fails
      */
     private validate(
@@ -183,106 +183,106 @@ In `features/<feature>/repositories/`, with the port alongside implementations.
 - Errors: Propagate or wrap as domain errors. [TO BE DECIDED] for transformation patterns.
 - Mock: Every feature **should** provide a mock for tests and mock env (e.g., via bootstrap).
 
-### Example: Port `features/prompts/repositories/PromptRepositoryPort.ts`
+### Example: Port `features/notes/repositories/NoteRepositoryPort.ts`
 Define the interface. Copy-paste for your feature's operations.
 
 ```typescript
-import { Prompt } from "../entities/Prompt";
+import { Note } from "../entities/Note";
 
-export interface PromptRepositoryPort {
-    getPrompts(): Promise<Prompt[]>;
-    getPromptById(id: string): Promise<Prompt>;
-    createPrompt(prompt: Prompt): Promise<void>;
-    updatePrompt(prompt: Prompt): Promise<void>;
-    deletePrompt(id: string): Promise<void>;
+export interface NoteRepositoryPort {
+    getNotes(): Promise<Note[]>;
+    getNoteById(id: string): Promise<Note>;
+    createNote(note: Note): Promise<void>;
+    updateNote(note: Note): Promise<void>;
+    deleteNote(id: string): Promise<void>;
 }
 ```
 
-### Example: Mock Implementation `features/prompts/repositories/MockPromptRepository.ts`
-Uses in-memory data. Include mock data helpers (e.g., in `tests/PromptMockData.ts`).
+### Example: Mock Implementation `features/notes/repositories/MockNoteRepository.ts`
+Uses in-memory data. Include mock data helpers (e.g., in `tests/NoteMockData.ts`).
 
 ```typescript
-import { Prompt } from "../entities/Prompt";
-import { PromptNotFoundError } from "../../../common/errors/DomainError";
-import type { PromptRepositoryPort } from "./PromptRepositoryPort";
-import { mockData } from "../tests/PromptMockData";  // Helper with sample data
+import { Note } from "../entities/Note";
+import { NoteNotFoundError } from "../../../common/errors/DomainError";
+import type { NoteRepositoryPort } from "./NoteRepositoryPort";
+import { mockData } from "../tests/NoteMockData";  // Helper with sample data
 
-export class MockPromptRepository implements PromptRepositoryPort {
-    private prompts: Prompt[];
-    private readonly _defaultPrompts: Prompt[] = mockData.prompts.map(prompt => Prompt.fromPlainObject(prompt));
+export class MockNoteRepository implements NoteRepositoryPort {
+    private notes: Note[];
+    private readonly _defaultNotes: Note[] = mockData.notes.map(note => Note.fromPlainObject(note));
 
-    constructor(initialPrompts: Prompt[] | undefined = undefined) {
-        this.prompts = initialPrompts ?? this._defaultPrompts;
+    constructor(initialNotes: Note[] | undefined = undefined) {
+        this.notes = initialNotes ?? this._defaultNotes;
     }
 
-    getPrompts(): Promise<Prompt[]> {
-        return Promise.resolve(this.prompts);
+    getNotes(): Promise<Note[]> {
+        return Promise.resolve(this.notes);
     }
 
-    getPromptById(id: string): Promise<Prompt> {
-        const prompt = this.prompts.find(prompt => prompt.id === id) ?? null;
-        if (prompt === null) {
-            return Promise.reject(new PromptNotFoundError(id));
+    getNoteById(id: string): Promise<Note> {
+        const note = this.notes.find(note => note.id === id) ?? null;
+        if (note === null) {
+            return Promise.reject(new NoteNotFoundError(id));
         }
-        return Promise.resolve(prompt);
+        return Promise.resolve(note);
     }
 
-    createPrompt(prompt: Prompt): Promise<void> {
-        this.prompts.push(prompt);
+    createNote(note: Note): Promise<void> {
+        this.notes.push(note);
         return Promise.resolve();
     }
 
-    updatePrompt(prompt: Prompt): Promise<void> {
-        const index = this.prompts.findIndex(p => p.id === prompt.id);
+    updateNote(note: Note): Promise<void> {
+        const index = this.notes.findIndex(p => p.id === note.id);
         if (index !== -1) {
-            this.prompts[index] = prompt;
+            this.notes[index] = note;
         }
         return Promise.resolve();
     }
 
-    deletePrompt(id: string): Promise<void> {
-        this.prompts = this.prompts.filter(prompt => prompt.id !== id);
+    deleteNote(id: string): Promise<void> {
+        this.notes = this.notes.filter(note => note.id !== id);
         return Promise.resolve();
     }
 }
 ```
 
-### Example: HTTP Implementation `features/prompts/repositories/HttpPromptRepository.ts`
+### Example: HTTP Implementation `features/notes/repositories/HttpNoteRepository.ts`
 Uses centralized `ApiClient`. Assumes no complex DTOs (direct mapping); add if needed.
 
 ```typescript
 import { ApiClient } from "@/common/http/HttpClient";
-import { Prompt } from "../entities/Prompt";
-import type { PromptRepositoryPort } from "./PromptRepositoryPort";
+import { Note } from "../entities/Note";
+import type { NoteRepositoryPort } from "./NoteRepositoryPort";
 
-export class HttpPromptRepository implements PromptRepositoryPort {
+export class HttpNoteRepository implements NoteRepositoryPort {
     constructor(
         private readonly apiClient: ApiClient
     ) {}
 
-    getPrompts(): Promise<Prompt[]> {
-        return this.apiClient.get('/prompts');
+    getNotes(): Promise<Note[]> {
+        return this.apiClient.get('/notes');
     }
 
-    getPromptById(id: string): Promise<Prompt> {
-        return this.apiClient.get(`/prompts/${id}`);
+    getNoteById(id: string): Promise<Note> {
+        return this.apiClient.get(`/notes/${id}`);
     }
 
-    createPrompt(prompt: Prompt): Promise<void> {
-        return this.apiClient.post('/prompts', prompt);
+    createNote(note: Note): Promise<void> {
+        return this.apiClient.post('/notes', note);
     }
     
-    updatePrompt(prompt: Prompt): Promise<void> {
-        return this.apiClient.put(`/prompts/${prompt.id}`, prompt);
+    updateNote(note: Note): Promise<void> {
+        return this.apiClient.put(`/notes/${note.id}`, note);
     }
 
-    deletePrompt(id: string): Promise<void> {
-        return this.apiClient.delete(`/prompts/${id}`);
+    deleteNote(id: string): Promise<void> {
+        return this.apiClient.delete(`/notes/${id}`);
     }
 }
 ```
 
-For DTOs (if backend response differs from entity): Define types like `interface PromptDto { ... }` here, then map: `Prompt.fromPlainObject(dto)` in methods.
+For DTOs (if backend response differs from entity): Define types like `interface NoteDto { ... }` here, then map: `Note.fromPlainObject(dto)` in methods.
 
 ## Services Layer
 
@@ -299,36 +299,36 @@ In `features/<feature>/services/`.
 - No direct data access or HTTP; always via repository.
 - Keep lean; delegate to backend for data-heavy ops.
 
-### Example: `features/prompts/services/PromptService.ts`
+### Example: `features/notes/services/NoteService.ts`
 Thin facade injecting repository.
 
 ```typescript
-import { Prompt } from "../entities/Prompt";
-import type { PromptRepositoryPort } from "../repositories/PromptRepositoryPort";
+import { Note } from "../entities/Note";
+import type { NoteRepositoryPort } from "../repositories/NoteRepositoryPort";
 
-export class PromptService {
+export class NoteService {
     constructor(
-        private readonly repository: PromptRepositoryPort
+        private readonly repository: NoteRepositoryPort
     ) {}
 
-    async getPrompts(): Promise<Prompt[]> {
-        return this.repository.getPrompts();
+    async getNotes(): Promise<Note[]> {
+        return this.repository.getNotes();
     }
 
-    async getPromptById(id: string): Promise<Prompt> {
-        return this.repository.getPromptById(id);
+    async getNoteById(id: string): Promise<Note> {
+        return this.repository.getNoteById(id);
     }
 
-    async createPrompt(prompt: Prompt): Promise<void> {
-        return this.repository.createPrompt(prompt);
+    async createNote(note: Note): Promise<void> {
+        return this.repository.createNote(note);
     }
 
-    async updatePrompt(prompt: Prompt): Promise<void> {
-        return this.repository.updatePrompt(prompt);
+    async updateNote(note: Note): Promise<void> {
+        return this.repository.updateNote(note);
     }
 
-    async deletePrompt(id: string): Promise<void> {
-        return this.repository.deletePrompt(id);
+    async deleteNote(id: string): Promise<void> {
+        return this.repository.deleteNote(id);
     }
 }
 ```
@@ -353,10 +353,10 @@ export class ValidationError extends DomainError {
 }
 
 // Add feature-specific, e.g.:
-export class PromptNotFoundError extends DomainError {
+export class NoteNotFoundError extends DomainError {
     constructor(id: string) {
-        super(`Prompt with id ${id} not found`);
-        this.name = 'PromptNotFoundError';
+        super(`Note with id ${id} not found`);
+        this.name = 'NoteNotFoundError';
     }
 }
 
@@ -367,75 +367,75 @@ In repositories/services, throw these for consistency.
 
 ## Testing Conventions
 
-- **Colocation**: Use `tests/` folders inside layers or at feature root (e.g., `features/prompts/tests/` for services).
-- **Naming**: `*.test.ts` (e.g., `PromptService.test.ts`).
+- **Colocation**: Use `tests/` folders inside layers or at feature root (e.g., `features/notes/tests/` for services).
+- **Naming**: `*.test.ts` (e.g., `NoteService.test.ts`).
 - **Approach**: Services always tested against mock repository (real logic, controlled data). Use Vitest.
 - Aspire to 100% coverage; mock only what's needed.
 
-### Example: `features/prompts/tests/PromptService.test.ts`
+### Example: `features/notes/tests/NoteService.test.ts`
 Comprehensive tests using mock repo.
 
 ```typescript
 import { describe, it, expect, beforeEach } from 'vitest';
-import { PromptService } from '../services/PromptService';
-import { MockPromptRepository } from '../repositories/MockPromptRepository';
-import { Prompt } from '../entities/Prompt';
-import { PromptNotFoundError } from '../../../common/errors/DomainError';
-import { mockData } from './PromptMockData';  // Sample data
+import { NoteService } from '../services/NoteService';
+import { MockNoteRepository } from '../repositories/MockNoteRepository';
+import { Note } from '../entities/Note';
+import { NoteNotFoundError } from '../../../common/errors/DomainError';
+import { mockData } from './NoteMockData';  // Sample data
 
-describe('PromptService', () => {
-    let service: PromptService;
-    let repository: MockPromptRepository;
+describe('NoteService', () => {
+    let service: NoteService;
+    let repository: MockNoteRepository;
 
     beforeEach(() => {
-        repository = new MockPromptRepository();
-        service = new PromptService(repository);
+        repository = new MockNoteRepository();
+        service = new NoteService(repository);
     });
 
-    describe('getPrompts', () => {
-        it('should return array of prompts from repository', async () => {
-            const prompts = await service.getPrompts();
+    describe('getNotes', () => {
+        it('should return array of notes from repository', async () => {
+            const notes = await service.getNotes();
             
-            expect(prompts).toBeInstanceOf(Array);
-            expect(prompts.length).toBeGreaterThan(0);
-            expect(prompts[0]).toBeInstanceOf(Prompt);
+            expect(notes).toBeInstanceOf(Array);
+            expect(notes.length).toBeGreaterThan(0);
+            expect(notes[0]).toBeInstanceOf(Note);
         });
 
-        it('should return empty array when repository has no prompts', async () => {
-            const emptyRepository = new MockPromptRepository([]);
-            const emptyService = new PromptService(emptyRepository);
+        it('should return empty array when repository has no notes', async () => {
+            const emptyRepository = new MockNoteRepository([]);
+            const emptyService = new NoteService(emptyRepository);
             
-            const prompts = await emptyService.getPrompts();
+            const notes = await emptyService.getNotes();
             
-            expect(prompts).toEqual([]);
+            expect(notes).toEqual([]);
         });
 
-        it('should return prompts with correct structure', async () => {
-            const prompts = await service.getPrompts();
+        it('should return notes with correct structure', async () => {
+            const notes = await service.getNotes();
             
-            prompts.forEach(prompt => {
-                expect(prompt).toHaveProperty('id');
-                expect(prompt).toHaveProperty('title');
-                expect(prompt).toHaveProperty('instructions');
-                expect(prompt).toHaveProperty('template');
-                expect(prompt).toHaveProperty('category');
-                expect(prompt).toHaveProperty('tags');
+            notes.forEach(note => {
+                expect(note).toHaveProperty('id');
+                expect(note).toHaveProperty('title');
+                expect(note).toHaveProperty('instructions');
+                expect(note).toHaveProperty('template');
+                expect(note).toHaveProperty('category');
+                expect(note).toHaveProperty('tags');
             });
         });
     });
 
-    // ... (full test suite as in provided PromptService.test.ts; truncated for brevity)
-    // Include tests for getPromptById, createPrompt, updatePrompt, deletePrompt
+    // ... (full test suite as in provided NoteService.test.ts; truncated for brevity)
+    // Include tests for getNoteById, createNote, updateNote, deleteNote
 });
 ```
 
-### Example Mock Data Helper: `features/prompts/tests/PromptMockData.ts`
+### Example Mock Data Helper: `features/notes/tests/NoteMockData.ts`
 ```typescript
 export const mockData = {
-    prompts: [
+    notes: [
         {
             id: '1',
-            title: 'Sample Prompt 1',
+            title: 'Sample Note 1',
             instructions: 'Instructions 1',
             template: 'Template 1',
             category: 'category1',
@@ -450,33 +450,33 @@ export const mockData = {
 
 Core layers are wired in `features/<feature>/bootstrap.ts` (select real vs. mock repo based on config). Export from `index.ts`. See `fe-store-instructions.md` and `architecture.md` for full details.
 
-### Example: `features/prompts/bootstrap.ts`
+### Example: `features/notes/bootstrap.ts`
 ```typescript
-import { PromptService } from './services/PromptService'
-import { MockPromptRepository } from './repositories/MockPromptRepository'
-import { HttpPromptRepository } from './repositories/HttpPromptRepository'
+import { NoteService } from './services/NoteService'
+import { MockNoteRepository } from './repositories/MockNoteRepository'
+import { HttpNoteRepository } from './repositories/HttpNoteRepository'
 import { ApiClient } from '@/common/http/HttpClient'
 import { appConfig } from '@/common/env/AppConfig'
-import { createPromptsStore } from './store/PromptsStore'
-import promptsRoutes from './routes'
+import { createNotesStore } from './store/NotesStore'
+import notesRoutes from './routes'
 
-const bootstrapPrompts = () => {
+const bootstrapNotes = () => {
     const useMocks = appConfig.isMockEnv
 
     const apiClient = new ApiClient(appConfig.baseUrl);
     const repository = useMocks
-        ? new MockPromptRepository()
-        : new HttpPromptRepository(apiClient)
+        ? new MockNoteRepository()
+        : new HttpNoteRepository(apiClient)
 
-    const service = new PromptService(repository)
+    const service = new NoteService(repository)
   
     return {
-        useStore: createPromptsStore(service),
-        routes: promptsRoutes
+        useStore: createNotesStore(service),
+        routes: notesRoutes
     }
 }
 
-export { bootstrapPrompts }
+export { bootstrapNotes }
 ```
 
 App-level: Aggregate in `app/bootstrap.ts`.
@@ -484,11 +484,11 @@ App-level: Aggregate in `app/bootstrap.ts`.
 ```typescript
 // src/app/bootstrap.ts
 import { Router } from 'vue-router'
-import { bootstrapPrompts } from '@/features/prompts'  // Adapted path
+import { bootstrapNotes } from '@/features/notes'  // Adapted path
 
 export const bootstrapFeatures = (router: Router) : void => {   
     console.log('bootstrapFeatures, router: ', router);
-    for (const route of bootstrapPrompts().routes) {
+    for (const route of bootstrapNotes().routes) {
         console.log('bootstrapFeatures, adding route: ', route.name);
         router.addRoute(route);
     }

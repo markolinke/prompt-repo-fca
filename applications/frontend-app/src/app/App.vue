@@ -35,7 +35,7 @@ const toggleMenu = () => {
           </button>
 
           <h1 class="text-xl font-semibold tracking-tight text-lime-600">
-            Prompts
+            Notes
           </h1>
         </div>
       </div>
@@ -74,7 +74,7 @@ const toggleMenu = () => {
               @click="isMenuOpen = false"
             >
               <span class="h-5 w-5 rounded-full border border-slate-300" />
-              <span>Prompts</span>
+              <span>Notes</span>
             </button>
             <button
               type="button"

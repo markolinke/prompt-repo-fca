@@ -1,10 +1,10 @@
 // src/app/bootstrap.ts
 import { Router } from 'vue-router'
-import { bootstrapPrompts } from '@/domains/prompts'
+import { bootstrapNotes } from '@/domains/notes'
 
 export const bootstrapFeatures = (router: Router) : void => {   
     console.log('Bootstrapping features...')
-    for (const route of bootstrapPrompts().routes) {
+    for (const route of bootstrapNotes().routes) {
         console.log('bootstrapFeatures, adding route: ', route.name);
         router.addRoute(route);
     }

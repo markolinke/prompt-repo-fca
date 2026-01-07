@@ -1,47 +1,47 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import { Prompt } from '../entities/Prompt';
-import { bootstrapPrompts } from '../bootstrap';
-import PromptsList from '../components/PromptsList.vue';
-import PromptDetails from '../components/PromptDetails.vue';
+import { Note } from '../entities/Note';
+import { bootstrapNotes } from '../bootstrap';
+import NotesList from '../components/NotesList.vue';
+import NoteDetails from '../components/NoteDetails.vue';
 import { FwbModal, FwbButton } from 'flowbite-vue';
 
-const bootstrap = bootstrapPrompts();
-const promptsStore = bootstrap.useStore();
+const bootstrap = bootstrapNotes();
+const notesStore = bootstrap.useStore();
 const searchDebouncer = bootstrap.createSearchDebouncer();
 
 const searchQuery = ref('');
 
 onMounted(() => {
-  promptsStore.fetchPrompts();
+  notesStore.fetchNotes();
 });
 
 const isModalOpen = ref(false);
-const selectedPrompt = ref<Prompt | null>(null);
+const selectedNote = ref<Note | null>(null);
 
-// Clear selected prompt when modal closes (handles ESC and outside click)
+// Clear selected note when modal closes (handles ESC and outside click)
 watch(isModalOpen, (newValue) => {
   if (!newValue) {
-    selectedPrompt.value = null;
+    selectedNote.value = null;
   }
 });
 
-const handlePromptClick = (prompt: Prompt) => {
-  selectedPrompt.value = prompt;
+const handleNoteClick = (note: Note) => {
+  selectedNote.value = note;
   isModalOpen.value = true;
 };
 
 const handleCloseModal = () => {
   isModalOpen.value = false;
-  selectedPrompt.value = null;
+  selectedNote.value = null;
 };
 
-const handleSave = async (prompt: Prompt) => {
+const handleSave = async (note: Note) => {
   try {
-    if (prompt.id) {
-      await promptsStore.updatePrompt(prompt);
+    if (note.id) {
+      await notesStore.updateNote(note);
     } else {
-      await promptsStore.createPrompt(prompt);
+      await notesStore.createNote(note);
     }
     handleCloseModal();
   } catch (error) {
@@ -55,12 +55,12 @@ const handleCancel = () => {
 };
 
 const handleDelete = () => {
-  promptsStore.deletePrompt(selectedPrompt.value?.id ?? '');
+  notesStore.deleteNote(selectedNote.value?.id ?? '');
   handleCloseModal();
 };
 
-const handleAddPrompt = () => {
-  selectedPrompt.value = Prompt.fromPlainObject({
+const handleAddNote = () => {
+  selectedNote.value = Note.fromPlainObject({
     id: '',
     title: '',
     instructions: '',
@@ -73,7 +73,7 @@ const handleAddPrompt = () => {
 
 const handleSearch = () => {
   searchDebouncer(() => {
-    promptsStore.searchPrompts(searchQuery.value);
+    notesStore.searchNotes(searchQuery.value);
   });
 };
 </script>
@@ -82,23 +82,23 @@ const handleSearch = () => {
   <div class="container mx-auto max-w-5xl px-4 py-8">
     <div class="flex justify-between items-center">
       <h1 class="text-3xl font-bold text-gray-900 mb-6">
-        Prompts
+        Notes
       </h1>
       <div class="flex items-center gap-2">
         <div>
           <input type="text" 
           v-model="searchQuery" 
           data-testid="search-input"
-          placeholder="Search prompts" 
+          placeholder="Search notes" 
           class="border border-gray-300 placeholder-gray-400 rounded-md p-2" 
           @input="handleSearch" 
           />
         </div>
 
-        <fwb-button color="blue" @click="handleAddPrompt">Add Prompt</fwb-button>
+        <fwb-button color="blue" @click="handleAddNote">Add Note</fwb-button>
       </div>
     </div>
-    <PromptsList @prompt-click="handlePromptClick" />
+    <NotesList @note-click="handleNoteClick" />
 
     <!-- Flowbite Modal -->
     <fwb-modal
@@ -108,21 +108,21 @@ const handleSearch = () => {
     >
       <template #header>
         <div class="flex items-center text-lg font-semibold text-gray-900">
-          Edit Prompt
+          Edit Note
         </div>
       </template>
 
       <template #body>
         <div class="space-y-6">
-          <PromptDetails
-            v-if="selectedPrompt"
-            :prompt="Prompt.fromPlainObject({
-              id: selectedPrompt.id,
-              title: selectedPrompt.title,
-              instructions: selectedPrompt.instructions,
-              template: selectedPrompt.template,
-              category: selectedPrompt.category,
-              tags: [...selectedPrompt.tags]
+          <NoteDetails
+            v-if="selectedNote"
+            :note="Note.fromPlainObject({
+              id: selectedNote.id,
+              title: selectedNote.title,
+              instructions: selectedNote.instructions,
+              template: selectedNote.template,
+              category: selectedNote.category,
+              tags: [...selectedNote.tags]
             })"
             @save="handleSave"
             @cancel="handleCancel"
