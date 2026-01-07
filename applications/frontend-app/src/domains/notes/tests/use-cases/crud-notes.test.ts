@@ -1,13 +1,28 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { mount, flushPromises } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import { mockBootstrapNotes, mockCurrentTime } from '../testHelpers';
-
-mockBootstrapNotes();
-
-import NotesPage from '../../pages/NotesPage.vue';
 import { mockData } from '../NotesMockData';
 import { bootstrapNotes } from '../../bootstrap';
+import {
+  mountNotesPage,
+  expectNotesCount,
+  clickAddNoteButton,
+  fillNoteForm,
+  clickSaveButton,
+  expectModalClosed,
+  expectTextVisible,
+  clickNoteItem,
+  expectFormFieldValue,
+  fillNoteTitle,
+  fillNoteContent,
+  fillNoteCategory,
+  addNoteTag,
+  clickDeleteButton,
+  expectModalOpen,
+  getNoteItems,
+} from './NotesPageTestHelpers';
+
+mockBootstrapNotes();
 
 describe('Note CRUD Operations', () => {
   beforeEach(() => {
@@ -17,125 +32,79 @@ describe('Note CRUD Operations', () => {
 
   describe('Creating a New Note', () => {
     it('should create a new note with correct values and date', async () => {
-      const wrapper = mount(NotesPage);
-      
-      await flushPromises();
-      await wrapper.vm.$nextTick();
+      const wrapper = await mountNotesPage();
+      const initialNoteCount = getNoteItems(wrapper).length;
+      expectNotesCount(wrapper, mockData.notes.length);
 
-      const initialNoteCount = wrapper.findAll('[data-testid="note-item"]').length;
-      expect(initialNoteCount).toBe(mockData.notes.length);
+      await clickAddNoteButton(wrapper);
+      expectModalOpen(wrapper);
 
-      const addButton = wrapper.find('[data-testid="add-note-button"]');
-      expect(addButton).toBeDefined();
-      await addButton!.trigger('click');
-      await wrapper.vm.$nextTick();
+      await fillNoteForm(wrapper, {
+        title: 'New Test Note',
+        content: 'This is test content',
+        category: 'test/category',
+      });
 
-      const modal = wrapper.find('[data-testid="note-details-modal"]');
-      expect(modal.exists()).toBe(true);
+      await clickSaveButton(wrapper);
 
-      const noteDetails = wrapper.findComponent('[data-testid="note-details-component"]');
-      const titleInput = noteDetails.find('[data-testid="edit-title-input"]');
-      const contentInput = noteDetails.find('#edit-content');
-      const categoryInput = noteDetails.find('#edit-category');
-
-      await titleInput.setValue('New Test Note');
-      await contentInput.setValue('This is test content');
-      await categoryInput.setValue('test/category');
-
-      const saveButton = noteDetails.find('[data-testid="save-note-button"]');
-      expect(saveButton).toBeDefined();
-      await saveButton!.trigger('click');
-
-      await flushPromises();
-      await wrapper.vm.$nextTick();
-
-      const finalNoteCount = wrapper.findAll('[data-testid="note-item"]').length;
-      expect(finalNoteCount).toBe(initialNoteCount + 1);
-
-      expect(wrapper.text()).toContain('New Test Note');
-      expect(wrapper.text()).toContain('This is test content');
-      expect(wrapper.text()).toContain('test/category');
+      expectNotesCount(wrapper, initialNoteCount + 1);
+      expectTextVisible(wrapper, 'New Test Note');
+      expectTextVisible(wrapper, 'This is test content');
+      expectTextVisible(wrapper, 'test/category');
 
       const bootstrap = bootstrapNotes();
       const store = bootstrap.useStore();
-      const newNote = store.notes.find(n => n.title === 'New Test Note');
+      const newNote = store.notes.find((n) => n.title === 'New Test Note');
       expect(newNote).toBeDefined();
-      expect(newNote!.last_modified_utc.getTime()).toBe(mockCurrentTime.getCurrentTime().getTime());
+      expect(newNote!.last_modified_utc.getTime()).toBe(
+        mockCurrentTime.getCurrentTime().getTime()
+      );
 
-      expect(wrapper.find('[data-testid="note-details-modal"]').exists()).toBe(false);
+      expectModalClosed(wrapper);
     });
   });
 
   describe('Reading/Selecting a Note', () => {
     it('should open modal and display note details when clicking on a note', async () => {
-      const wrapper = mount(NotesPage);
-      
-      await flushPromises();
-      await wrapper.vm.$nextTick();
-
-      const noteItems = wrapper.findAll('[data-testid="note-item"]');
-      expect(noteItems.length).toBeGreaterThan(0);
-
+      const wrapper = await mountNotesPage();
       const firstNote = mockData.notes[0];
-      await noteItems[0].trigger('click');
-      await wrapper.vm.$nextTick();
 
-      const modal = wrapper.find('[data-testid="note-details-modal"]');
-      expect(modal.exists()).toBe(true);
+      await clickNoteItem(wrapper, 0);
+      expectModalOpen(wrapper);
 
-      const noteDetails = wrapper.find('[data-testid="note-details-component"]');
-      const titleInput = noteDetails.find('[data-testid="edit-title-input"]');
-      const contentInput = noteDetails.find('[data-testid="edit-content-input"]');
-      const categoryInput = noteDetails.find('[data-testid="edit-category-input"]');
-
-      expect((titleInput.element as HTMLInputElement).value).toBe(firstNote.title);
-      expect((contentInput.element as HTMLTextAreaElement).value).toBe(firstNote.content);
+      expectFormFieldValue(wrapper, 'edit-title-input', firstNote.title);
+      expectFormFieldValue(wrapper, 'edit-content-input', firstNote.content);
       if (firstNote.category) {
-        expect((categoryInput.element as HTMLInputElement).value).toBe(firstNote.category);
+        expectFormFieldValue(wrapper, 'edit-category-input', firstNote.category);
       }
     });
   });
 
   describe('Updating an Existing Note', () => {
     it('should update note values and preserve date', async () => {
-      const wrapper = mount(NotesPage);
-      
-      await flushPromises();
-      await wrapper.vm.$nextTick();
-
-      const noteItems = wrapper.findAll('[data-testid="note-item"]');
+      const wrapper = await mountNotesPage();
       const firstNote = mockData.notes[0];
 
-      await noteItems[0].trigger('click');
-      await wrapper.vm.$nextTick();
+      await clickNoteItem(wrapper, 0);
 
-      const noteDetails = wrapper.findComponent('[data-testid="note-details-component"]');
-      const titleInput = noteDetails.find('[data-testid="edit-title-input"]');
-      const contentInput = noteDetails.find('[data-testid="edit-content-input"]');
-      const categoryInput = noteDetails.find('[data-testid="edit-category-input"]');
-
-      await titleInput.setValue('Updated Title');
-      await contentInput.setValue('Updated Content');
-      await categoryInput.setValue('updated/category');
+      await fillNoteTitle(wrapper, 'Updated Title');
+      await fillNoteContent(wrapper, 'Updated Content');
+      await fillNoteCategory(wrapper, 'updated/category');
 
       // set mock current time as one hour from original date
       mockCurrentTime.advanceTimeBy(3600000);
       const newTime = mockCurrentTime.getCurrentTime();
 
-      const saveButton = noteDetails.find('[data-testid="save-note-button"]');
-      await saveButton!.trigger('click');
+      await clickSaveButton(wrapper);
 
-      await flushPromises();
-      await wrapper.vm.$nextTick();
-
-      expect(wrapper.text()).toContain('Updated Title');
-      expect(wrapper.text()).toContain('Updated Content');
-      expect(wrapper.text()).toContain('updated/category');
+      expectTextVisible(wrapper, 'Updated Title');
+      expectTextVisible(wrapper, 'Updated Content');
+      expectTextVisible(wrapper, 'updated/category');
       expect(wrapper.text()).not.toContain(firstNote.title);
 
       const bootstrap = bootstrapNotes();
       const store = bootstrap.useStore();
-      const updatedNote = store.notes.find(n => n.id === firstNote.id);
+      const updatedNote = store.notes.find((n) => n.id === firstNote.id);
       expect(updatedNote).toBeDefined();
       expect(updatedNote!.title).toBe('Updated Title');
       expect(updatedNote!.content).toBe('Updated Content');
@@ -146,46 +115,28 @@ describe('Note CRUD Operations', () => {
 
   describe('Validating Updated Values', () => {
     it('should correctly save all updated field values', async () => {
-      const wrapper = mount(NotesPage);
-      
-      await flushPromises();
-      await wrapper.vm.$nextTick();
+      const wrapper = await mountNotesPage();
 
-      const noteItems = wrapper.findAll('[data-testid="note-item"]');
-      await noteItems[0].trigger('click');
-      await wrapper.vm.$nextTick();
+      await clickNoteItem(wrapper, 0);
 
-      const noteDetails = wrapper.findComponent('[data-testid="note-details-component"]');
-      const titleInput = noteDetails.find('[data-testid="edit-title-input"]');
-      const contentInput = noteDetails.find('[data-testid="edit-content-input"]');
-      const categoryInput = noteDetails.find('[data-testid="edit-category-input"]');
-      const tagInput = noteDetails.find('[data-testid="edit-tags-input"]');
-      const addTagButton = noteDetails.find('[data-testid="add-tag-button"]');
+      await fillNoteTitle(wrapper, 'Multi Field Update');
+      await fillNoteContent(wrapper, 'Updated content with changes');
+      await fillNoteCategory(wrapper, 'new/category');
+      await addNoteTag(wrapper, 'newtag');
 
-      await titleInput.setValue('Multi Field Update');
-      await contentInput.setValue('Updated content with changes');
-      await categoryInput.setValue('new/category');
-      await tagInput.setValue('newtag');
-      await addTagButton!.trigger('click');
-      await wrapper.vm.$nextTick();
-
-      const saveButton = noteDetails.find('[data-testid="save-note-button"]');
-      await saveButton!.trigger('click');
-
-      await flushPromises();
-      await wrapper.vm.$nextTick();
+      await clickSaveButton(wrapper);
 
       const bootstrap = bootstrapNotes();
       const store = bootstrap.useStore();
-      const updatedNote = store.notes.find(n => n.title === 'Multi Field Update');
-      
+      const updatedNote = store.notes.find((n) => n.title === 'Multi Field Update');
+
       expect(updatedNote).toBeDefined();
       expect(updatedNote!.title).toBe('Multi Field Update');
       expect(updatedNote!.content).toBe('Updated content with changes');
       expect(updatedNote!.category).toBe('new/category');
       expect(updatedNote!.tags).toContain('newtag');
 
-      const noteCount = store.notes.filter(n => n.title === 'Multi Field Update').length;
+      const noteCount = store.notes.filter((n) => n.title === 'Multi Field Update').length;
       expect(noteCount).toBe(1);
     });
   });
@@ -195,32 +146,19 @@ describe('Note CRUD Operations', () => {
       const testDate = new Date('2024-01-20T14:30:00Z');
       mockCurrentTime.setDate(testDate);
 
-      const wrapper = mount(NotesPage);
-      
-      await flushPromises();
-      await wrapper.vm.$nextTick();
+      const wrapper = await mountNotesPage();
 
-      const addButton = wrapper.find('[data-testid="add-note-button"]');
-      await addButton.trigger('click');
-      await wrapper.vm.$nextTick();
+      await clickAddNoteButton(wrapper);
 
-      const noteDetails = wrapper.findComponent('[data-testid="note-details-component"]');
-      const titleInput = noteDetails.find('[data-testid="edit-title-input"]');
-      const contentInput = noteDetails.find('[data-testid="edit-content-input"]');
+      await fillNoteTitle(wrapper, 'Date Test Note');
+      await fillNoteContent(wrapper, 'Testing date');
 
-      await titleInput.setValue('Date Test Note');
-      await contentInput.setValue('Testing date');
-      
-      const saveButton = noteDetails.find('[data-testid="save-note-button"]');
-      await saveButton!.trigger('click');
-
-      await flushPromises();
-      await wrapper.vm.$nextTick();
+      await clickSaveButton(wrapper);
 
       const bootstrap = bootstrapNotes();
       const store = bootstrap.useStore();
-      const newNote = store.notes.find(n => n.title === 'Date Test Note');
-      
+      const newNote = store.notes.find((n) => n.title === 'Date Test Note');
+
       expect(newNote).toBeDefined();
       expect(newNote!.last_modified_utc.getTime()).toBe(testDate.getTime());
     });
@@ -229,71 +167,47 @@ describe('Note CRUD Operations', () => {
       const originalDate = new Date('2024-01-10T08:00:00Z');
       mockCurrentTime.setDate(originalDate);
 
-      const wrapper = mount(NotesPage);
-      
-      await flushPromises();
-      await wrapper.vm.$nextTick();
-
-      const noteItems = wrapper.findAll('[data-testid="note-item"]');
+      const wrapper = await mountNotesPage();
       const firstNote = mockData.notes[0];
 
-      await noteItems[0].trigger('click');
-      await wrapper.vm.$nextTick();
+      await clickNoteItem(wrapper, 0);
 
       mockCurrentTime.advanceTimeBy(3600000);
 
-      const noteDetails = wrapper.findComponent('[data-testid="note-details-component"]');
-      const titleInput = noteDetails.find('[data-testid="edit-title-input"]');
-      await titleInput.setValue('Updated After Time Advance');
-      
-      const saveButton = noteDetails.find('[data-testid="save-note-button"]');
-      await saveButton!.trigger('click');
+      await fillNoteTitle(wrapper, 'Updated After Time Advance');
 
-      await flushPromises();
-      await wrapper.vm.$nextTick();
+      await clickSaveButton(wrapper);
 
       const bootstrap = bootstrapNotes();
       const store = bootstrap.useStore();
-      const updatedNote = store.notes.find(n => n.id === firstNote.id);
-      
+      const updatedNote = store.notes.find((n) => n.id === firstNote.id);
+
       expect(updatedNote).toBeDefined();
-      expect(updatedNote!.last_modified_utc.getTime()).toBe(mockCurrentTime.getCurrentTime().getTime());
+      expect(updatedNote!.last_modified_utc.getTime()).toBe(
+        mockCurrentTime.getCurrentTime().getTime()
+      );
     });
   });
 
   describe('Deleting a Note', () => {
     it('should remove note from list and repository when deleted', async () => {
-      const wrapper = mount(NotesPage);
-      
-      await flushPromises();
-      await wrapper.vm.$nextTick();
-
-      const initialNoteCount = wrapper.findAll('[data-testid="note-item"]').length;
+      const wrapper = await mountNotesPage();
+      const initialNoteCount = getNoteItems(wrapper).length;
       const firstNote = mockData.notes[0];
 
-      const noteItems = wrapper.findAll('[data-testid="note-item"]');
-      await noteItems[0].trigger('click');
-      await wrapper.vm.$nextTick();
+      await clickNoteItem(wrapper, 0);
 
-      const deleteButton = wrapper.find('[data-testid="delete-note-button"]');
-      expect(deleteButton).toBeDefined();
-      await deleteButton!.trigger('click');
+      await clickDeleteButton(wrapper);
 
-      await flushPromises();
-      await wrapper.vm.$nextTick();
-
-      const finalNoteCount = wrapper.findAll('[data-testid="note-item"]').length;
-      expect(finalNoteCount).toBe(initialNoteCount - 1);
-
+      expectNotesCount(wrapper, initialNoteCount - 1);
       expect(wrapper.text()).not.toContain(firstNote.title);
 
       const bootstrap = bootstrapNotes();
       const store = bootstrap.useStore();
-      const deletedNote = store.notes.find(n => n.id === firstNote.id);
+      const deletedNote = store.notes.find((n) => n.id === firstNote.id);
       expect(deletedNote).toBeUndefined();
 
-      const modal = wrapper.find('[data-testid="note-details-modal"]');
-      expect(modal.exists()).toBe(false);
+      expectModalClosed(wrapper);
     });
   });
 });
