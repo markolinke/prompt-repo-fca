@@ -35,7 +35,7 @@ const toggleMenu = () => {
           </button>
 
           <h1 class="text-xl font-semibold tracking-tight text-lime-600">
-            Notes
+            Scaffolding App
           </h1>
         </div>
       </div>
@@ -48,59 +48,36 @@ const toggleMenu = () => {
         class="fixed inset-x-0 top-16 z-30"
       >
         <div class="mx-auto flex max-w-5xl px-4 sm:px-6">
-          <div
-            class="w-full max-w-sm rounded-2xl border border-slate-200 bg-white shadow-xl"
-          >
-          <div class="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
-            <div
-              class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-200 text-sm font-medium text-slate-700"
-            >
-              DU
+          <div class="w-full max-w-sm rounded-2xl border border-slate-200 bg-white shadow-xl">
+            <div class="flex items-center gap-3 border-b border-slate-100 px-4 py-3" @click="isMenuOpen = false">
+              <router-link :to="{ name: 'home' }">
+                <div class="flex items-center gap-4">
+                  <div class="rounded-full bg-slate-200 text-sm font-medium text-slate-700 h-10 w-10 flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                      </svg>
+                    </div>
+                  <div class="text-sm font-semibold text-slate-900">
+                      Home
+                  </div>
+                </div>
+              </router-link>
             </div>
-            <div>
-              <p class="text-sm font-semibold text-slate-900">
-                Demo User
-              </p>
-              <p class="text-xs text-slate-500">
-                demo.user@example.com
-              </p>
-            </div>
-          </div>
 
-          <nav class="px-2 py-2 text-sm text-slate-700">
-            <button
-              type="button"
-              class="flex w-full items-center gap-3 rounded-xl px-3 py-2 hover:bg-slate-50"
-              @click="isMenuOpen = false"
-            >
-              <span class="h-5 w-5 rounded-full border border-slate-300" />
-              <span>Notes</span>
-            </button>
-            <button
-              type="button"
-              class="flex w-full items-center gap-3 rounded-xl px-3 py-2 hover:bg-slate-50"
-            >
-              <span class="h-5 w-5 rounded-full border border-slate-300" />
-              <span>Guardians</span>
-            </button>
-            <button
-              type="button"
-              class="flex w-full items-center gap-3 rounded-xl px-3 py-2 hover:bg-slate-50"
-            >
-              <span class="h-5 w-5 rounded-full border border-slate-300" />
-              <span>Notifications</span>
-            </button>
-
-            <div class="mt-3 border-t border-slate-100 pt-2">
-              <button
-                type="button"
-                class="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-red-600 hover:bg-red-50"
-              >
-                <span class="h-5 w-5 rounded-full border border-red-300" />
-                <span>Log out</span>
-              </button>
+            <div class="flex items-center gap-3 border-b border-slate-100 px-4 py-3" @click="isMenuOpen = false">
+              <router-link :to="{ name: 'notes-list' }" @click="isMenuOpen = false">
+                <div class="flex items-center gap-4">
+                    <div class="rounded-full bg-slate-200 text-sm font-medium text-slate-700 h-10 w-10 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                        </svg>
+                      </div>
+                    <div class="text-sm font-semibold text-slate-900">
+                        Notes
+                    </div>
+                  </div>
+              </router-link>
             </div>
-          </nav>
           </div>
         </div>
       </div>
