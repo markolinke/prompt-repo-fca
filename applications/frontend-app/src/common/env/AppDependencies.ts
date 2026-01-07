@@ -1,5 +1,6 @@
 import type { MyRouterPort } from "@/common/routing/MyRouterPort";
 import type { HttpClientPort } from "@/common/http/HttpClientPort";
+import type { TimeoutPort } from "@/common/time/TimeoutPort";
 
 export interface AppConfig {
     isMockEnv: boolean;
@@ -9,6 +10,7 @@ export interface AppConfig {
 class AppDependencies {
     private myRouter: MyRouterPort | null = null
     private httpClient: HttpClientPort | null = null
+    private timeoutClient: TimeoutPort | null = null
     private appConfig: AppConfig | null = null
 
     registerAppConfig(appConfig: AppConfig): void {
@@ -31,6 +33,17 @@ class AppDependencies {
             throw new Error('HttpClient has not been registered. Make sure to call registerHttpClient() during app initialization.')
         }
         return this.httpClient
+    }
+
+    registerTimeoutClient(timeoutClient: TimeoutPort): void {
+        this.timeoutClient = timeoutClient
+    }
+
+    getTimeoutClient(): TimeoutPort {
+        if (!this.timeoutClient) {
+            throw new Error('TimeoutClient has not been registered. Make sure to call registerTimeoutClient() during app initialization.')
+        }
+        return this.timeoutClient
     }
 
     registerMyRouter(router: MyRouterPort): void {

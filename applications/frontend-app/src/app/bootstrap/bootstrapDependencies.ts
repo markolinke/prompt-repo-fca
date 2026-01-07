@@ -2,6 +2,7 @@ import { appDependencies } from "@/common/env/AppDependencies";
 import type { AppConfig } from "@/common/env/AppDependencies";
 import { MyRouter } from "../router/MyRouter";
 import { AxiosHttpClient } from "@/common/http/AxiosHttpClient";
+import { BrowserTimeout } from "@/common/time/BrowserTimeout";
 import { Router } from 'vue-router'
 
 export const bootstrapDependencies = (router: Router) : void => {
@@ -18,6 +19,9 @@ export const bootstrapDependencies = (router: Router) : void => {
 
     const httpClient = new AxiosHttpClient(appConfig.baseUrl);
     appDependencies.registerHttpClient(httpClient);
+
+    const timeoutClient = new BrowserTimeout();
+    appDependencies.registerTimeoutClient(timeoutClient);
 
     console.log('Dependencies bootstrapped successfully')
 }
