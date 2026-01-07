@@ -29,5 +29,12 @@ export class NoteService {
     async searchNotes(query: string): Promise<Note[]> {
         return this.repository.searchNotes(query);
     }
+
+    /**
+     * @throws {ValidationError} if validation fails
+     */
+    async validateNote(note: Note): Promise<void> {
+        return Promise.resolve(note.validate());
+    }
 }
 

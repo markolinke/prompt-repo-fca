@@ -55,36 +55,15 @@ export class Note {
      * Validates note properties according to domain rules.
      * @throws {ValidationError} if validation fails
      */
-    public validate(
-    ): void {
+    public validate(): void {
         const errors: string[] = [];
-
+        
         if (!this.id?.trim()) errors.push('ID is required');
         if (!this.title?.trim()) errors.push('Title is required');
         if (!this.content?.trim()) errors.push('Content is required');
-        if (!(this.last_modified_utc instanceof Date) || isNaN(this.last_modified_utc.getTime())) {
-            errors.push('last_modified_utc must be a valid Date');
-        }
-        if (this.category !== null && typeof this.category !== 'string') errors.push('Category must be a string or null');
-
-        if (!Array.isArray(this.tags)) {
-            errors.push('Tags must be an array');
-        } else {
-            const tagSet: Set<string> = new Set();
-            for (const tag of this.tags) {
-                if (typeof tag !== 'string') {
-                    errors.push('All tags must be strings');
-                    break;
-                }
-                if (tagSet.has(tag)) {
-                    errors.push(`Duplicate tag: '${tag}'`);
-                }
-                tagSet.add(tag);
-            }
-        }
 
         if (errors.length > 0) {
-            throw new ValidationError(errors.join('; '));
+            throw new ValidationError(`Validation failed: ${errors.join('; ')}`, errors);
         }
     }
 }

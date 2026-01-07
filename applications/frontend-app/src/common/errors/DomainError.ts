@@ -6,7 +6,7 @@ export class DomainError extends Error {
 }
 
 export class ValidationError extends DomainError {
-    constructor(message: string, public readonly field?: string) {
+    constructor(message: string, public readonly errors: string[] = []) {
         super(message);
         this.name = 'ValidationError';
     }
