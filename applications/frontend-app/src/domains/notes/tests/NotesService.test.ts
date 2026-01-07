@@ -38,8 +38,8 @@ describe('NoteService', () => {
             notes.forEach(note => {
                 expect(note).toHaveProperty('id');
                 expect(note).toHaveProperty('title');
-                expect(note).toHaveProperty('instructions');
-                expect(note).toHaveProperty('template');
+                expect(note).toHaveProperty('content');
+                expect(note).toHaveProperty('last_modified_utc');
                 expect(note).toHaveProperty('category');
                 expect(note).toHaveProperty('tags');
             });
@@ -84,8 +84,8 @@ describe('NoteService', () => {
             const newNote = new Note(
                 '5',
                 'New Note',
-                'Test instructions',
-                'Test template',
+                'Test content',
+                new Date('2024-01-20T10:00:00Z'),
                 'test/category',
                 ['test', 'tag']
             );
@@ -103,8 +103,8 @@ describe('NoteService', () => {
             const newNote = new Note(
                 '4',
                 'Another Note',
-                'Another instructions',
-                'Another template',
+                'Another content',
+                new Date('2024-01-21T12:00:00Z'),
                 null,
                 []
             );
@@ -119,8 +119,8 @@ describe('NoteService', () => {
             const newNote = new Note(
                 '5',
                 'Full Note',
-                'Full instructions',
-                'Full template',
+                'Full content',
+                new Date('2024-01-22T14:30:00Z'),
                 'full/category',
                 ['tag1', 'tag2']
             );
@@ -130,8 +130,8 @@ describe('NoteService', () => {
             const createdNote = await service.getNoteById('5');
             expect(createdNote.id).toBe('5');
             expect(createdNote.title).toBe('Full Note');
-            expect(createdNote.instructions).toBe('Full instructions');
-            expect(createdNote.template).toBe('Full template');
+            expect(createdNote.content).toBe('Full content');
+            expect(createdNote.last_modified_utc).toEqual(new Date('2024-01-22T14:30:00Z'));
             expect(createdNote.category).toBe('full/category');
             expect(createdNote.tags).toEqual(['tag1', 'tag2']);
         });
@@ -143,8 +143,8 @@ describe('NoteService', () => {
             const updatedNote = new Note(
                 existingNote.id,
                 'Updated Title',
-                existingNote.instructions,
-                existingNote.template,
+                existingNote.content,
+                existingNote.last_modified_utc,
                 existingNote.category,
                 [...existingNote.tags]
             );
@@ -159,8 +159,8 @@ describe('NoteService', () => {
             const updatedNote = new Note(
                 '1',
                 'New Title',
-                'New Instructions',
-                'New Template',
+                'New Content',
+                new Date('2024-01-23T16:00:00Z'),
                 'new/category',
                 ['new', 'tags']
             );
@@ -169,8 +169,8 @@ describe('NoteService', () => {
             
             const result = await service.getNoteById('1');
             expect(result.title).toBe('New Title');
-            expect(result.instructions).toBe('New Instructions');
-            expect(result.template).toBe('New Template');
+            expect(result.content).toBe('New Content');
+            expect(result.last_modified_utc).toEqual(new Date('2024-01-23T16:00:00Z'));
             expect(result.category).toBe('new/category');
             expect(result.tags).toEqual(['new', 'tags']);
         });
@@ -179,8 +179,8 @@ describe('NoteService', () => {
             const nonExistentNote = new Note(
                 '999',
                 'Non-existent',
-                'Instructions',
-                'Template',
+                'Content',
+                new Date('2024-01-24T08:00:00Z'),
                 null,
                 []
             );

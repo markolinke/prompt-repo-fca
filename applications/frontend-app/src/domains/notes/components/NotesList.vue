@@ -65,7 +65,7 @@ const handleNoteClick = (note: Note) => {
           </div>
 
           <p class="mt-1 line-clamp-1 text-xs text-gray-600">
-            {{ note.instructions }}
+            {{ note.content }}
           </p>
         </div>
 

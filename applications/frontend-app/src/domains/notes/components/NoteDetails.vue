@@ -15,8 +15,7 @@ const emit = defineEmits<{
 
 // Local state
 const editTitle = ref<string>('');
-const editInstructions = ref<string>('');
-const editTemplate = ref<string>('');
+const editContent = ref<string>('');
 const editCategory = ref<string>('');
 const editTags = ref<string[]>([]);
 const newTag = ref<string>('');
@@ -25,8 +24,7 @@ const validationErrors = ref<string[]>([]);
 // Initialize local state from note prop
 const initializeEditState = () => {
   editTitle.value = props.note.title;
-  editInstructions.value = props.note.instructions;
-  editTemplate.value = props.note.template;
+  editContent.value = props.note.content;
   editCategory.value = props.note.category ?? '';
   editTags.value = [...props.note.tags];
   newTag.value = '';
@@ -55,11 +53,8 @@ const handleSave = () => {
   if (!editTitle.value.trim()) {
     validationErrors.value.push('Title is required');
   }
-  if (!editInstructions.value.trim()) {
-    validationErrors.value.push('Instructions are required');
-  }
-  if (!editTemplate.value.trim()) {
-    validationErrors.value.push('Template is required');
+  if (!editContent.value.trim()) {
+    validationErrors.value.push('Content is required');
   }
 
   if (validationErrors.value.length > 0) {
@@ -68,11 +63,14 @@ const handleSave = () => {
 
   try {
     // Construct new Note instance using fromPlainObject
+    // Keep existing last_modified_utc for existing notes, use current date for new notes
+    const lastModified = props.note.id ? props.note.last_modified_utc : new Date();
+    
     const updatedNote = Note.fromPlainObject({
       id: props.note.id,
       title: editTitle.value.trim(),
-      instructions: editInstructions.value.trim(),
-      template: editTemplate.value.trim(),
+      content: editContent.value.trim(),
+      last_modified_utc: lastModified,
       category: editCategory.value.trim() || null,
       tags: editTags.value.map(tag => tag.trim()).filter(tag => tag.length > 0),
     });
@@ -184,31 +182,27 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
         </div>
       </div>
 
-      <!-- Instructions -->
+      <!-- Last Modified (Read-only) -->
       <div>
-        <label for="edit-instructions" class="block text-xs font-medium text-gray-700 uppercase tracking-wide mb-1">
-          Instructions <span class="text-red-500">*</span>
+        <label class="block text-xs font-medium text-gray-700 uppercase tracking-wide mb-1">
+          Last Modified
         </label>
-        <textarea
-          id="edit-instructions"
-          v-model="editInstructions"
-          rows="3"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-sans resize-y"
-          placeholder="Enter instructions for the note"
-        />
+        <div class="px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm text-gray-600">
+          {{ note.last_modified_utc.toLocaleString() }}
+        </div>
       </div>
 
-      <!-- Template -->
+      <!-- Content -->
       <div>
-        <label for="edit-template" class="block text-xs font-medium text-gray-700 uppercase tracking-wide mb-1">
-          Template <span class="text-red-500">*</span>
+        <label for="edit-content" class="block text-xs font-medium text-gray-700 uppercase tracking-wide mb-1">
+          Content <span class="text-red-500">*</span>
         </label>
         <textarea
-          id="edit-template"
-          v-model="editTemplate"
-          rows="3"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-mono resize-y"
-          placeholder="Enter the note template"
+          id="edit-content"
+          v-model="editContent"
+          rows="8"
+          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm font-sans resize-y"
+          placeholder="Enter note content"
         />
       </div>
 
