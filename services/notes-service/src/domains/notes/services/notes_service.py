@@ -18,12 +18,12 @@ class NotesService:
     
     async def create_note(self, note: Note) -> None:
         """Create a new note with validation."""
-        note.validate()
+        note.validate_entity()
         await self.repository.create_note(note)
     
     async def update_note(self, note: Note) -> None:
         """Update an existing note with validation."""
-        note.validate()
+        note.validate_entity()
         await self.repository.update_note(note)
     
     async def delete_note(self, id: str) -> None:
