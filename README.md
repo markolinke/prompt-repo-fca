@@ -18,6 +18,7 @@ For detailed frontend guidelines, see `docs/architecture.md`, `docs/domain-core-
 ## Monorepo Design and Principles
 
 ### Design
+
 - **Monorepo Benefits**: Single repository for all codebases enables shared tooling, consistent CI/CD, easier refactoring across services, and simplified dependency management.
 - **Structure Overview**:
   - `applications/`: Contains frontend applications (e.g., `frontend-app/` with Vue codebase).
@@ -25,7 +26,25 @@ For detailed frontend guidelines, see `docs/architecture.md`, `docs/domain-core-
   - `packages/`: Shared packages (e.g., `shared-types/` for TypeScript types reusable between FE and BE).
   - `docs/`: Central documentation for architecture, guidelines, and more.
 
+#### Files Directory structure
+
+```text
+monorepo-root/
+├── applications/
+│   └── frontend-app/                  # Vue 3 frontend application
+│       └── ... (see below)
+├── services/
+│   ├── auth-service/                  # Python backend microservices
+│   ├── invoice-service/
+│   └── ...
+├── packages/
+│   └── shared-types/                  # Optional: shared TS types between FE & BE
+└── docs/
+    └── architecture.md                # This file
+```
+
 ### Principles
+
 - **Modularity**: Slice by domains/features (e.g., `domains/notes/` in frontend) to keep concerns isolated and scalable.
 - **Separation of Concerns**: Backend owns data-heavy logic and validation; frontend handles UI and lightweight orchestration.
 - **Dependency Direction**: Inner layers (entities, repositories) are framework-agnostic; outer layers (stores, components) depend on them.
@@ -51,6 +70,7 @@ pnpm install  # Installs frontend and shared packages; for backend, navigate to 
 ### Development
 
 For frontend:
+
 ```bash
 cd applications/frontend-app
 pnpm dev
@@ -59,6 +79,7 @@ pnpm dev
 Open http://localhost:3000 (or your configured port).
 
 For backend services:
+
 - Navigate to a service (e.g., `cd services/auth-service`)
 - Run development server (e.g., `python main.py` or as per service docs).
 
@@ -68,7 +89,7 @@ For backend services:
 
 ## Folder Structure (Example)
 
-```
+```text
 team-note-repo/
 ├── applications/
 │   └── frontend-app/                  # Vue frontend application

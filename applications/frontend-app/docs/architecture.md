@@ -37,23 +37,6 @@ Layers (from inner to outer):
 | **Application**    | Use cases / services (frontend-specific logic, calculations)                   | Plain TS functions or classes            | Yes       |
 | **Presentation**   | UI components, views, state management                                         | Vue 3 components, Pinia, Composables     | Yes       |
 
-## Project Structure (Monorepo)
-
-```text
-monorepo-root/
-├── applications/
-│   └── frontend-app/                  # Vue 3 frontend application
-│       └── ... (see below)
-├── services/
-│   ├── auth-service/                  # Python backend microservices
-│   ├── invoice-service/
-│   └── ...
-├── packages/
-│   └── shared-types/                  # Optional: shared TS types between FE & BE
-└── docs/
-    └── architecture.md                # This file
-```
-
 ## Frontend Application Structure
 
 ```text
