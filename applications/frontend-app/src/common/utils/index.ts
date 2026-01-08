@@ -1,1 +1,1 @@
-export { FlagsUtil } from './aFlagsUtil';
+export { FlagsUtil } from './FlagsUtil';

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { FlagsUtil } from '../aFlagsUtil';
+import { FlagsUtil } from '../FlagsUtil';
 
 describe('flagsUtil', () => {
 
