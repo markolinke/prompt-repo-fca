@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest';
-import { FlagsUtil } from '../FlagsUtil';
+import { FlagsUtil } from '../aFlagsUtil';
 
 describe('flagsUtil', () => {
 
     it('should be empty when created', () => {
         const f = new FlagsUtil();
-        expect(f.flags).toEqual([]);
+        expect(f.isEmpty).toBe(true);
         
         f.set('test');
-        expect(f.flags).not.toEqual([]);
+        expect(f.isEmpty).toBe(false);
     });
 
     it('should return true if the flag is enabled', () => {

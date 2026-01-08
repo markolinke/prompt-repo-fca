@@ -1,8 +1,8 @@
 export class FlagsUtil {
     private _flags: string[] = [];
     
-    get flags(): string[] {
-        return [...this._flags];
+    get isEmpty(): boolean {
+        return this._flags.length === 0;
     }
 
     isSet(flag: string): boolean {
