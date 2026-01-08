@@ -20,7 +20,13 @@ export const bootstrapDependencies = (router: Router) : void => {
     const myRouter = new MyRouter(router);
     appDependencies.registerMyRouter(myRouter);
 
-    const httpClient = new AxiosHttpClient(appConfig.baseUrl, {}, "", myRouter);
+    // Create base HTTP client without token (for non-auth repositories)
+    const httpClient = new AxiosHttpClient(
+        appConfig.baseUrl, 
+        {}, 
+        myRouter,
+        undefined  // No token provider - repositories that need auth will get their own client
+    );
     appDependencies.registerHttpClient(httpClient);
 
     const timeoutClient = new BrowserTimeout();

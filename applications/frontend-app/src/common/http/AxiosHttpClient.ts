@@ -8,8 +8,8 @@ export class AxiosHttpClient implements HttpClientPort {
     constructor(
         private readonly baseUrl: string,
         private readonly headers: Record<string, string> = {},
-        private readonly authToken: string = "",
-        private readonly router: MyRouterPort
+        private readonly router: MyRouterPort,
+        private readonly getToken?: () => string | null
     ) { }
 
     public async get(endpoint: string = "", params?: any, signal?: AbortSignal): Promise<any> {
@@ -72,9 +72,10 @@ export class AxiosHttpClient implements HttpClientPort {
             headers: this.headers,
             params: params
         };
-        if (this.authToken) {
+        const token = this.getToken?.(); // Dynamic token retrieval at request time
+        if (token) {
             config.headers = config.headers || {};
-            config.headers.Authorization = `Bearer ${this.authToken}`;
+            config.headers.Authorization = `Bearer ${token}`;
         }
         return axios.create(config);
     }
