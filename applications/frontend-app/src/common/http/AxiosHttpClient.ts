@@ -1,17 +1,15 @@
 import axios, { type AxiosInstance, type AxiosRequestConfig } from "axios";
 import { HttpError, UnauthorizedError, NotFoundError, ForbiddenError, InternalServerError } from "@/common/errors/DomainError";
 import type { MyRouterPort } from "@/common/routing/MyRouterPort";
-import { appDependencies } from "@/common/env/AppDependencies";
 import type { HttpClientPort } from "./HttpClientPort";
 
 export class AxiosHttpClient implements HttpClientPort {
 
-    private readonly router: MyRouterPort = appDependencies.getMyRouter();
-
     constructor(
         private readonly baseUrl: string,
         private readonly headers: Record<string, string> = {},
-        private readonly authToken: string = ""
+        private readonly authToken: string = "",
+        private readonly router: MyRouterPort
     ) { }
 
     public async get(endpoint: string = "", params?: any, signal?: AbortSignal): Promise<any> {
