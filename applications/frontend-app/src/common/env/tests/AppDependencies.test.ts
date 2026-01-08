@@ -1,11 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import { appDependencies } from '../AppDependencies';
+import type { AppConfig } from '../AppDependencies';
 import { BrowserTimeout } from '@/common/time/timeout/BrowserTimeout';
 import { MyRouter } from '@/app/router/MyRouter';
 import router from '@/app/router';
 
-const _testAppConfig = {
-    isMockEnv: false,
+const _testAppConfig : AppConfig = {
+    repositoryType: 'mock',
     baseUrl: 'https://api.example.com',
   };
 

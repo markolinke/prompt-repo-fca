@@ -3,8 +3,8 @@ import type { HttpClientPort } from "@/common/http/HttpClientPort";
 import type { TimeoutPort } from "@/common/time/timeout/TimeoutPort";
 
 export interface AppConfig {
-    isMockEnv: boolean;
     baseUrl: string;
+    repositoryType: 'mock' | 'http';
 }
 
 class AppDependencies {
@@ -55,6 +55,16 @@ class AppDependencies {
             throw new Error('MyRouter has not been registered. Make sure to call registerMyRouter() during app initialization.')
         }
         return this.myRouter
+    }
+
+    /**
+     * Resets all registered dependencies (ONLY for testing). 
+     */
+    resetForTesting(): void {
+        this.myRouter = null;
+        this.httpClient = null;
+        this.timeoutClient = null;
+        this.appConfig = null;
     }
 }
 

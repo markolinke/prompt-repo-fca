@@ -3,6 +3,7 @@ import { setActivePinia, createPinia } from 'pinia';
 import { mockBootstrapNotes, mockCurrentTime } from '../testHelpers';
 import { mockData } from '../NotesMockData';
 import { bootstrapNotes } from '../../bootstrap';
+
 import {
   mountNotesPage,
   expectNotesCount,
@@ -76,6 +77,7 @@ describe('Note CRUD Operations', () => {
       expectModalClosed(wrapper);
       expectNotesCount(wrapper, initialNoteCount);
     });
+
   });
 
   describe('Reading/Selecting a Note', () => {
@@ -125,6 +127,18 @@ describe('Note CRUD Operations', () => {
       expect(updatedNote!.category).toBe('updated/category');
       expect(updatedNote!.last_modified_utc.getTime()).toBe(newTime.getTime());
     });
+  });
+
+  it('should save a note with tags', async () => {
+    const wrapper = await mountNotesPage();
+    const newTag = crypto.randomUUID();
+
+    await clickNoteItem(wrapper, 0);
+    await addNoteTag(wrapper, newTag);
+    await clickSaveButton(wrapper);
+
+    await clickNoteItem(wrapper, 0);
+    expectTextVisible(wrapper, newTag);
   });
 
   describe('Validating Updated Values', () => {

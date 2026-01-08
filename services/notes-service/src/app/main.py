@@ -14,7 +14,7 @@ def create_app() -> FastAPI:
     # CORS middleware (adjust for production)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173"],  # Vue dev server
+        allow_origins=["http://localhost:5101"],  # Vue dev server
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
