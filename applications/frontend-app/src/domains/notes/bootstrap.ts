@@ -7,7 +7,7 @@ import { appDependencies } from "@/common/env/AppDependencies";
 import { createDebouncer, createCurrentTimeProvider } from '@/common/time';
 
 const bootstrapNotes = () => {
-    const repoType = appDependencies.getAppConfig().repoType
+    const repoType = appDependencies.getAppConfig().repositoryType
 
     const apiClient = appDependencies.getHttpClient();
     const timeoutClient = appDependencies.getTimeoutClient();

@@ -4,7 +4,7 @@ import type { TimeoutPort } from "@/common/time/timeout/TimeoutPort";
 
 export interface AppConfig {
     baseUrl: string;
-    repoType: string;
+    repositoryType: 'mock' | 'http';
 }
 
 class AppDependencies {

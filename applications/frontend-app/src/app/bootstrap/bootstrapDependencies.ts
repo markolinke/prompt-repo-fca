@@ -10,7 +10,7 @@ export const bootstrapDependencies = (router: Router) : void => {
 
     const appConfig : AppConfig= {
         baseUrl: import.meta.env.VITE_API_URL,
-        repoType: import.meta.env.VITE_REPO_TYPE,
+        repositoryType: import.meta.env.VITE_REPOSITORY_TYPE,
     }
     appDependencies.registerAppConfig(appConfig);
 
