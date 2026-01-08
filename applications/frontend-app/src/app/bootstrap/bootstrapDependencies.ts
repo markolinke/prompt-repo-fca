@@ -15,8 +15,6 @@ const bootstrapAppConfig = () : AppConfig=> {
 }
 
 export const bootstrapDependencies = (router: Router) : void => {
-    console.log('Bootstrapping dependencies...')
-
     const appConfig =bootstrapAppConfig();
 
     const myRouter = new MyRouter(router);
@@ -27,6 +25,4 @@ export const bootstrapDependencies = (router: Router) : void => {
 
     const timeoutClient = new BrowserTimeout();
     appDependencies.registerTimeoutClient(timeoutClient);
-
-    console.log('Dependencies bootstrapped successfully')
 }

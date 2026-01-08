@@ -56,6 +56,16 @@ class AppDependencies {
         }
         return this.myRouter
     }
+
+    /**
+     * Resets all registered dependencies (ONLY for testing). 
+     */
+    resetForTesting(): void {
+        this.myRouter = null;
+        this.httpClient = null;
+        this.timeoutClient = null;
+        this.appConfig = null;
+    }
 }
 
 export const appDependencies = new AppDependencies()

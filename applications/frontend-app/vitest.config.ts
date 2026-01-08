@@ -30,9 +30,6 @@ export default defineConfig({
         // Ports/interfaces (contracts, not implementations)
         '**/*Port.ts',
         // Bootstrap/app wiring (tested via integration)
-        '**/bootstrap/**',
-        '**/app/bootstrap/**',
-        '**/app/router/**',
         '**/app/stores/index.ts',
         // HTTP client implementation (infrastructure, tested via integration)
         '**/common/http/AxiosHttpClient.ts',
