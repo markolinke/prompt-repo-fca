@@ -13,7 +13,24 @@ const app = createApp(App) // create the app
 bootstrapDependencies(router);
 
 // 2. Add all routes BEFORE installing the router
-bootstrapFeatures(router); // Add routes to router instance
+const authBootstrap = bootstrapFeatures(router); // Add routes to router instance
+
+// 2.5. Add route guards (non-enforcing in Phase 2 - structure only)
+if (authBootstrap) {
+    router.beforeEach((_to, _from, next) => {
+        // const authStore = authBootstrap.useStore();
+        
+        // Phase 2: Structure only - don't enforce yet
+        // Phase 3: Check auth state and redirect to login if needed
+        // if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+        //   next({ name: 'login' });
+        // } else {
+        //   next();
+        // }
+        
+        next();
+    });
+}
 
 // 3. NOW install the router (it will have all routes available)
 app.use(router) // inject the router and the pinia store

@@ -78,6 +78,16 @@ const toggleMenu = () => {
                   </div>
               </router-link>
             </div>
+
+            <div class="flex items-center gap-3 border-b border-slate-100 px-4 py-3" @click="isMenuOpen = false">
+              <router-link :to="{ name: 'login' }">
+                <div class="flex items-center gap-4">
+                    <div class="text-sm font-semibold text-red-500">
+                        Logout
+                    </div>
+                  </div>
+              </router-link>
+            </div>
           </div>
         </div>
       </div>
