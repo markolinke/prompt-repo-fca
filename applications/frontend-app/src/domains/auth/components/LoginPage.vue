@@ -1,7 +1,7 @@
 <template>
   <div class="login-page">
     <h1>Login</h1>
-    <fwb-button @click="handleLogin">Login with Google (Mock)</fwb-button>
+    <fwb-button data-testid="login-button" @click="handleLogin">Login with Google (Mock)</fwb-button>
     <!-- Phase 3: Real OAuth button -->
   </div>
 </template>
