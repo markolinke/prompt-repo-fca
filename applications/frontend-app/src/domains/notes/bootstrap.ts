@@ -7,11 +7,11 @@ import { appDependencies } from "@/common/env/AppDependencies";
 import { createDebouncer, createCurrentTimeProvider } from '@/common/time';
 
 const bootstrapNotes = () => {
-    const useMocks = appDependencies.getAppConfig().isMockEnv
+    const repoType = appDependencies.getAppConfig().repoType
 
     const apiClient = appDependencies.getHttpClient();
     const timeoutClient = appDependencies.getTimeoutClient();
-    const repository = useMocks
+    const repository = repoType === 'mock'
         ? new MockNoteRepository()
         : new HttpNoteRepository(apiClient)
 

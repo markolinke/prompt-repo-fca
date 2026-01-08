@@ -5,7 +5,7 @@ import { MyRouter } from '@/app/router/MyRouter';
 import router from '@/app/router';
 
 const _testAppConfig = {
-    isMockEnv: false,
+    repoType: 'mock',
     baseUrl: 'https://api.example.com',
   };
 

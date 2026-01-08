@@ -3,8 +3,8 @@ import type { HttpClientPort } from "@/common/http/HttpClientPort";
 import type { TimeoutPort } from "@/common/time/timeout/TimeoutPort";
 
 export interface AppConfig {
-    isMockEnv: boolean;
     baseUrl: string;
+    repoType: string;
 }
 
 class AppDependencies {
