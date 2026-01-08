@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia';
 import { Note } from '../entities/Note';
+import { FlagsUtil } from '@/common/utils/flagsUtil';
 
 interface NotesState {
     notes: Note[];
     loading: boolean;
     error: string | null;
+    actionFlags: FlagsUtil;
 }
 
 type NoteServiceShape = {
@@ -22,6 +24,7 @@ export const createNotesStore = (noteService: NoteServiceShape) => {
             notes: [],
             loading: false,
             error: null,
+            actionFlags: new FlagsUtil(),
         }),
 
         actions: {

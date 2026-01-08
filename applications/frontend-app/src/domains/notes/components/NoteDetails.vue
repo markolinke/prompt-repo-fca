@@ -3,8 +3,10 @@ import { ref, watch } from 'vue';
 import { Note } from '../entities/Note';
 import { FwbButton } from 'flowbite-vue';
 import { bootstrapNotes } from '../bootstrap';
+import ButtonWithLoader from '@/ui/base/ButtonWithLoader.vue';
 
 const bootstrap = bootstrapNotes();
+const notesStore = bootstrap.useStore();
 const currentTimeProvider = bootstrap.getCurrentTimeProvider();
 
 const props = defineProps<{
@@ -66,7 +68,7 @@ const handleSave = () => {
   }
 
   try {
-    
+    notesStore.actionFlags.set('save');
     const updatedNote = Note.fromPlainObject({
       id: props.note.id,
       title: editTitle.value.trim(),
@@ -83,7 +85,7 @@ const handleSave = () => {
     } else {
       validationErrors.value.push('Failed to create note');
     }
-  }
+  } 
 };
 
 const handleCancel = () => {
@@ -217,7 +219,7 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
         <div>
             <fwb-button color="red" @click="handleDelete" data-testid="delete-note-button">Delete</fwb-button>
         </div>
-          <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+          <div class="flex justify-end gap-3">
             <fwb-button
               @click="handleCancel"
               color="light"
@@ -225,13 +227,9 @@ const handleTagInputKeydown = (event: KeyboardEvent) => {
             >
               Cancel
             </fwb-button>
-            <fwb-button
-              @click="handleSave"
-              color="blue"
-              data-testid="save-note-button"
-            >
-              Save
-            </fwb-button>
+            <button-with-loader :loading="notesStore.actionFlags.isSet('save')" @click="handleSave" data-testid="save-note-button" >
+                Save
+            </button-with-loader>
           </div>
       </div>
     </div>
