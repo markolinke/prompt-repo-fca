@@ -56,18 +56,27 @@ applications/frontend-app/
 │   │   ├── stores/
 │   │   │   └── index.ts
 │   │   └── style.css
-│   ├── common/                        # Cross-cutting infrastructure (framework-agnostic)
-│   │   ├── env/
+│   ├── common/                         # Cross-cutting infrastructure (framework-agnostic)
+│   │   ├── env/                        # Bootstrapping, config
 │   │   │   └── AppDependencies.ts
-│   │   ├── errors/
+│   │   ├── errors/                     # Type-safe errors
 │   │   │   └── DomainError.ts
-│   │   ├── http/
+│   │   ├── http/                       # Http clients
 │   │   │   ├── AxiosHttpClient.ts
 │   │   │   └── HttpClientPort.ts
-│   │   └── routing/
+│   │   ├── time/                       # Time-related providers
+│   │   │   ├── debouncer/              # UI debouncer (i.e. for search)
+│   │   │   ├── time_provider/          # Time provider 
+│   │   │   └── timeout/                # Timeout provider
+│   │   ├── utils/                      # Common utils
+│   │   │   └── FlagsUtil.ts
+│   │   └── routing/                    # Router abstraction and implementation
 │   │       └── MyRouterPort.ts
-│   └── domains/                       # Feature-Sliced Design (FSD) modules
-│       └── notes/                   # Example feature – self-contained module
+│   ├── ui/                             # Common UI controls (shared controls library)
+│   │   ├── base/
+│   │   │   └── ButtonWithLoader.ts
+│   └── domains/                        # Feature-Sliced Design (FSD) modules
+│       └── notes/                      # Example feature – self-contained module
 │           ├── bootstrap.ts
 │           ├── components/
 │           │   └── NotesList.vue
