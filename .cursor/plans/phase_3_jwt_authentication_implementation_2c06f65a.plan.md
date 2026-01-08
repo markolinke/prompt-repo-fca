@@ -302,4 +302,3 @@ REFRESH_TOKEN_EXPIRY_DAYS=7
 - `src/domains/auth/services/jwt_service.py`
 - `src/domains/auth/repositories/user_repository_port.py`
 - `src/domains/auth/repositories/in_memory_user_repository.py`
-- `src/domains/auth/repositories/token_repository_port.py`

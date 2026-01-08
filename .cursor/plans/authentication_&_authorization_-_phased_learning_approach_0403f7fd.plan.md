@@ -551,7 +551,3 @@ Each phase is **backward compatible**:
 - Phase 6 can drop in replace Phase 3 implementation
 
 ### Dependencies Timeline
-
-**Phase 1**: No new dependencies**Phase 3**: `python-jose[cryptography] `(JWT)**Phase 4**: No new frontend dependencies (use existing axios)**Phase 6**: `boto3` (Cognito), `python-multipart` (OAuth forms)---
-
-## Recommended Learning Path

@@ -46,6 +46,9 @@ def create_get_current_user(auth_service: AuthenticationService):
             )
         
         token = credentials.credentials
+        # Strip "Bearer " prefix if present (HTTPBearer should do this, but handle it defensively)
+        if token and token.startswith("Bearer "):
+            token = token[7:]  # Remove "Bearer " prefix (7 characters)
         user = await auth_service.get_current_user(token)
         
         if not user:
