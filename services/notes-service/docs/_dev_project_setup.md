@@ -1,24 +1,4 @@
-Reviewing the project structure and existing setup to align FastAPI bootstrapping with the project's architecture.
-
-
-[4 tools called]
-
-
-Reviewing frontend patterns to understand domain organization, then outlining FastAPI setup steps.
-
-
-[3 tools called]
-
-
-Reviewing the Note entity structure:
-
-
-[2 tools called]
-
-
-FastAPI bootstrap steps aligned with your Clean Architecture:
-
-## Step-by-Step FastAPI Bootstrap Guide
+## Step-by-Step FastAPI Project Setup Guide
 
 ### Step 1: Create Project Structure
 
