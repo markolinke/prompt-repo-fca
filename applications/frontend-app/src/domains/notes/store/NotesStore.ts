@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { Note } from '../entities/Note';
-import { FlagsUtil } from '@/common/utils/flagsUtil';
+import { FlagsUtil } from '@/common/utils/FlagsUtil';
 
 interface NotesState {
     notes: Note[];

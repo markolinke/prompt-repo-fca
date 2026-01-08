@@ -1,20 +1,24 @@
 export class FlagsUtil {
-    private flags: string[] = [];
+    private _flags: string[] = [];
     
+    get flags(): string[] {
+        return [...this._flags];
+    }
+
     isSet(flag: string): boolean {
-        return this.flags.includes(flag);
+        return this._flags.includes(flag);
     }
 
     set(flag: string): void {
-        if (!this.flags.includes(flag))
-            this.flags.push(flag);
+        if (!this._flags.includes(flag))
+            this._flags.push(flag);
     }
 
     unset(flag: string): void {
-        this.flags = this.flags.filter(f => f !== flag);
+        this._flags = this._flags.filter(f => f !== flag);
     }
 
     clear(): void {
-        this.flags = [];
+        this._flags = [];
     }
 }
