@@ -16,13 +16,13 @@ class InMemoryUserRepository:
         """Initialize with mock user data for testing."""
         mock_user = User(
             id="user-1",
-            email="test@example.com",
+            email="john.doe@ancorit.com",
             name="Test User"
         )
         self._users_by_id[mock_user.id] = mock_user
         self._users_by_email[mock_user.email] = mock_user
         # For Phase 3, simple password check
-        self._passwords[mock_user.email] = "password123"
+        self._passwords[mock_user.email] = "LetMeIn!"
     
     async def get_by_email(self, email: str) -> User | None:
         """Retrieve a user by email address."""

@@ -174,7 +174,7 @@ Backend returns:
 ```json
 {
   "id": "mock-user-1",
-  "email": "test@example.com",
+  "email": "john.doe@ancorit.com",
   "name": "Test User"
 }
 ```

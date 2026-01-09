@@ -15,7 +15,7 @@ class MockAuthProvider:
         # Return a mock user regardless of token
         return User(
             id="mock-user-1",
-            email="test@example.com",
+            email="mock@ancorit.com",
             name="Test User"
         )
 

@@ -7,7 +7,7 @@ import { UnauthorizedError, ValidationError } from "@/common/errors/DomainError"
 export class MockAuthRepository implements AuthRepositoryPort {
 
     async getCurrentUser(): Promise<User> {
-        return new User('mock-user-1', 'test@example.com', 'Test User');
+        return new User('mock-user-1', 'mock@ancorit.com', 'Test User');
     }
 
     async login(credentials: LoginCredentials): Promise<{ access_token: string; refresh_token: string; token_type: string }> {
@@ -16,7 +16,7 @@ export class MockAuthRepository implements AuthRepositoryPort {
             throw new ValidationError('Invalid credentials', ['Email and password are required']);
         }
 
-        if (credentials.email !== 'test@example.com' || credentials.password !== 'password123') {
+        if (credentials.email !== 'mock@ancorit.com' || credentials.password !== 'LetMeIn!') {
             throw new UnauthorizedError('Invalid credentials');
         }
 

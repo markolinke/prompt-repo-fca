@@ -116,7 +116,7 @@ The service calls the provider:
 # In MockAuthProvider
 async def authenticate(self, token: str) -> User:
     # Phase 1: Always returns mock user (no real checking)
-    return User(id="mock-user-1", email="test@example.com", name="Test User")
+    return User(id="mock-user-1", email="john.doe@ancorit.com", name="Test User")
 ```
 
 ### 6. Response Flows Back Up
@@ -131,7 +131,7 @@ Route handler receives User as `current_user`
     ↓
 Route handler converts to schema and returns JSON
     ↓
-Client receives: {"id": "mock-user-1", "email": "test@example.com", "name": "Test User"}
+Client receives: {"id": "mock-user-1", "email": "john.doe@ancorit.com", "name": "Test User"}
 ```
 
 ---
@@ -156,7 +156,7 @@ GET http://localhost:8000/auth/me
 ```json
 {
   "id": "mock-user-1",
-  "email": "test@example.com",
+  "email": "john.doe@ancorit.com",
   "name": "Test User"
 }
 ```
@@ -363,7 +363,7 @@ This allows dependency injection at bootstrap time.
                         ↓
 ┌─────────────────────────────────────────────────────────────┐
 │  HTTP Response                                              │
-│  {"id": "mock-user-1", "email": "test@example.com", ...}   │
+│  {"id": "mock-user-1", "email": "john.doe@ancorit.com", ...}   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -388,7 +388,7 @@ Both will return the same mock user.
 ```json
 {
   "id": "mock-user-1",
-  "email": "test@example.com",
+  "email": "john.doe@ancorit.com",
   "name": "Test User"
 }
 ```
@@ -490,7 +490,7 @@ curl -X POST http://localhost:8000/notes \
            # Default mock user
            return User(
                id="mock-user-1",
-               email="test@example.com",
+               email="john.doe@ancorit.com",
                name="Test User"
            )
    ```
@@ -851,7 +851,7 @@ domains/auth/
 # Test the endpoint
 curl http://localhost:8000/auth/me
 
-# Returns: {"id": "mock-user-1", "email": "test@example.com", "name": "Test User"}
+# Returns: {"id": "mock-user-1", "email": "john.doe@ancorit.com", "name": "Test User"}
 ```
 
 **Note**: Phase 1 has no real authentication - it's all mock. Real JWT validation comes in Phase 3.

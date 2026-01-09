@@ -180,12 +180,12 @@ it('should login successfully', async () => {
   const wrapper = await mountLoginPage();
   const authStore = getAuthStore();
   
-  await fillLoginForm(wrapper, 'test@example.com', 'password123');
+  await fillLoginForm(wrapper, 'mock@ancorit.com', 'LetMeIn!');
   await submitLoginForm(wrapper);
   await waitForLoginToComplete(wrapper, authStore);
   
   expectUserAuthenticated(authStore);
-  expectUserMatches(authStore, 'mock-user-1', 'test@example.com', 'Test User');
+  expectUserMatches(authStore, 'mock-user-1', 'mock@ancorit.com', 'Test User');
 });
 ```
 

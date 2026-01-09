@@ -109,3 +109,23 @@ team-note-repo/
 ├── docs/                              # Monorepo-level docs (architecture.md, etc.)
 └── README.md
 ```
+
+## Mock Data Access
+
+Both Frontend and Backend applications provide in-memory Mock data access. They support all CRUD operations and may be used for manual testing, and not only for automated testing.
+
+Once running, the system provides a few mock repositories to run against:
+
+- Frontend: Frontend supports mock and http repositories
+  - Mock repositories are always used for automated testing, but can also be set altering the `.env.development` configuration file.
+  - Mock login credentials are:
+    - Email: `mock@ancorit.com`
+    - Password: `LetMeIn!`
+  - To reset: simply hard refresh page
+- Backend: 
+  - Backend provides different set of mock information, and is implemented as in-memory mock. 
+  - Mock login credentials are:
+    - Email: `john.doe@ancorit.com` (deliberately different from frontend mock credentials!)
+    - Password: `LetMeIn!`
+  - To reset: restart service
+

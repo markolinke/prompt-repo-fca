@@ -116,7 +116,7 @@ describe('Route Protection Integration', () => {
         beforeEach(async () => {
             // Authenticate user
             const store = authBootstrap.useStore();
-            await store.login('test@example.com', 'password123');
+            await store.login('mock@ancorit.com', 'LetMeIn!');
             expect(store.isAuthenticated).toBe(true);
         });
 
@@ -169,7 +169,7 @@ describe('Route Protection Integration', () => {
             expect(router.currentRoute.value.query.redirect).toBe('/notes');
 
             // When: User logs in
-            await store.login('test@example.com', 'password123');
+            await store.login('mock@ancorit.com', 'LetMeIn!');
             expect(store.isAuthenticated).toBe(true);
 
             // Then: Redirect query param should still be available for component to use
@@ -182,7 +182,7 @@ describe('Route Protection Integration', () => {
         beforeEach(async () => {
             // Authenticate user first
             const store = authBootstrap.useStore();
-            await store.login('test@example.com', 'password123');
+            await store.login('mock@ancorit.com', 'LetMeIn!');
             expect(store.isAuthenticated).toBe(true);
         });
 
@@ -248,7 +248,7 @@ describe('Route Protection Integration', () => {
         it('should not re-initialize auth if already authenticated', async () => {
             // Given: User is already authenticated
             const store = authBootstrap.useStore();
-            await store.login('test@example.com', 'password123');
+            await store.login('mock@ancorit.com', 'LetMeIn!');
             const initializeAuthSpy = vi.spyOn(store, 'initializeAuth');
 
             // When: User navigates to protected route

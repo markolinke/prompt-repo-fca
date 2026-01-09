@@ -32,7 +32,7 @@ describe('Logout Flow', () => {
     it('should show logout button when user is authenticated', async () => {
       // Given: User is logged in
       const authStore = getAuthStore();
-      await authStore.login('test@example.com', 'password123');
+      await authStore.login('mock@ancorit.com', 'LetMeIn!');
       expectUserAuthenticated(authStore);
 
       // When: App is mounted
@@ -59,7 +59,7 @@ describe('Logout Flow', () => {
     it('should show user info when authenticated', async () => {
       // Given: User is logged in
       const authStore = getAuthStore();
-      await authStore.login('test@example.com', 'password123');
+      await authStore.login('mock@ancorit.com', 'LetMeIn!');
       expectUserAuthenticated(authStore);
 
       // When: App is mounted and menu is opened
@@ -67,7 +67,7 @@ describe('Logout Flow', () => {
       await openMenu(wrapper);
 
       // Then: User info should be visible
-      expectUserInfoVisible(wrapper, 'Test User', 'test@example.com');
+      expectUserInfoVisible(wrapper, 'Test User', 'mock@ancorit.com');
     });
   });
 
@@ -75,7 +75,7 @@ describe('Logout Flow', () => {
     it('should logout successfully and clear all auth state', async () => {
       // Given: User is logged in
       const authStore = getAuthStore();
-      await authStore.login('test@example.com', 'password123');
+      await authStore.login('mock@ancorit.com', 'LetMeIn!');
       expectUserAuthenticated(authStore);
       expectUserTokens(authStore, 'mock-access-token', 'mock-refresh-token');
 
@@ -96,7 +96,7 @@ describe('Logout Flow', () => {
     it('should close menu after logout', async () => {
       // Given: User is logged in and menu is open
       const authStore = getAuthStore();
-      await authStore.login('test@example.com', 'password123');
+      await authStore.login('mock@ancorit.com', 'LetMeIn!');
       
       const wrapper = await mountApp();
       await openMenu(wrapper);
@@ -113,7 +113,7 @@ describe('Logout Flow', () => {
     it('should redirect to login page after logout', async () => {
       // Given: User is logged in
       const authStore = getAuthStore();
-      await authStore.login('test@example.com', 'password123');
+      await authStore.login('mock@ancorit.com', 'LetMeIn!');
       
       const wrapper = await mountApp();
       await openMenu(wrapper);
@@ -133,7 +133,7 @@ describe('Logout Flow', () => {
     it('should not be able to access protected routes after logout', async () => {
       // Given: User is logged in
       const authStore = getAuthStore();
-      await authStore.login('test@example.com', 'password123');
+      await authStore.login('mock@ancorit.com', 'LetMeIn!');
       expectUserAuthenticated(authStore);
 
       const wrapper = await mountApp();

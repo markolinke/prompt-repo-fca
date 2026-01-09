@@ -41,7 +41,7 @@ describe('AuthStore', () => {
         
         expect(store.user).not.toBeNull();
         expect(store.user?.id).toBe('mock-user-1');
-        expect(store.user?.email).toBe('test@example.com');
+        expect(store.user?.email).toBe('mock@ancorit.com');
         expect(store.isAuthenticated).toBe(true);
         expect(store.loading).toBe(false);
     });
@@ -114,7 +114,7 @@ describe('AuthStore', () => {
         const useStore = createAuthStore(authService, tokenService);
         const store = useStore();
         
-        await store.login('test@example.com', 'password123');
+        await store.login('mock@ancorit.com', 'LetMeIn!');
         
         expect(store.accessToken).toBe('mock-access-token');
         expect(store.refreshToken).toBe('mock-refresh-token');
@@ -160,7 +160,7 @@ describe('AuthStore', () => {
         const useStore = createAuthStore(delayedService, tokenService);
         const store = useStore();
         
-        const loginPromiseAction = store.login('test@example.com', 'password123');
+        const loginPromiseAction = store.login('mock@ancorit.com', 'LetMeIn!');
         
         expect(store.loading).toBe(true);
         

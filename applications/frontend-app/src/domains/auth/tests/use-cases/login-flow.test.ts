@@ -30,13 +30,13 @@ describe('Login Flow', () => {
     expectLoginFormVisible(wrapper);
 
     // When: User fills in credentials and submits form
-    await fillLoginForm(wrapper, 'test@example.com', 'password123');
+    await fillLoginForm(wrapper, 'mock@ancorit.com', 'LetMeIn!');
     await submitLoginForm(wrapper);
     await waitForLoginToComplete(authStore);
 
     // Then: Store should be updated with tokens and user data
     expectUserAuthenticated(authStore);
-    expectUserMatches(authStore, 'mock-user-1', 'test@example.com', 'Test User');
+    expectUserMatches(authStore, 'mock-user-1', 'mock@ancorit.com', 'Test User');
     expectUserTokens(authStore, 'mock-access-token', 'mock-refresh-token');
   });
 });

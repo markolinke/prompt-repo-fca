@@ -296,8 +296,8 @@ All tests pass when:
 
 Use these test credentials (if available from backend mock):
 
-- **Email**: `test@example.com`
-- **Password**: `password123`
+- **Email**: `john.doe@ancorit.com`
+- **Password**: `LetMeIn!`
 
 Or create test user via backend API if needed.
 

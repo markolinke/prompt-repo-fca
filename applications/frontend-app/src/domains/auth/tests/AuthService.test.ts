@@ -19,14 +19,14 @@ describe('AuthService', () => {
             
             expect(user).toBeInstanceOf(User);
             expect(user.id).toBe('mock-user-1');
-            expect(user.email).toBe('test@example.com');
+            expect(user.email).toBe('mock@ancorit.com');
             expect(user.name).toBe('Test User');
         });
     });
 
     describe('login', () => {
         it('should login successfully and return tokens', async () => {
-            const result = await service.login('test@example.com', 'password123');
+            const result = await service.login('mock@ancorit.com', 'LetMeIn!');
             
             expect(result).toHaveProperty('accessToken');
             expect(result).toHaveProperty('refreshToken');
@@ -35,15 +35,15 @@ describe('AuthService', () => {
         });
 
         it('should throw ValidationError for invalid email', async () => {
-            await expect(service.login('invalid-email', 'password123')).rejects.toThrow(ValidationError);
+            await expect(service.login('invalid-email', 'LetMeIn!')).rejects.toThrow(ValidationError);
         });
 
         it('should throw ValidationError for empty password', async () => {
-            await expect(service.login('test@example.com', '')).rejects.toThrow(ValidationError);
+            await expect(service.login('mock@ancorit.com', '')).rejects.toThrow(ValidationError);
         });
 
         it('should propagate repository errors', async () => {
-            await expect(service.login('test@example.com', 'wrong')).rejects.toThrow('Invalid credentials');
+            await expect(service.login('mock@ancorit.com', 'wrong')).rejects.toThrow('Invalid credentials');
         });
     });
 });

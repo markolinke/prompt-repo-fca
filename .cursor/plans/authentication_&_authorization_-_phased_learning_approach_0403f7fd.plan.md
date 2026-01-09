@@ -187,7 +187,7 @@ class AuthProviderPort(Protocol):
 class MockAuthProvider:
     async def authenticate(self, token: str) -> User | None:
         # Always returns a mock user (no validation)
-        return User(id="mock-user-1", email="test@example.com", name="Test User")
+        return User(id="mock-user-1", email="john.doe@ancorit.com", name="Test User")
 
 # auth_middleware.py
 async def get_current_user(

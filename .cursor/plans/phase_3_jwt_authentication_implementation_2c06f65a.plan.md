@@ -151,7 +151,7 @@ Phase 3 implements real JWT-based authentication, replacing the Phase 1 mock imp
 - `InMemoryUserRepository` implementing `UserRepositoryPort`
 - Store users in `dict[str, User]` keyed by email and id
 - Initialize with mock user(s) for testing:
-- `test@example.com` / password: `password123` (or simple check)
+- `john.doe@ancorit.com` / password: `LetMeIn!` (or simple check)
 - For Phase 3, password validation can be simple (constant or basic check)
 - Pattern matches `InMemoryNotesRepository` from notes domain
 

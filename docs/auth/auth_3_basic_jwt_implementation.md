@@ -80,7 +80,7 @@ When the app starts, `bootstrap.py` creates everything in this order:
 
 1. **AppConfig** - Reads environment variables (JWT secret key, expiry times)
 2. **JWTService** - Created with secret key from config
-3. **UserRepository** - In-memory storage (has test user: `test@example.com` / `password123`)
+3. **UserRepository** - In-memory storage (has test user: `john.doe@ancorit.com` / `LetMeIn!`)
 4. **TokenRepository** - In-memory storage for refresh tokens
 5. **AuthenticationService** - Wired with JWT service + both repositories
 6. **JWTAuthProvider** - Optional adapter (for consistency with Phase 1 pattern)
@@ -98,8 +98,8 @@ When the app starts, `bootstrap.py` creates everything in this order:
 POST /auth/login
 Headers: Content-Type: application/json
 Body: {
-    "email": "test@example.com",
-    "password": "password123"
+    "email": "john.doe@ancorit.com",
+    "password": "LetMeIn!"
 }
 
 Response: {
@@ -125,7 +125,7 @@ Headers:
 
 Response: {
     "id": "user-1",
-    "email": "test@example.com",
+    "email": "john.doe@ancorit.com",
     "name": "Test User"
 }
 ```
@@ -305,8 +305,8 @@ async def get_current_user_info(
 curl -X POST http://localhost:8000/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "test@example.com",
-    "password": "password123"
+    "email": "john.doe@ancorit.com",
+    "password": "LetMeIn!"
   }'
 ```
 
@@ -334,7 +334,7 @@ curl -X GET http://localhost:8000/auth/me \
 ```json
 {
   "id": "user-1",
-  "email": "test@example.com",
+  "email": "john.doe@ancorit.com",
   "name": "Test User"
 }
 ```
@@ -377,8 +377,8 @@ curl -X POST http://localhost:8000/auth/refresh \
 3. Enter:
    ```json
    {
-     "email": "test@example.com",
-     "password": "password123"
+     "email": "john.doe@ancorit.com",
+     "password": "LetMeIn!"
    }
    ```
 4. Click "Execute"
@@ -400,7 +400,7 @@ curl -X POST http://localhost:8000/auth/refresh \
    ```json
    {
      "sub": "user-1",
-     "email": "test@example.com",
+     "email": "john.doe@ancorit.com",
      "type": "access",
      "exp": 1234567890,
      "iat": 1234567890
