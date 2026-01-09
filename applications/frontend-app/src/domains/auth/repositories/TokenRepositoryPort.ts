@@ -3,7 +3,7 @@
  * Abstracts token persistence to allow different storage implementations
  * (localStorage, sessionStorage, in-memory for testing, etc.)
  */
-export interface TokenStoragePort {
+export interface TokenRepositoryPort {
     /**
      * Store access token
      */

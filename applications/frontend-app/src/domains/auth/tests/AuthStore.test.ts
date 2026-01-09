@@ -1,16 +1,16 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { createAuthStore } from '../store/AuthStore';
-import { MockTokenStorage } from '../repositories/MockTokenRepository';
+import { MockTokenRepository } from '../repositories/MockTokenRepository';
 import { User } from '../entities/User';
 
 describe('AuthStore', () => {
-    let tokenRepository: MockTokenStorage;
+    let tokenRepository: MockTokenRepository;
 
     beforeEach(() => {
         setActivePinia(createPinia());
         // Create a fresh in-memory token repository for each test
-        tokenRepository = new MockTokenStorage();
+        tokenRepository = new MockTokenRepository();
     });
 
     it('should initialize with empty state', () => {
