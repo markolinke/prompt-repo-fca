@@ -1,0 +1,11 @@
+
+- LoginCredentials:
+  - Zasto radi validate
+  - Mozda nam trebaju DTO objekti
+  - Mozda validate mora ostati, a da view ne koristi entitet, nego koristi MVVM!?
+- repositories
+  - Da, da, kao da mi treba types.ts i u njemu request/response objekti!
+- AuthService.ts: zasto radi transform iz snake_case to camelCase?
+- AuthStore:
+  - Opet, kao da nam treba Request/Response object model, a ne XShape ad-hoc objekti!
+  - 

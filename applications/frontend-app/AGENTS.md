@@ -184,7 +184,10 @@ NOTE: Do not validate on object constructor. We'll need empty object for manipul
 
 ### Adding a New Component
 
-1. Place in `domains/<feature>/components/` or `domains/<feature>/pages/`
+1. **Placement**:
+   - **Pages**: Place route-level components in `domains/<feature>/pages/` if they are directly referenced in `routes.ts`
+   - **Components**: Place reusable components in `domains/<feature>/components/` if they are imported and used by pages or other components
+   - See `docs/vue-application.md` for detailed explanation of the distinction
 2. Use PascalCase: `MyComponent.vue`
 3. Follow component pattern (bootstrap → store)
 4. Use Tailwind classes only (no `<style scoped>`)
@@ -242,7 +245,9 @@ vi.mock('../bootstrap', () => {
 - ✅ Reset Pinia: `setActivePinia(createPinia())` in `beforeEach`
 - ✅ Fresh repository instance per test (no shared state)
 - ✅ Wait for async: `await wrapper.vm.$nextTick()`
+- ✅ ALWAYS use real services, never mock service objects
 - ❌ Never share store instances between tests
+- ❌ Never create mock service objects - use Mock Repository classes instead
 
 **What to Test**:
 
@@ -252,12 +257,15 @@ vi.mock('../bootstrap', () => {
 
 **Test Guidelines**:
 
+- ✅ ALWAYS test **Real Components** + **Real Store** + **Real Service** + **Mock Repository**
 - ✅ For Test Selectors in component testing, ALWAYS use the `data-testid`attribute
 - ✅ Avoid code duplication and hard to read patterns
 - ✅ Tests are documentation, so they should be as readable as possible
 - ❌ NEVER create test selectors that rely on html structure, implementation etc.
+- ❌ NEVER create mock service objects - always use real services with mock repositories
 
 **Test Organization**:
+
 ```
 domains/<feature>/tests/
 ├── <Service>.test.ts              # Unit tests
@@ -307,6 +315,7 @@ See: `src/domains/notes/entities/Note.ts`
 ## What NOT to Do
 
 ❌ **Never**:
+
 - Make HTTP calls outside repositories
 - Import stores directly (use bootstrap)
 - Put business logic in components/stores
@@ -319,6 +328,7 @@ See: `src/domains/notes/entities/Note.ts`
 - Mock bootstrap inside `beforeEach` (must be at top level)
 - Share store instances between tests
 - Test implementation details instead of user workflows
+- Create mock service objects - always use real services with mock repositories
 
 ✅ **Always**:
 - Use feature bootstrap for stores

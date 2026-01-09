@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { AuthService } from '../services/AuthService';
 import { User } from '../entities/User';
 import { MockAuthRepository } from '../repositories/MockAuthRepository';
+import { ValidationError } from '@/common/errors/DomainError';
 
 describe('AuthService', () => {
     let service: AuthService;
@@ -20,6 +21,29 @@ describe('AuthService', () => {
             expect(user.id).toBe('mock-user-1');
             expect(user.email).toBe('test@example.com');
             expect(user.name).toBe('Test User');
+        });
+    });
+
+    describe('login', () => {
+        it('should login successfully and return tokens', async () => {
+            const result = await service.login('test@example.com', 'password123');
+            
+            expect(result).toHaveProperty('accessToken');
+            expect(result).toHaveProperty('refreshToken');
+            expect(result.accessToken).toBe('mock-access-token');
+            expect(result.refreshToken).toBe('mock-refresh-token');
+        });
+
+        it('should throw ValidationError for invalid email', async () => {
+            await expect(service.login('invalid-email', 'password123')).rejects.toThrow(ValidationError);
+        });
+
+        it('should throw ValidationError for empty password', async () => {
+            await expect(service.login('test@example.com', '')).rejects.toThrow(ValidationError);
+        });
+
+        it('should propagate repository errors', async () => {
+            await expect(service.login('test@example.com', 'wrong')).rejects.toThrow('Invalid credentials');
         });
     });
 });

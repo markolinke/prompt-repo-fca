@@ -1,14 +1,41 @@
 import { mount, VueWrapper, flushPromises } from '@vue/test-utils';
 import { expect } from 'vitest';
-import LoginPage from '../../components/LoginPage.vue';
+import { createRouter, createWebHistory, type Router } from 'vue-router';
+import { defineComponent } from 'vue';
+import LoginPage from '../../pages/LoginPage.vue';
 import { bootstrapAuth } from '../../bootstrap';
+
+// Create simple test component for router
+const TestHomePage = defineComponent({
+  name: 'TestHomePage',
+  template: '<div>Home Page</div>',
+});
+
+/**
+ * Creates a test router with login route.
+ */
+const createTestRouter = (): Router => {
+  return createRouter({
+    history: createWebHistory(),
+    routes: [
+      { path: '/', name: 'home', component: TestHomePage },
+      { path: '/login', name: 'login', component: LoginPage, meta: { isPublic: true } },
+    ],
+  });
+};
 
 /**
  * Mounts LoginPage and waits for initial render.
  * Use this as the starting point for most tests.
+ * Provides a router instance so useRoute() works correctly.
  */
-export const mountLoginPage = async (): Promise<VueWrapper> => {
-  const wrapper = mount(LoginPage);
+export const mountLoginPage = async (router?: Router): Promise<VueWrapper> => {
+  const testRouter = router || createTestRouter();
+  const wrapper = mount(LoginPage, {
+    global: {
+      plugins: [testRouter],
+    },
+  });
   await waitForLoginPageToLoad(wrapper);
   return wrapper;
 };
@@ -42,7 +69,7 @@ export const clickLoginButton = async (wrapper: VueWrapper): Promise<void> => {
 /**
  * Asserts that the login button is visible and contains the expected text.
  */
-export const expectLoginButtonVisible = (wrapper: VueWrapper, expectedText: string = 'Login with Google (Mock)'): void => {
+export const expectLoginButtonVisible = (wrapper: VueWrapper, expectedText: string = 'Login'): void => {
   const button = getLoginButton(wrapper);
   expect(button.exists()).toBe(true);
   expect(button.text()).toContain(expectedText);
@@ -114,5 +141,83 @@ export const expectUserMatches = (
   if (expectedUserName) {
     expect(store.user?.name).toBe(expectedUserName);
   }
+};
+
+/**
+ * Fills the login form with email and password.
+ */
+export const fillLoginForm = async (
+  wrapper: VueWrapper,
+  email: string,
+  password: string
+): Promise<void> => {
+  const emailInput = wrapper.find('[data-testid="email-input"]');
+  const passwordInput = wrapper.find('[data-testid="password-input"]');
+  
+  expect(emailInput.exists()).toBe(true);
+  expect(passwordInput.exists()).toBe(true);
+  
+  await emailInput.setValue(email);
+  await passwordInput.setValue(password);
+  await waitForLoginPageToLoad(wrapper);
+};
+
+/**
+ * Asserts that a login error message is displayed.
+ */
+export const expectLoginError = (
+  wrapper: VueWrapper,
+  errorMessage: string
+): void => {
+  expectTextVisible(wrapper, errorMessage);
+};
+
+/**
+ * Asserts that the login form is visible with all required fields.
+ */
+export const expectLoginFormVisible = (wrapper: VueWrapper): void => {
+  const emailInput = wrapper.find('[data-testid="email-input"]');
+  const passwordInput = wrapper.find('[data-testid="password-input"]');
+  
+  expect(emailInput.exists()).toBe(true);
+  expect(passwordInput.exists()).toBe(true);
+  expectLoginButtonVisible(wrapper, 'Login');
+};
+
+/**
+ * Submits the login form.
+ */
+export const submitLoginForm = async (wrapper: VueWrapper): Promise<void> => {
+  const form = wrapper.find('form');
+  await form.trigger('submit');
+  await waitForLoginPageToLoad(wrapper);
+};
+
+/**
+ * Waits for login to complete by polling the auth store loading state.
+ * Continues until loading becomes false or max attempts reached.
+ */
+export const waitForLoginToComplete = async (
+  store: ReturnType<ReturnType<typeof bootstrapAuth>['useStore']>,
+  maxAttempts: number = 50,
+  delayMs: number = 10
+): Promise<void> => {
+  let attempts = 0;
+  while (store.loading && attempts < maxAttempts) {
+    await new Promise(resolve => setTimeout(resolve, delayMs));
+    attempts++;
+  }
+};
+
+/**
+ * Asserts that user tokens are set correctly after login.
+ */
+export const expectUserTokens = (
+  store: ReturnType<ReturnType<typeof bootstrapAuth>['useStore']>,
+  expectedAccessToken: string,
+  expectedRefreshToken: string
+): void => {
+  expect(store.accessToken).toBe(expectedAccessToken);
+  expect(store.refreshToken).toBe(expectedRefreshToken);
 };
 

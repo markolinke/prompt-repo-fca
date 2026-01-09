@@ -3,11 +3,14 @@ import { createPinia, setActivePinia } from 'pinia';
 import { mockBootstrapAuth, setupMockAppDependencies } from '../testHelpers';
 import {
   mountLoginPage,
-  clickLoginButton,
-  expectLoginButtonVisible,
   getAuthStore,
   expectUserAuthenticated,
   expectUserMatches,
+  expectUserTokens,
+  expectLoginFormVisible,
+  fillLoginForm,
+  submitLoginForm,
+  waitForLoginToComplete,
 } from './LoginPageTestHelpers';
 
 mockBootstrapAuth();
@@ -18,25 +21,22 @@ describe('Login Flow', () => {
     setupMockAppDependencies();
   });
 
-  it('should fetch current user when login button is clicked', async () => {
-    // Note: This test will be fully implemented in Phase 4.2 when login() is added to AuthService
-    // For Phase 4.1, we're testing that the infrastructure is in place
-    
+  it('should login successfully with email and password', async () => {
     // Given: User navigates to login page
     const wrapper = await mountLoginPage();
-
-    // Then: Login button is visible
-    expectLoginButtonVisible(wrapper);
-
-    // When: User clicks login button (currently just calls fetchCurrentUser)
-    await clickLoginButton(wrapper);
-
-    // Then: Store should be updated with user data
     const authStore = getAuthStore();
+
+    // Then: Login form is visible
+    expectLoginFormVisible(wrapper);
+
+    // When: User fills in credentials and submits form
+    await fillLoginForm(wrapper, 'test@example.com', 'password123');
+    await submitLoginForm(wrapper);
+    await waitForLoginToComplete(authStore);
+
+    // Then: Store should be updated with tokens and user data
     expectUserAuthenticated(authStore);
     expectUserMatches(authStore, 'mock-user-1', 'test@example.com', 'Test User');
-    // Note: In Phase 4.1, tokens are managed via TokenStorageService
-    // fetchCurrentUser() doesn't set tokens - login() will be added in Phase 4.2
-    // For now, we just verify user data is fetched correctly
+    expectUserTokens(authStore, 'mock-access-token', 'mock-refresh-token');
   });
 });

@@ -132,234 +132,103 @@ describe('Creating Notes', () => {
 
 ### Test Helper Pattern
 
-For reusable setup, create test helpers that set up the mocked bootstrap:
+For reusable setup, create test helpers that set up the mocked bootstrap. **IMPORTANT**: Bootstrap mocks must be called at the top level before any imports.
+
+See: `domains/notes/tests/testHelpers.ts` and `domains/auth/tests/testHelpers.ts` for examples.
+
+## Test Refactoring Pattern: Separating Concerns
+
+Follow a **three-layer helper pattern** to keep tests readable and maintainable:
+
+1. **`testHelpers.ts`** - Domain setup (bootstrap mocking, AppDependencies setup)
+2. **`<Feature>PageTestHelpers.ts`** - Technical helpers (DOM, timing, interactions)
+3. **Test files** - Business logic only (user workflows)
+
+### Layer 1: `testHelpers.ts`
+
+**Contains**: Bootstrap mocking, AppDependencies setup, shared mock data, domain utilities.
+
+See: `domains/auth/tests/testHelpers.ts`, `domains/notes/tests/testHelpers.ts`
+
+### Layer 2: `<Feature>PageTestHelpers.ts`
+
+**Contains**: All technical DOM manipulation, timing, component interactions. Handles "how" of testing.
+
+**Examples of helpers**:
+
+- `mount<Feature>Page()` - Mount and wait
+- `get<Element>()` - Find by `data-testid`
+- `click<Button>()`, `fill<Form>()`, `submit<Form>()` - User actions
+- `waitFor<Event>()` - Async/timing helpers
+- `expect<Element>Visible()`, `expect<State>()` - UI assertions
+- `get<Feature>Store()` - Store access
+
+**Key Principle**: Test files should never contain DOM traversal, `await` timing, Vue updates, or debouncers directly.
+
+See: `domains/auth/tests/use-cases/LoginPageTestHelpers.ts`, `domains/notes/tests/use-cases/NotesPageTestHelpers.ts`
+
+### Layer 3: Test Files
+
+**Contains**: Business logic only - user stories, Given/When/Then scenarios, business assertions.
+
+**Don't include**: DOM traversal, timing logic, polling loops, `data-testid` strings, direct store access.
+
+**Example**:
 
 ```typescript
-// tests/testHelpers.ts
-import { setActivePinia, createPinia } from 'pinia';
-import { NoteService } from '../services/NoteService';
-import { MockNoteRepository } from '../repositories/MockNoteRepository';
-import { createNotesStore } from '../store/NotesStore';
-import { vi } from 'vitest';
-
-/**
- * Mocks the bootstrap function for a feature.
- * IMPORTANT: This must be called at the top level of your test file,
- * before any imports that use the bootstrap.
- * 
- * Creates a factory that returns fresh instances for each bootstrap call,
- * ensuring complete test isolation.
- * 
- * Usage:
- * ```typescript
- * import { mockBootstrap } from './testHelpers';
- * mockBootstrap(); // Call at top level
- * 
- * import NotesPage from '../pages/NotesPage.vue'; // Now safe to import
- * ```
- */
-export const mockBootstrap = () => {
-  vi.mock('../bootstrap', () => {
-    // Return a factory that creates fresh instances for each call
-    return {
-      bootstrapNotes: () => {
-        const repository = new MockNoteRepository();
-        const service = new NoteService(repository);
-        const store = createNotesStore(service);
-        return {
-          useStore: store,
-          routes: [],
-        };
-      },
-    };
-  });
-};
-
-/**
- * Creates a test store with custom repository data.
- * Useful for testing edge cases (empty state, error states, etc.).
- */
-export const createTestStoreWithData = (initialNotes: Note[] = []) => {
-  setActivePinia(createPinia());
+it('should login successfully', async () => {
+  const wrapper = await mountLoginPage();
+  const authStore = getAuthStore();
   
-  const repository = new MockNoteRepository(initialNotes);
-  const service = new NoteService(repository);
-  const store = createNotesStore(service);
+  await fillLoginForm(wrapper, 'test@example.com', 'password123');
+  await submitLoginForm(wrapper);
+  await waitForLoginToComplete(wrapper, authStore);
   
-  return { repository, service, store };
-};
+  expectUserAuthenticated(authStore);
+  expectUserMatches(authStore, 'mock-user-1', 'test@example.com', 'Test User');
+});
 ```
+
+See: `domains/auth/tests/use-cases/login-flow.test.ts`
+
+### Benefits
+
+- **Readability**: Tests read like user stories
+- **Maintainability**: Technical changes only affect helper files
+- **Reusability**: Helpers shared across test files
+- **Refactoring**: UI changes only require helper updates
+
+### When to Create Helpers
+
+Create helpers when you see:
+
+- ✅ Repetition (same pattern 2+ times)
+- ✅ Technical complexity in tests
+- ✅ Readability issues
+- ✅ Complex async/timing logic
+
+### Helper Naming
+
+- `mount<Feature>Page()` - Mounting
+- `get<Element>()`, `click<Element>()`, `fill<Form>()` - Interactions
+- `waitFor<Event>()` - Timing
+- `expect<Element>Visible()`, `expect<State>()` - Assertions
+- `get<Feature>Store()` - Store access
+
+### Anti-Patterns
+
+❌ **Don't**: Put DOM traversal, timing, or `data-testid` strings in test files
+✅ **Do**: Use helpers for all technical concerns, keep tests business-focused
 
 ## Example: Use Case-Based Integration Test
 
-### Test File: `tests/use-cases/creating-notes.test.ts`
+See actual examples:
 
-```typescript
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { mount } from '@vue/test-utils';
-import { setActivePinia, createPinia } from 'pinia';
-import NotesPage from '../pages/NotesPage.vue';
-import { NoteService } from '../services/NoteService';
-import { MockNoteRepository } from '../repositories/MockNoteRepository';
-import { createNotesStore } from '../store/NotesStore';
-import { Note } from '../entities/Note';
-import { mockData } from '../NoteMockData';
+- `domains/notes/tests/use-cases/crud-notes.test.ts` - Full CRUD workflow
+- `domains/notes/tests/use-cases/browsing-prompts.test.ts` - Simple browsing
+- `domains/auth/tests/use-cases/login-flow.test.ts` - Authentication flow
 
-// Mock bootstrap to ensure test isolation
-vi.mock('../bootstrap', () => {
-  const repository = new MockNoteRepository();
-  const service = new NoteService(repository);
-  const store = createNotesStore(service);
-  
-  return {
-    bootstrapNotes: () => ({
-      useStore: store,
-      routes: [],
-    }),
-  };
-});
-
-describe('Creating Notes', () => {
-  beforeEach(() => {
-    setActivePinia(createPinia());
-  });
-
-  describe('As a user, I can create a new note', () => {
-    it('should create and display a note after filling the form', async () => {
-      // Given: User is on notes page
-      const wrapper = mount(NotesPage);
-      
-      // Wait for initial load
-      await new Promise(resolve => setTimeout(resolve, 100));
-      await wrapper.vm.$nextTick();
-      
-      const initialCount = wrapper.findAll('[data-testid="initial-count"]').length;
-
-      // When: User clicks "Add Note" and fills the form
-      const addButton = wrapper.find('[data-testid="add-button"]');
-      await addButton.trigger('click');
-      await wrapper.vm.$nextTick();
-
-      // Fill form
-      const noteDetails = wrapper.findComponent({ name: 'NoteDetails' });
-      await noteDetails.find('[data-testid="title-field"]').setValue('New Test Note');
-      await noteDetails.find('[data-testid="instructions-field"]').setValue('Test instructions');
-      await noteDetails.find('[data-testid="template-field"]').setValue('Test template');
-      
-      // Save
-      const saveButton = noteDetails.find('[data-testid="save-button"]');
-      await saveButton?.trigger('click');
-      
-      // Wait for async operations
-      await new Promise(resolve => setTimeout(resolve, 100));
-      await wrapper.vm.$nextTick();
-
-      // Then: The note appears in the list
-      expect(wrapper.text()).toContain('New Test Note');
-      expect(wrapper.findAll('[data-testid="note-item"]').length).toBe(initialCount + 1);
-    });
-
-    it('should prevent creating a note without required fields', async () => {
-      // Given: User opens create form
-      const wrapper = mount(NotesPage);
-      await new Promise(resolve => setTimeout(resolve, 100));
-      await wrapper.vm.$nextTick();
-      
-      const addButton = wrapper.find('fwb-button');
-      await addButton.trigger('click');
-      await wrapper.vm.$nextTick();
-
-      // When: User tries to save without filling required fields
-      const noteDetails = wrapper.findComponent({ name: 'NoteDetails' });
-      const saveButton = noteDetails.findAll('[data-testid="save-button"]').find(
-        btn => btn.attributes('color') === 'blue'
-      );
-      await saveButton?.trigger('click');
-      await wrapper.vm.$nextTick();
-
-      // Then: Validation errors are shown
-      expect(wrapper.text()).toContain('Title is required');
-      expect(wrapper.text()).toContain('Instructions are required');
-      expect(wrapper.text()).toContain('Template is required');
-    });
-  });
-});
-```
-
-### Test File: `tests/use-cases/viewing-notes.test.ts`
-
-```typescript
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { mount } from '@vue/test-utils';
-import { setActivePinia, createPinia } from 'pinia';
-import NotesPage from '../pages/NotesPage.vue';
-import { NoteService } from '../services/NoteService';
-import { MockNoteRepository } from '../repositories/MockNoteRepository';
-import { createNotesStore } from '../store/NotesStore';
-import { mockData } from '../NoteMockData';
-
-// Mock bootstrap to ensure test isolation
-vi.mock('../bootstrap', () => {
-  const repository = new MockNoteRepository();
-  const service = new NoteService(repository);
-  const store = createNotesStore(service);
-  
-  return {
-    bootstrapNotes: () => ({
-      useStore: store,
-      routes: [],
-    }),
-  };
-});
-
-describe('Viewing Notes', () => {
-  beforeEach(() => {
-    setActivePinia(createPinia());
-  });
-
-  describe('As a user, I can view all my notes', () => {
-    it('should display all notes when I open the page', async () => {
-      // Given: User navigates to notes page
-      const wrapper = mount(NotesPage);
-      
-      // When: Page loads
-      await new Promise(resolve => setTimeout(resolve, 100));
-      await wrapper.vm.$nextTick();
-
-      // Then: All notes are displayed
-      expect(wrapper.text()).toContain(mockData.notes[0].title);
-      expect(wrapper.text()).toContain(mockData.notes[1].title);
-    });
-
-    it('should show empty state when I have no notes', async () => {
-      // Given: Repository has no notes
-      // Override the mock to use an empty repository
-      vi.mocked(await import('../bootstrap')).bootstrapNotes = () => {
-        const emptyRepository = new MockNoteRepository([]);
-        const service = new NoteService(emptyRepository);
-        const store = createNotesStore(service);
-        return {
-          useStore: store,
-          routes: [],
-        };
-      };
-      
-      // When: User opens page
-      const wrapper = mount(NotesPage);
-      await new Promise(resolve => setTimeout(resolve, 100));
-      await wrapper.vm.$nextTick();
-
-      // Then: Empty state is shown
-      expect(wrapper.text()).toContain('No notes found');
-    });
-
-    it('should show loading state while fetching notes', async () => {
-      // This test would require more sophisticated mocking to control async timing
-      // Implementation depends on specific requirements
-    });
-  });
-});
-```
+**Structure**: Use test helpers from `testHelpers.ts` and `<Feature>PageTestHelpers.ts`, keep test files focused on business logic.
 
 ## Test Data Management
 

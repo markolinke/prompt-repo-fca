@@ -1,7 +1,9 @@
 import { User } from "../entities/User";
+import { LoginCredentials } from "../entities/LoginCredentials";
 
 export interface AuthRepositoryPort {
     getCurrentUser(): Promise<User>;
-    // Phase 3: login(), logout() will be added here
+    login(credentials: LoginCredentials): Promise<{ access_token: string; refresh_token: string; token_type: string }>;
+    refreshToken(refreshToken: string): Promise<{ access_token: string; refresh_token: string; token_type: string }>;
 }
 

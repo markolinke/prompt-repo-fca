@@ -547,4 +547,3 @@ All phases follow Clean Architecture:
 Each phase is **backward compatible**:
 
 - Phase 2 can still work with Phase 1 backend
-- Phase 3 can gradually replace Phase 1 mock

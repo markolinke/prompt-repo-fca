@@ -1,6 +1,7 @@
 import type { HttpClientPort } from "@/common/http/HttpClientPort";
 import type { AuthRepositoryPort } from "./AuthRepositoryPort";
 import { User } from "../entities/User";
+import { LoginCredentials } from "../entities/LoginCredentials";
 
 export class HttpAuthRepository implements AuthRepositoryPort {
     constructor(private readonly httpClient: HttpClientPort) {}
@@ -8,6 +9,27 @@ export class HttpAuthRepository implements AuthRepositoryPort {
     async getCurrentUser(): Promise<User> {
         const data = await this.httpClient.get('/auth/me');
         return User.fromPlainObject(data);
+    }
+
+    async login(credentials: LoginCredentials): Promise<{ access_token: string; refresh_token: string; token_type: string }> {
+        const response = await this.httpClient.post('/auth/login', credentials.toPlainObject());
+        return {
+            access_token: response.access_token,
+            refresh_token: response.refresh_token,
+            token_type: response.token_type || 'bearer',
+        };
+    }
+
+    async refreshToken(refreshToken: string): Promise<{ access_token: string; refresh_token: string; token_type: string }> {
+        // Call refresh endpoint - this uses base HTTP client (no auth header needed)
+        const response = await this.httpClient.post('/auth/refresh', { 
+            refresh_token: refreshToken 
+        });
+        return {
+            access_token: response.access_token,
+            refresh_token: response.refresh_token,
+            token_type: response.token_type || 'bearer',
+        };
     }
 }
 

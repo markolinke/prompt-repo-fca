@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import { User } from '../entities/User';
 import { isTokenExpired } from '../utils/tokenUtils';
+import { AuthService } from '../services/AuthService';
+import { TokenService } from '../services/TokenService';
 
 interface AuthState {
     user: User | null;
@@ -11,22 +13,9 @@ interface AuthState {
     error: string | null;
 }
 
-type AuthServiceShape = {
-    getCurrentUser(): Promise<User>;
-};
-
-type TokenServiceShape = {
-    setAccessToken(token: string): void;
-    getAccessToken(): string | null;
-    setRefreshToken(token: string): void;
-    getRefreshToken(): string | null;
-    clearTokens(): void;
-    hasTokens(): boolean;
-};
-
 export const createAuthStore = (
-    authService: AuthServiceShape,
-    tokenService: TokenServiceShape
+    authService: AuthService,
+    tokenService: TokenService
 ) => {
     return defineStore('auth', {
         state: (): AuthState => ({
@@ -88,10 +77,25 @@ export const createAuthStore = (
                 } catch (error) {
                     this.error = error instanceof Error ? error.message : 'Failed to fetch user';
                     this.isAuthenticated = false;
-                    // If 401, clear auth state
-                    if (error instanceof Error && error.message.includes('401')) {
-                        this.clearAuth();
-                    }
+                    // AuthenticatedHttpClient handles 401 and refresh automatically
+                    // If we get here after refresh fails, the auth state will be cleared
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            async login(email: string, password: string): Promise<void> {
+                this.loading = true;
+                this.error = null;
+                try {
+                    const { accessToken, refreshToken } = await authService.login(email, password);
+                    this.setTokens(accessToken, refreshToken);
+                    // Automatically fetch user info after login
+                    await this.fetchCurrentUser();
+                } catch (error) {
+                    this.error = error instanceof Error ? error.message : 'Login failed';
+                    this.isAuthenticated = false;
+                    throw error; // Re-throw so component can handle
                 } finally {
                     this.loading = false;
                 }
@@ -99,6 +103,27 @@ export const createAuthStore = (
 
             logout(): void {
                 this.clearAuth();
+            },
+
+            async refreshTokens(): Promise<boolean> {
+                if (!this.refreshToken) {
+                    this.clearAuth();
+                    return false;
+                }
+                
+                if (isTokenExpired(this.refreshToken)) {
+                    this.clearAuth();
+                    return false;
+                }
+                
+                try {
+                    const { accessToken, refreshToken } = await authService.refreshToken(this.refreshToken);
+                    this.setTokens(accessToken, refreshToken);
+                    return true;
+                } catch (error) {
+                    this.clearAuth();
+                    return false;
+                }
             },
         },
 
@@ -116,6 +141,14 @@ export const createAuthStore = (
             isAccessTokenExpired(): boolean {
                 if (!this.accessToken) return true;
                 return isTokenExpired(this.accessToken);
+            },
+
+            /**
+             * Check if refresh token is expired
+             */
+            isRefreshTokenExpired(): boolean {
+                if (!this.refreshToken) return true;
+                return isTokenExpired(this.refreshToken);
             },
         },
     });

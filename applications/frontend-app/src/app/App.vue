@@ -1,11 +1,23 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import { ref } from 'vue'
+import { bootstrapAuth } from '@/domains/auth'
+import { appDependencies } from '@/common/env/AppDependencies'
 
 const isMenuOpen = ref(false)
 
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
+}
+
+const bootstrap = bootstrapAuth()
+const authStore = bootstrap.useStore()
+const myRouter = appDependencies.getMyRouter()
+
+const handleLogout = () => {
+  authStore.logout()
+  isMenuOpen.value = false
+  myRouter.navigateTo({ name: 'login' })
 }
 </script>
 
@@ -79,14 +91,37 @@ const toggleMenu = () => {
               </router-link>
             </div>
 
-            <div class="flex items-center gap-3 border-b border-slate-100 px-4 py-3" @click="isMenuOpen = false">
-              <router-link :to="{ name: 'login' }">
-                <div class="flex items-center gap-4">
-                    <div class="text-sm font-semibold text-red-500">
-                        Logout
-                    </div>
+            <!-- User info section (shown when authenticated) -->
+            <div v-if="authStore.isAuthenticated && authStore.user" class="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
+              <div class="flex items-center gap-3 flex-1">
+                <div class="rounded-full bg-lime-200 text-sm font-medium text-lime-700 h-10 w-10 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                  </svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-semibold text-slate-900 truncate">
+                    {{ authStore.user.name }}
                   </div>
-              </router-link>
+                  <div class="text-xs text-slate-500 truncate">
+                    {{ authStore.user.email }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Logout button (shown only when authenticated) -->
+            <div v-if="authStore.isAuthenticated" class="flex items-center gap-3 border-b border-slate-100 px-4 py-3" @click="isMenuOpen = false">
+              <button
+                type="button"
+                data-testid="logout-button"
+                @click="handleLogout"
+                class="flex items-center gap-4 w-full text-left hover:bg-slate-50 rounded-md p-1 -ml-1 transition-colors"
+              >
+                <div class="text-sm font-semibold text-red-500">
+                  Logout
+                </div>
+              </button>
             </div>
           </div>
         </div>
