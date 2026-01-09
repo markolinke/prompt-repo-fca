@@ -77,10 +77,8 @@ export const createAuthStore = (
                 } catch (error) {
                     this.error = error instanceof Error ? error.message : 'Failed to fetch user';
                     this.isAuthenticated = false;
-                    // If 401, clear auth state
-                    if (error instanceof Error && error.message.includes('401')) {
-                        this.clearAuth();
-                    }
+                    // AuthenticatedHttpClient handles 401 and refresh automatically
+                    // If we get here after refresh fails, the auth state will be cleared
                 } finally {
                     this.loading = false;
                 }
@@ -106,6 +104,27 @@ export const createAuthStore = (
             logout(): void {
                 this.clearAuth();
             },
+
+            async refreshTokens(): Promise<boolean> {
+                if (!this.refreshToken) {
+                    this.clearAuth();
+                    return false;
+                }
+                
+                if (isTokenExpired(this.refreshToken)) {
+                    this.clearAuth();
+                    return false;
+                }
+                
+                try {
+                    const { accessToken, refreshToken } = await authService.refreshToken(this.refreshToken);
+                    this.setTokens(accessToken, refreshToken);
+                    return true;
+                } catch (error) {
+                    this.clearAuth();
+                    return false;
+                }
+            },
         },
 
         getters: {
@@ -122,6 +141,14 @@ export const createAuthStore = (
             isAccessTokenExpired(): boolean {
                 if (!this.accessToken) return true;
                 return isTokenExpired(this.accessToken);
+            },
+
+            /**
+             * Check if refresh token is expired
+             */
+            isRefreshTokenExpired(): boolean {
+                if (!this.refreshToken) return true;
+                return isTokenExpired(this.refreshToken);
             },
         },
     });

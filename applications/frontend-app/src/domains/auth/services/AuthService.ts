@@ -22,4 +22,12 @@ export class AuthService {
             refreshToken: response.refresh_token,
         };
     }
+
+    async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+        const response = await this.repository.refreshToken(refreshToken);
+        return {
+            accessToken: response.access_token,
+            refreshToken: response.refresh_token,
+        };
+    }
 }
