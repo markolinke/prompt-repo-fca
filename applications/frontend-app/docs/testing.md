@@ -132,628 +132,103 @@ describe('Creating Notes', () => {
 
 ### Test Helper Pattern
 
-For reusable setup, create test helpers that set up the mocked bootstrap:
+For reusable setup, create test helpers that set up the mocked bootstrap. **IMPORTANT**: Bootstrap mocks must be called at the top level before any imports.
 
-```typescript
-// tests/testHelpers.ts
-import { setActivePinia, createPinia } from 'pinia';
-import { NoteService } from '../services/NoteService';
-import { MockNoteRepository } from '../repositories/MockNoteRepository';
-import { createNotesStore } from '../store/NotesStore';
-import { vi } from 'vitest';
-
-/**
- * Mocks the bootstrap function for a feature.
- * IMPORTANT: This must be called at the top level of your test file,
- * before any imports that use the bootstrap.
- * 
- * Creates a factory that returns fresh instances for each bootstrap call,
- * ensuring complete test isolation.
- * 
- * Usage:
- * ```typescript
- * import { mockBootstrap } from './testHelpers';
- * mockBootstrap(); // Call at top level
- * 
- * import NotesPage from '../pages/NotesPage.vue'; // Now safe to import
- * ```
- */
-export const mockBootstrap = () => {
-  vi.mock('../bootstrap', () => {
-    // Return a factory that creates fresh instances for each call
-    return {
-      bootstrapNotes: () => {
-        const repository = new MockNoteRepository();
-        const service = new NoteService(repository);
-        const store = createNotesStore(service);
-        return {
-          useStore: store,
-          routes: [],
-        };
-      },
-    };
-  });
-};
-
-/**
- * Creates a test store with custom repository data.
- * Useful for testing edge cases (empty state, error states, etc.).
- */
-export const createTestStoreWithData = (initialNotes: Note[] = []) => {
-  setActivePinia(createPinia());
-  
-  const repository = new MockNoteRepository(initialNotes);
-  const service = new NoteService(repository);
-  const store = createNotesStore(service);
-  
-  return { repository, service, store };
-};
-```
+See: `domains/notes/tests/testHelpers.ts` and `domains/auth/tests/testHelpers.ts` for examples.
 
 ## Test Refactoring Pattern: Separating Concerns
 
-To maintain readable, maintainable tests that focus on business logic rather than technical implementation, we follow a **three-layer helper pattern** that separates concerns:
+Follow a **three-layer helper pattern** to keep tests readable and maintainable:
 
-### The Three-Layer Pattern
+1. **`testHelpers.ts`** - Domain setup (bootstrap mocking, AppDependencies setup)
+2. **`<Feature>PageTestHelpers.ts`** - Technical helpers (DOM, timing, interactions)
+3. **Test files** - Business logic only (user workflows)
 
-1. **`testHelpers.ts`** - Domain-level setup and mocks
-2. **`<Feature>PageTestHelpers.ts`** - Page/component interaction helpers (technical)
-3. **Test files** - Business logic and user workflows (clean and readable)
+### Layer 1: `testHelpers.ts`
 
-### Layer 1: `testHelpers.ts` - Domain Setup
+**Contains**: Bootstrap mocking, AppDependencies setup, shared mock data, domain utilities.
 
-**Purpose**: Contains domain-level setup utilities, bootstrap mocking, and shared test infrastructure.
+See: `domains/auth/tests/testHelpers.ts`, `domains/notes/tests/testHelpers.ts`
 
-**What belongs here**:
-- Bootstrap mocking functions (`mockBootstrap<Feature>()`)
-- AppDependencies setup for tests (`setupMockAppDependencies()`)
-- Shared mock data or test builders
-- Domain-specific test utilities (e.g., time mocking, debouncer mocking)
+### Layer 2: `<Feature>PageTestHelpers.ts`
 
-**Example**: `domains/auth/tests/testHelpers.ts`
+**Contains**: All technical DOM manipulation, timing, component interactions. Handles "how" of testing.
 
-```typescript
-import { vi } from 'vitest';
-import { AuthService } from '../services/AuthService';
-import { TokenService } from '../services/TokenService';
-import { createAuthStore } from '../store/AuthStore';
-import { MockTokenRepository } from '../repositories/MockTokenRepository';
-import { MockAuthRepository } from '../repositories/MockAuthRepository';
-import { appDependencies } from '@/common/env/AppDependencies';
-import type { MyRouterPort } from '@/common/routing/MyRouterPort';
+**Examples of helpers**:
 
-/**
- * Mocks the bootstrap function for auth domain.
- * Must be called at top level before imports.
- */
-export const mockBootstrapAuth = () => {
-  vi.mock('../bootstrap', () => {
-    return {
-      bootstrapAuth: () => {
-        const repository = new MockAuthRepository();
-        const service = new AuthService(repository);
-        const tokenRepository = new MockTokenRepository();
-        const tokenService = new TokenService(tokenRepository);
-        const useStore = createAuthStore(service, tokenService);
-        
-        return {
-          useStore,
-          routes: [],
-        };
-      },
-    };
-  });
-};
+- `mount<Feature>Page()` - Mount and wait
+- `get<Element>()` - Find by `data-testid`
+- `click<Button>()`, `fill<Form>()`, `submit<Form>()` - User actions
+- `waitFor<Event>()` - Async/timing helpers
+- `expect<Element>Visible()`, `expect<State>()` - UI assertions
+- `get<Feature>Store()` - Store access
 
-/**
- * Sets up mock AppDependencies for testing.
- * Registers a mock MyRouter and AppConfig.
- */
-export const setupMockAppDependencies = () => {
-  appDependencies.resetForTesting();
-  
-  const mockMyRouter: MyRouterPort = {
-    navigateTo: vi.fn(),
-    navigateToError: vi.fn(),
-  };
-  
-  appDependencies.registerMyRouter(mockMyRouter);
-  appDependencies.registerAppConfig({
-    baseUrl: 'http://localhost:8000',
-    repositoryType: 'mock',
-  });
-};
-```
+**Key Principle**: Test files should never contain DOM traversal, `await` timing, Vue updates, or debouncers directly.
 
-### Layer 2: `<Feature>PageTestHelpers.ts` - Technical Interaction Helpers
+See: `domains/auth/tests/use-cases/LoginPageTestHelpers.ts`, `domains/notes/tests/use-cases/NotesPageTestHelpers.ts`
 
-**Purpose**: Contains all technical DOM manipulation, timing, and component interaction utilities. This is the **technical layer** that handles all the "how" of testing.
+### Layer 3: Test Files
 
-**What belongs here**:
-- Mounting functions (`mount<Feature>Page()`)
-- DOM element finders using `data-testid` (`get<Element>()`)
-- User interaction helpers (`click<Button>()`, `fill<Form>()`, `enter<Input>()`)
-- Timing and async helpers (`waitFor<Event>()`, debounce handling)
-- Assertion helpers for UI elements (`expect<Element>Visible()`, `expectTextVisible()`)
-- Store access helpers (`get<Feature>Store()`)
-- State assertion helpers (`expect<Feature>State()`)
+**Contains**: Business logic only - user stories, Given/When/Then scenarios, business assertions.
 
-**Key Principle**: This layer handles all technical concerns - DOM traversal, `await` timing, Vue updates, debouncers, etc. Test files should never contain this logic directly.
+**Don't include**: DOM traversal, timing logic, polling loops, `data-testid` strings, direct store access.
 
-**Example**: `domains/auth/tests/use-cases/LoginPageTestHelpers.ts`
+**Example**:
 
 ```typescript
-import { mount, VueWrapper, flushPromises } from '@vue/test-utils';
-import { expect } from 'vitest';
-import LoginPage from '../../components/LoginPage.vue';
-import { bootstrapAuth } from '../../bootstrap';
-
-/**
- * Mounts LoginPage and waits for initial render.
- * Use this as the starting point for most tests.
- */
-export const mountLoginPage = async (): Promise<VueWrapper> => {
-  const wrapper = mount(LoginPage);
-  await waitForLoginPageToLoad(wrapper);
-  return wrapper;
-};
-
-/**
- * Waits for Vue to finish rendering and async operations to complete.
- */
-export const waitForLoginPageToLoad = async (wrapper: VueWrapper): Promise<void> => {
-  await flushPromises();
-  await wrapper.vm.$nextTick();
-};
-
-/**
- * Gets the login button element.
- */
-export const getLoginButton = (wrapper: VueWrapper) => {
-  return wrapper.find('[data-testid="login-button"]');
-};
-
-/**
- * Clicks the login button and waits for async operations to complete.
- */
-export const clickLoginButton = async (wrapper: VueWrapper): Promise<void> => {
-  const button = getLoginButton(wrapper);
-  expect(button.exists()).toBe(true);
-  await button.trigger('click');
-  await waitForLoginPageToLoad(wrapper);
-};
-
-/**
- * Fills the login form with email and password.
- */
-export const fillLoginForm = async (
-  wrapper: VueWrapper,
-  email: string,
-  password: string
-): Promise<void> => {
-  const emailInput = wrapper.find('[data-testid="email-input"]');
-  const passwordInput = wrapper.find('[data-testid="password-input"]');
+it('should login successfully', async () => {
+  const wrapper = await mountLoginPage();
+  const authStore = getAuthStore();
   
-  expect(emailInput.exists()).toBe(true);
-  expect(passwordInput.exists()).toBe(true);
+  await fillLoginForm(wrapper, 'test@example.com', 'password123');
+  await submitLoginForm(wrapper);
+  await waitForLoginToComplete(wrapper, authStore);
   
-  await emailInput.setValue(email);
-  await passwordInput.setValue(password);
-  await waitForLoginPageToLoad(wrapper);
-};
-
-/**
- * Gets the auth store instance from bootstrap.
- */
-export const getAuthStore = () => {
-  const bootstrap = bootstrapAuth();
-  return bootstrap.useStore();
-};
-
-/**
- * Asserts that the user is authenticated in the store.
- */
-export const expectUserAuthenticated = (
-  store: ReturnType<ReturnType<typeof bootstrapAuth>['useStore']>
-): void => {
-  expect(store.isAuthenticated).toBe(true);
-  expect(store.user).not.toBeNull();
-};
-
-/**
- * Asserts that the user in the store matches the expected user data.
- */
-export const expectUserMatches = (
-  store: ReturnType<ReturnType<typeof bootstrapAuth>['useStore']>,
-  expectedUserId: string,
-  expectedUserEmail?: string,
-  expectedUserName?: string
-): void => {
-  expect(store.user).not.toBeNull();
-  expect(store.user?.id).toBe(expectedUserId);
-  if (expectedUserEmail) {
-    expect(store.user?.email).toBe(expectedUserEmail);
-  }
-  if (expectedUserName) {
-    expect(store.user?.name).toBe(expectedUserName);
-  }
-};
-
-/**
- * Submits the login form.
- */
-export const submitLoginForm = async (wrapper: VueWrapper): Promise<void> => {
-  const form = wrapper.find('form');
-  await form.trigger('submit');
-  await waitForLoginPageToLoad(wrapper);
-};
-
-/**
- * Waits for login operation to complete by polling the store's loading state.
- */
-export const waitForLoginToComplete = async (
-  wrapper: VueWrapper,
-  store: ReturnType<ReturnType<typeof bootstrapAuth>['useStore']>
-): Promise<void> => {
-  let attempts = 0;
-  while (store.loading && attempts < 50) {
-    await new Promise(resolve => setTimeout(resolve, 10));
-    attempts++;
-  }
-  await waitForLoginPageToLoad(wrapper);
-};
-
-/**
- * Asserts that the login form elements are visible.
- */
-export const expectLoginFormVisible = (wrapper: VueWrapper): void => {
-  expect(wrapper.find('[data-testid="email-input"]').exists()).toBe(true);
-  expect(wrapper.find('[data-testid="password-input"]').exists()).toBe(true);
-  expectLoginButtonVisible(wrapper, 'Login');
-};
-```
-
-### Layer 3: Test Files - Business Logic Only
-
-**Purpose**: Contains only business logic, user workflows, and test scenarios. Should be **completely free** of technical implementation details.
-
-**What belongs here**:
-- Test descriptions (user stories)
-- Test scenarios (Given/When/Then structure)
-- Business assertions (what should happen from user perspective)
-- Helper function calls (not implementation)
-
-**What should NOT be here**:
-- DOM traversal (`wrapper.find(...)`)
-- Timing logic (`await wrapper.vm.$nextTick()`, `setTimeout`, debounce handling)
-- Technical await patterns (polling loops, promise chains)
-- Direct store access (use helpers from PageTestHelpers)
-- `data-testid` strings (handled in helpers)
-
-**Example**: `domains/auth/tests/use-cases/login-flow.test.ts`
-
-```typescript
-import { describe, it, expect, beforeEach } from 'vitest';
-import { createPinia, setActivePinia } from 'pinia';
-import { mockBootstrapAuth, setupMockAppDependencies } from '../testHelpers';
-import {
-  mountLoginPage,
-  expectLoginButtonVisible,
-  getAuthStore,
-  expectUserAuthenticated,
-  expectUserMatches,
-  fillLoginForm,
-} from './LoginPageTestHelpers';
-
-mockBootstrapAuth();
-
-describe('Login Flow', () => {
-  beforeEach(() => {
-    setActivePinia(createPinia());
-    setupMockAppDependencies();
-  });
-
-  it('should login successfully with email and password', async () => {
-    // Given: User navigates to login page
-    const wrapper = await mountLoginPage();
-    const authStore = getAuthStore();
-
-    // Then: Login form is visible
-    expectLoginFormVisible(wrapper);
-
-    // When: User fills in credentials and submits form
-    await fillLoginForm(wrapper, 'test@example.com', 'password123');
-    await submitLoginForm(wrapper);
-    await waitForLoginToComplete(wrapper, authStore);
-
-    // Then: User should be authenticated with correct data
-    expectUserAuthenticated(authStore);
-    expectUserMatches(authStore, 'mock-user-1', 'test@example.com', 'Test User');
-    expect(authStore.accessToken).toBe('mock-access-token');
-    expect(authStore.refreshToken).toBe('mock-refresh-token');
-  });
+  expectUserAuthenticated(authStore);
+  expectUserMatches(authStore, 'mock-user-1', 'test@example.com', 'Test User');
 });
 ```
 
-**Note**: Even this example could be further improved by moving the polling loop for `loading` into a helper like `waitForLoginToComplete(wrapper, authStore)`.
+See: `domains/auth/tests/use-cases/login-flow.test.ts`
 
-### Benefits of This Pattern
+### Benefits
 
-1. **Readability**: Test files read like user stories, not technical documentation
-2. **Maintainability**: Technical changes (e.g., `data-testid` changes) only affect helper files
-3. **Reusability**: Helpers can be shared across multiple test files
-4. **Testability**: Helpers themselves can be tested if needed
-5. **Separation of Concerns**: Business logic separated from technical implementation
-6. **Easier Refactoring**: When UI changes, only helper files need updates
+- **Readability**: Tests read like user stories
+- **Maintainability**: Technical changes only affect helper files
+- **Reusability**: Helpers shared across test files
+- **Refactoring**: UI changes only require helper updates
 
 ### When to Create Helpers
 
-Create helpers when you notice:
-- ✅ **Repetition**: Same DOM traversal pattern appears 2+ times
-- ✅ **Complexity**: Test contains technical implementation details
-- ✅ **Readability**: Test is hard to understand due to technical noise
-- ✅ **Timing**: Complex async/await or polling logic
+Create helpers when you see:
 
-**Good Helper Candidates**:
-- Mounting and waiting for initial load
-- Filling forms with multiple fields
-- Waiting for async operations to complete (with polling/timeout)
-- Complex DOM queries or traversals
-- Debounce/timing-related operations
-- Store state assertions
+- ✅ Repetition (same pattern 2+ times)
+- ✅ Technical complexity in tests
+- ✅ Readability issues
+- ✅ Complex async/timing logic
 
-### Helper Naming Conventions
+### Helper Naming
 
-- **Mounting**: `mount<Feature>Page()`, `mount<Component>()`
-- **Elements**: `get<Element>()` (e.g., `getLoginButton()`, `getEmailInput()`)
-- **Actions**: `click<Element>()`, `fill<Form>()`, `enter<Input>()`, `submit<Form>()`
-- **Waiting**: `waitFor<Event>()`, `waitFor<State>()` (e.g., `waitForLoginToComplete()`)
-- **Assertions**: `expect<Element>Visible()`, `expect<State>()`, `expectTextVisible()`
-- **Store**: `get<Feature>Store()`, `expect<State>State()`
+- `mount<Feature>Page()` - Mounting
+- `get<Element>()`, `click<Element>()`, `fill<Form>()` - Interactions
+- `waitFor<Event>()` - Timing
+- `expect<Element>Visible()`, `expect<State>()` - Assertions
+- `get<Feature>Store()` - Store access
 
-### Complete Example Structure
+### Anti-Patterns
 
-```text
-domains/auth/tests/
-├── testHelpers.ts                    # Layer 1: Domain setup
-│   ├── mockBootstrapAuth()
-│   └── setupMockAppDependencies()
-│
-└── use-cases/
-    ├── LoginPageTestHelpers.ts       # Layer 2: Technical helpers
-    │   ├── mountLoginPage()
-    │   ├── fillLoginForm()
-    │   ├── clickLoginButton()
-    │   ├── getAuthStore()
-    │   ├── expectUserAuthenticated()
-    │   └── expectUserMatches()
-    │
-    └── login-flow.test.ts            # Layer 3: Business logic
-        └── Tests using helpers from above
-```
-
-### Anti-Patterns to Avoid
-
-❌ **Don't put technical logic in test files**:
-```typescript
-// ❌ BAD: Technical details in test
-it('should login', async () => {
-  const wrapper = mount(LoginPage);
-  await wrapper.vm.$nextTick();
-  await flushPromises();
-  const emailInput = wrapper.find('[data-testid="email-input"]');
-  await emailInput.setValue('test@example.com');
-  // ... more technical code
-});
-```
-
-✅ **Do use helpers**:
-```typescript
-// ✅ GOOD: Business logic only
-it('should login successfully', async () => {
-  const wrapper = await mountLoginPage();
-  await fillLoginForm(wrapper, 'test@example.com', 'password123');
-  await clickLoginButton(wrapper);
-  expectUserAuthenticated(getAuthStore());
-});
-```
-
-❌ **Don't mix concerns in helpers**:
-```typescript
-// ❌ BAD: Helper contains business logic
-export const loginUser = async (wrapper, shouldSucceed = true) => {
-  // Business logic shouldn't be in technical helpers
-  if (shouldSucceed) {
-    await fillLoginForm(wrapper, 'valid@email.com', 'password');
-  }
-  // ...
-};
-```
-
-✅ **Do keep helpers technical, test files business-focused**:
-```typescript
-// ✅ GOOD: Helper is purely technical
-export const fillLoginForm = async (wrapper, email, password) => {
-  // Pure technical implementation
-};
-
-// Test file contains business logic
-it('should login with valid credentials', async () => {
-  await fillLoginForm(wrapper, 'valid@email.com', 'password');
-  // Business assertion
-});
-```
+❌ **Don't**: Put DOM traversal, timing, or `data-testid` strings in test files
+✅ **Do**: Use helpers for all technical concerns, keep tests business-focused
 
 ## Example: Use Case-Based Integration Test
 
-### Test File: `tests/use-cases/creating-notes.test.ts`
+See actual examples:
 
-```typescript
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { mount } from '@vue/test-utils';
-import { setActivePinia, createPinia } from 'pinia';
-import NotesPage from '../pages/NotesPage.vue';
-import { NoteService } from '../services/NoteService';
-import { MockNoteRepository } from '../repositories/MockNoteRepository';
-import { createNotesStore } from '../store/NotesStore';
-import { Note } from '../entities/Note';
-import { mockData } from '../NoteMockData';
+- `domains/notes/tests/use-cases/crud-notes.test.ts` - Full CRUD workflow
+- `domains/notes/tests/use-cases/browsing-prompts.test.ts` - Simple browsing
+- `domains/auth/tests/use-cases/login-flow.test.ts` - Authentication flow
 
-// Mock bootstrap to ensure test isolation
-vi.mock('../bootstrap', () => {
-  const repository = new MockNoteRepository();
-  const service = new NoteService(repository);
-  const store = createNotesStore(service);
-  
-  return {
-    bootstrapNotes: () => ({
-      useStore: store,
-      routes: [],
-    }),
-  };
-});
-
-describe('Creating Notes', () => {
-  beforeEach(() => {
-    setActivePinia(createPinia());
-  });
-
-  describe('As a user, I can create a new note', () => {
-    it('should create and display a note after filling the form', async () => {
-      // Given: User is on notes page
-      const wrapper = mount(NotesPage);
-      
-      // Wait for initial load
-      await new Promise(resolve => setTimeout(resolve, 100));
-      await wrapper.vm.$nextTick();
-      
-      const initialCount = wrapper.findAll('[data-testid="initial-count"]').length;
-
-      // When: User clicks "Add Note" and fills the form
-      const addButton = wrapper.find('[data-testid="add-button"]');
-      await addButton.trigger('click');
-      await wrapper.vm.$nextTick();
-
-      // Fill form
-      const noteDetails = wrapper.findComponent({ name: 'NoteDetails' });
-      await noteDetails.find('[data-testid="title-field"]').setValue('New Test Note');
-      await noteDetails.find('[data-testid="instructions-field"]').setValue('Test instructions');
-      await noteDetails.find('[data-testid="template-field"]').setValue('Test template');
-      
-      // Save
-      const saveButton = noteDetails.find('[data-testid="save-button"]');
-      await saveButton?.trigger('click');
-      
-      // Wait for async operations
-      await new Promise(resolve => setTimeout(resolve, 100));
-      await wrapper.vm.$nextTick();
-
-      // Then: The note appears in the list
-      expect(wrapper.text()).toContain('New Test Note');
-      expect(wrapper.findAll('[data-testid="note-item"]').length).toBe(initialCount + 1);
-    });
-
-    it('should prevent creating a note without required fields', async () => {
-      // Given: User opens create form
-      const wrapper = mount(NotesPage);
-      await new Promise(resolve => setTimeout(resolve, 100));
-      await wrapper.vm.$nextTick();
-      
-      const addButton = wrapper.find('fwb-button');
-      await addButton.trigger('click');
-      await wrapper.vm.$nextTick();
-
-      // When: User tries to save without filling required fields
-      const noteDetails = wrapper.findComponent({ name: 'NoteDetails' });
-      const saveButton = noteDetails.findAll('[data-testid="save-button"]').find(
-        btn => btn.attributes('color') === 'blue'
-      );
-      await saveButton?.trigger('click');
-      await wrapper.vm.$nextTick();
-
-      // Then: Validation errors are shown
-      expect(wrapper.text()).toContain('Title is required');
-      expect(wrapper.text()).toContain('Instructions are required');
-      expect(wrapper.text()).toContain('Template is required');
-    });
-  });
-});
-```
-
-### Test File: `tests/use-cases/viewing-notes.test.ts`
-
-```typescript
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { mount } from '@vue/test-utils';
-import { setActivePinia, createPinia } from 'pinia';
-import NotesPage from '../pages/NotesPage.vue';
-import { NoteService } from '../services/NoteService';
-import { MockNoteRepository } from '../repositories/MockNoteRepository';
-import { createNotesStore } from '../store/NotesStore';
-import { mockData } from '../NoteMockData';
-
-// Mock bootstrap to ensure test isolation
-vi.mock('../bootstrap', () => {
-  const repository = new MockNoteRepository();
-  const service = new NoteService(repository);
-  const store = createNotesStore(service);
-  
-  return {
-    bootstrapNotes: () => ({
-      useStore: store,
-      routes: [],
-    }),
-  };
-});
-
-describe('Viewing Notes', () => {
-  beforeEach(() => {
-    setActivePinia(createPinia());
-  });
-
-  describe('As a user, I can view all my notes', () => {
-    it('should display all notes when I open the page', async () => {
-      // Given: User navigates to notes page
-      const wrapper = mount(NotesPage);
-      
-      // When: Page loads
-      await new Promise(resolve => setTimeout(resolve, 100));
-      await wrapper.vm.$nextTick();
-
-      // Then: All notes are displayed
-      expect(wrapper.text()).toContain(mockData.notes[0].title);
-      expect(wrapper.text()).toContain(mockData.notes[1].title);
-    });
-
-    it('should show empty state when I have no notes', async () => {
-      // Given: Repository has no notes
-      // Override the mock to use an empty repository
-      vi.mocked(await import('../bootstrap')).bootstrapNotes = () => {
-        const emptyRepository = new MockNoteRepository([]);
-        const service = new NoteService(emptyRepository);
-        const store = createNotesStore(service);
-        return {
-          useStore: store,
-          routes: [],
-        };
-      };
-      
-      // When: User opens page
-      const wrapper = mount(NotesPage);
-      await new Promise(resolve => setTimeout(resolve, 100));
-      await wrapper.vm.$nextTick();
-
-      // Then: Empty state is shown
-      expect(wrapper.text()).toContain('No notes found');
-    });
-
-    it('should show loading state while fetching notes', async () => {
-      // This test would require more sophisticated mocking to control async timing
-      // Implementation depends on specific requirements
-    });
-  });
-});
-```
+**Structure**: Use test helpers from `testHelpers.ts` and `<Feature>PageTestHelpers.ts`, keep test files focused on business logic.
 
 ## Test Data Management
 
