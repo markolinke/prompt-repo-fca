@@ -1,16 +1,18 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { createAuthStore } from '../store/AuthStore';
-import { MockTokenRepository } from '../repositories/MockTokenRepository';
 import { User } from '../entities/User';
+import { MockTokenRepository } from '../repositories/MockTokenRepository';
+import { TokenService } from '../services/TokenService';
 
 describe('AuthStore', () => {
-    let tokenRepository: MockTokenRepository;
+    let tokenService: TokenService;
 
     beforeEach(() => {
         setActivePinia(createPinia());
         // Create a fresh in-memory token repository for each test
-        tokenRepository = new MockTokenRepository();
+        const tokenRepository = new MockTokenRepository();
+        tokenService = new TokenService(tokenRepository);
     });
 
     it('should initialize with empty state', () => {
@@ -20,7 +22,7 @@ describe('AuthStore', () => {
             }
         };
         
-        const useStore = createAuthStore(mockService, tokenRepository);
+        const useStore = createAuthStore(mockService, tokenService);
         const store = useStore();
         
         expect(store.user).toBeNull();
@@ -38,7 +40,7 @@ describe('AuthStore', () => {
             }
         };
         
-        const useStore = createAuthStore(mockService, tokenRepository);
+        const useStore = createAuthStore(mockService, tokenService);
         const store = useStore();
         
         await store.fetchCurrentUser();
@@ -56,7 +58,7 @@ describe('AuthStore', () => {
             }
         };
         
-        const useStore = createAuthStore(mockService, tokenRepository);
+        const useStore = createAuthStore(mockService, tokenService);
         const store = useStore();
         
         await store.fetchCurrentUser();
@@ -77,7 +79,7 @@ describe('AuthStore', () => {
             }
         };
         
-        const useStore = createAuthStore(mockService, tokenRepository);
+        const useStore = createAuthStore(mockService, tokenService);
         const store = useStore();
         
         // Set tokens manually for this test
@@ -98,10 +100,10 @@ describe('AuthStore', () => {
         // Store a valid token (not expired) in repository
         // Create a simple valid JWT: header.payload.signature (we'll use a mock one)
         // For testing, we'll set tokens directly via tokenRepository
-        tokenRepository.setAccessToken('valid.token.here');
-        tokenRepository.setRefreshToken('valid.refresh.token');
+        tokenService.setAccessToken('valid.token.here');
+        tokenService.setRefreshToken('valid.refresh.token');
         
-        const useStore = createAuthStore(mockService, tokenRepository);
+        const useStore = createAuthStore(mockService, tokenService);
         const store = useStore();
         
         // Initialize auth - should load tokens from storage
@@ -123,10 +125,10 @@ describe('AuthStore', () => {
         // Store an expired token
         // An expired JWT would have exp in the past
         // For simplicity, we'll use an obviously invalid token
-        tokenRepository.setAccessToken('expired.token.here');
-        tokenRepository.setRefreshToken('refresh.token');
+        tokenService.setAccessToken('expired.token.here');
+        tokenService.setRefreshToken('refresh.token');
         
-        const useStore = createAuthStore(mockService, tokenRepository);
+        const useStore = createAuthStore(mockService, tokenService);
         const store = useStore();
         
         store.initializeAuth();
