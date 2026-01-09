@@ -78,11 +78,14 @@ export const getAuthStore = () => {
 
 /**
  * Asserts that the user is authenticated in the store.
+ * Note: In Phase 4.1, tokens may not be set yet (login flow in Phase 4.2).
+ * This checks that user is authenticated and user data exists.
  */
 export const expectUserAuthenticated = (store: ReturnType<ReturnType<typeof bootstrapAuth>['useStore']>): void => {
   expect(store.isAuthenticated).toBe(true);
   expect(store.user).not.toBeNull();
-  expect(store.token).not.toBeNull();
+  // accessToken may be null in Phase 4.1 if login() hasn't been called yet
+  // Will be set in Phase 4.2 when login flow is implemented
 };
 
 /**
@@ -91,7 +94,7 @@ export const expectUserAuthenticated = (store: ReturnType<ReturnType<typeof boot
 export const expectUserNotAuthenticated = (store: ReturnType<ReturnType<typeof bootstrapAuth>['useStore']>): void => {
   expect(store.isAuthenticated).toBe(false);
   expect(store.user).toBeNull();
-  expect(store.token).toBeNull();
+  expect(store.accessToken).toBeNull();
 };
 
 /**

@@ -1,6 +1,7 @@
 import { AuthService } from './services/AuthService';
 import { HttpAuthRepository } from './repositories/HttpAuthRepository';
 import { createAuthStore } from './store/AuthStore';
+import { LocalStorageTokenStorage } from './repositories/LocalStorageTokenRepository';
 import authRoutes from './routes';
 import { appDependencies } from "@/common/env/AppDependencies";
 import { AxiosHttpClient } from '@/common/http/AxiosHttpClient';
@@ -8,31 +9,42 @@ import { AxiosHttpClient } from '@/common/http/AxiosHttpClient';
 const bootstrapAuth = () => {
     const appConfig = appDependencies.getAppConfig();
     const myRouter = appDependencies.getMyRouter();
-    const baseHttpClient = appDependencies.getHttpClient();
     
-    // Create repository, service, and store
-    const repository = new HttpAuthRepository(baseHttpClient);
-    const service = new AuthService(repository);
-    const useStore = createAuthStore(service);
+    // Create token repository (localStorage implementation)
+    const tokenRepository = new LocalStorageTokenStorage();
     
-    // Create authenticated client (will be used if repository needs it later)
-    // For Phase 2, base client works since backend mock doesn't require tokens
-    // Store provides token getter for future use in Phase 3
+    // Create a token getter function that will reference the store
+    let tokenGetter: (() => string | null) | undefined;
+    
+    // Create authenticated HTTP client with token getter
     const authenticatedHttpClient = new AxiosHttpClient(
         appConfig.baseUrl,
         {},
         myRouter,
-        () => useStore().getToken()
+        () => tokenGetter?.() || null
     );
     
-    // Create authenticated repository (ready for Phase 3 when tokens are required)
+    // Create repository and service
     const authenticatedRepository = new HttpAuthRepository(authenticatedHttpClient);
     const authenticatedService = new AuthService(authenticatedRepository);
-    const authenticatedStore = createAuthStore(authenticatedService);
+    
+    // Create store with token repository
+    const useStore = createAuthStore(authenticatedService, tokenRepository);
+    
+    // Set the token getter after store is created
+    // getToken is a getter that returns a function, so we access it directly
+    const store = useStore();
+    tokenGetter = () => {
+        const getTokenFn = store.getToken;
+        return getTokenFn();
+    };
     
     return {
-        useStore: authenticatedStore,
+        useStore,
         routes: authRoutes,
+        initializeAuth: () => {
+            store.initializeAuth();
+        },
     };
 };
 
