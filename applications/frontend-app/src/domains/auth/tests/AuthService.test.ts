@@ -1,13 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { AuthService } from '../services/AuthService';
 import { User } from '../entities/User';
-
-// Mock repository
-class MockAuthRepository {
-    async getCurrentUser(): Promise<User> {
-        return new User('mock-user-1', 'test@example.com', 'Test User');
-    }
-}
+import { MockAuthRepository } from '../repositories/MockAuthRepository';
 
 describe('AuthService', () => {
     let service: AuthService;

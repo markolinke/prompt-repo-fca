@@ -1,10 +1,10 @@
-import type { TokenStoragePort } from './TokenStoragePort';
+import type { TokenRepositoryPort } from './TokenRepositoryPort';
 
 /**
  * Token repository implementation using browser localStorage.
  * Provides persistent token storage across browser sessions.
  */
-export class LocalStorageTokenStorage implements TokenStoragePort {
+export class LocalStorageTokenRepository implements TokenRepositoryPort {
     private readonly ACCESS_TOKEN_KEY = 'auth_access_token';
     private readonly REFRESH_TOKEN_KEY = 'auth_refresh_token';
 

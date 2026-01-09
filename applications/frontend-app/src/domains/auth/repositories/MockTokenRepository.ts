@@ -1,10 +1,10 @@
-import type { TokenStoragePort } from './TokenStoragePort';
+import type { TokenRepositoryPort } from './TokenRepositoryPort';
 
 /**
  * Mock token repository implementation for testing and development.
  * Tokens are stored in memory and lost when the repository instance is destroyed.
  */
-export class MockTokenStorage implements TokenStoragePort {
+export class MockTokenRepository implements TokenRepositoryPort {
     private accessToken: string | null = null;
     private refreshToken: string | null = null;
 

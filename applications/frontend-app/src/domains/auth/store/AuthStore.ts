@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import { User } from '../entities/User';
-import type { TokenStoragePort } from '../repositories/TokenStoragePort';
 import { isTokenExpired } from '../utils/tokenUtils';
 
 interface AuthState {
@@ -16,9 +15,18 @@ type AuthServiceShape = {
     getCurrentUser(): Promise<User>;
 };
 
+type TokenServiceShape = {
+    setAccessToken(token: string): void;
+    getAccessToken(): string | null;
+    setRefreshToken(token: string): void;
+    getRefreshToken(): string | null;
+    clearTokens(): void;
+    hasTokens(): boolean;
+};
+
 export const createAuthStore = (
     authService: AuthServiceShape,
-    tokenRepository: TokenStoragePort
+    tokenService: TokenServiceShape
 ) => {
     return defineStore('auth', {
         state: (): AuthState => ({
@@ -35,8 +43,8 @@ export const createAuthStore = (
              * Initialize auth state from storage (call on app start)
              */
             initializeAuth(): void {
-                const accessToken = tokenRepository.getAccessToken();
-                const refreshToken = tokenRepository.getRefreshToken();
+                const accessToken = tokenService.getAccessToken();
+                const refreshToken = tokenService.getRefreshToken();
                 
                 if (accessToken && refreshToken && !isTokenExpired(accessToken)) {
                     this.accessToken = accessToken;
@@ -55,8 +63,8 @@ export const createAuthStore = (
             setTokens(accessToken: string, refreshToken: string): void {
                 this.accessToken = accessToken;
                 this.refreshToken = refreshToken;
-                tokenRepository.setAccessToken(accessToken);
-                tokenRepository.setRefreshToken(refreshToken);
+                tokenService.setAccessToken(accessToken);
+                tokenService.setRefreshToken(refreshToken);
                 this.isAuthenticated = true;
             },
 
@@ -68,7 +76,7 @@ export const createAuthStore = (
                 this.accessToken = null;
                 this.refreshToken = null;
                 this.isAuthenticated = false;
-                tokenRepository.clearTokens();
+                tokenService.clearTokens();
             },
 
             async fetchCurrentUser(): Promise<void> {
