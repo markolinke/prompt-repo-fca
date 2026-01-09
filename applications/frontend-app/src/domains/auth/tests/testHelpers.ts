@@ -1,6 +1,7 @@
 import { vi } from 'vitest';
 import { AuthService } from '../services/AuthService';
 import { createAuthStore } from '../store/AuthStore';
+import { MockTokenStorage } from '../repositories/MockTokenRepository';
 import { User } from '../entities/User';
 import { appDependencies } from '@/common/env/AppDependencies';
 import type { MyRouterPort } from '@/common/routing/MyRouterPort';
@@ -15,11 +16,16 @@ export const mockBootstrapAuth = () => {
           },
         };
         const service = new AuthService(mockRepository);
-        const useStore = createAuthStore(service);
+        const tokenRepository = new MockTokenStorage();
+        const useStore = createAuthStore(service, tokenRepository);
 
         return {
           useStore,
           routes: [],
+          initializeAuth: () => {
+            const store = useStore();
+            store.initializeAuth();
+          },
         };
       },
     };

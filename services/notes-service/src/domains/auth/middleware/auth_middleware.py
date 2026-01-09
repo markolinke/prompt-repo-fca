@@ -26,11 +26,10 @@ def create_get_current_user(auth_service: AuthenticationService):
         """
         FastAPI dependency to get the current authenticated user.
         
-        For Phase 1, this returns a mock user without actual token validation.
-        In Phase 3, this will be updated to validate JWT tokens.
+        Validates JWT token and returns authenticated user.
         
         Args:
-            credentials: HTTP Bearer token credentials (optional in Phase 1)
+            credentials: HTTP Bearer token credentials (required)
             
         Returns:
             Authenticated User
@@ -38,10 +37,20 @@ def create_get_current_user(auth_service: AuthenticationService):
         Raises:
             HTTPException: 401 if authentication fails
         """
-        # For Phase 1, use a mock token since we're not validating
-        token = credentials.credentials if credentials else "mock-token"
+        # Require Authorization header with Bearer token
+        if not credentials:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Not authenticated",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
         
+        token = credentials.credentials
+        # Strip "Bearer " prefix if present (HTTPBearer should do this, but handle it defensively)
+        if token and token.startswith("Bearer "):
+            token = token[7:]  # Remove "Bearer " prefix (7 characters)
         user = await auth_service.get_current_user(token)
+        
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
