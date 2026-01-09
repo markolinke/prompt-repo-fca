@@ -52,12 +52,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRoute } from 'vue-router';
 import { bootstrapAuth } from '@/domains/auth';
 import { appDependencies } from '@/common/env/AppDependencies';
 
 const bootstrap = bootstrapAuth();
 const authStore = bootstrap.useStore();
 const myRouter = appDependencies.getMyRouter();
+const route = useRoute();
 
 const email = ref('');
 const password = ref('');
@@ -65,8 +67,17 @@ const password = ref('');
 const handleLogin = async () => {
     try {
         await authStore.login(email.value, password.value);
-        // Navigate to home or intended route after successful login
-        myRouter.navigateTo({ name: 'home' });
+        
+        // Get redirect query parameter or default to 'home'
+        const redirect = (route.query.redirect as string) || 'home';
+        
+        // Navigate to intended route or home after successful login
+        // If redirect is a path, use it; otherwise treat as route name
+        if (redirect.startsWith('/')) {
+            myRouter.navigateTo({ path: redirect });
+        } else {
+            myRouter.navigateTo({ name: redirect });
+        }
     } catch (error) {
         // Error is already set in store, just log for debugging
         console.error('Login failed:', error);

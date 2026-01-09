@@ -145,3 +145,52 @@ export const expectLoginError = (
   expectTextVisible(wrapper, errorMessage);
 };
 
+/**
+ * Asserts that the login form is visible with all required fields.
+ */
+export const expectLoginFormVisible = (wrapper: VueWrapper): void => {
+  const emailInput = wrapper.find('[data-testid="email-input"]');
+  const passwordInput = wrapper.find('[data-testid="password-input"]');
+  
+  expect(emailInput.exists()).toBe(true);
+  expect(passwordInput.exists()).toBe(true);
+  expectLoginButtonVisible(wrapper, 'Login');
+};
+
+/**
+ * Submits the login form.
+ */
+export const submitLoginForm = async (wrapper: VueWrapper): Promise<void> => {
+  const form = wrapper.find('form');
+  await form.trigger('submit');
+  await waitForLoginPageToLoad(wrapper);
+};
+
+/**
+ * Waits for login to complete by polling the auth store loading state.
+ * Continues until loading becomes false or max attempts reached.
+ */
+export const waitForLoginToComplete = async (
+  store: ReturnType<ReturnType<typeof bootstrapAuth>['useStore']>,
+  maxAttempts: number = 50,
+  delayMs: number = 10
+): Promise<void> => {
+  let attempts = 0;
+  while (store.loading && attempts < maxAttempts) {
+    await new Promise(resolve => setTimeout(resolve, delayMs));
+    attempts++;
+  }
+};
+
+/**
+ * Asserts that user tokens are set correctly after login.
+ */
+export const expectUserTokens = (
+  store: ReturnType<ReturnType<typeof bootstrapAuth>['useStore']>,
+  expectedAccessToken: string,
+  expectedRefreshToken: string
+): void => {
+  expect(store.accessToken).toBe(expectedAccessToken);
+  expect(store.refreshToken).toBe(expectedRefreshToken);
+};
+
