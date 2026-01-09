@@ -5,6 +5,7 @@ import { createAuthGuard } from '../../utils/routeGuards';
 import { mockBootstrapAuth, setupMockAppDependencies } from '../testHelpers';
 import { bootstrapAuth } from '../../bootstrap';
 import { defineComponent } from 'vue';
+import { logoutUsingMenuButton } from './AppTestHelpers';
 
 // Mock bootstrap before imports
 mockBootstrapAuth();
@@ -175,6 +176,60 @@ describe('Route Protection Integration', () => {
             // Then: Redirect query param should still be available for component to use
             // (Component will handle navigation to intended route)
             expect(router.currentRoute.value.query.redirect).toBe('/notes');
+        });
+    });
+
+    describe('Logout and route protection', () => {
+        beforeEach(async () => {
+            // Authenticate user first
+            const store = authBootstrap.useStore();
+            await store.login('test@example.com', 'password123');
+            expect(store.isAuthenticated).toBe(true);
+        });
+
+        it('should not be able to access protected routes after logout', async () => {
+            // Given: User is authenticated and on a protected route
+            const store = authBootstrap.useStore();
+            await router.push('/notes');
+            expect(router.currentRoute.value.name).toBe('notes-list');
+
+            // When: User logs out
+            await logoutUsingMenuButton();
+            expect(store.isAuthenticated).toBe(false);
+
+            // Then: User should be redirected to login when trying to access protected route
+            await router.push('/notes');
+            expect(router.currentRoute.value.name).toBe('login');
+            expect(router.currentRoute.value.query.redirect).toBe('/notes');
+        });
+
+        it('should redirect to login when accessing home after logout', async () => {
+            // Given: User is authenticated and on home
+            const store = authBootstrap.useStore();
+            await router.push('/');
+            expect(router.currentRoute.value.name).toBe('home');
+
+            // When: User logs out and tries to access home
+            store.logout();
+            expect(store.isAuthenticated).toBe(false);
+            await router.push('/');
+
+            // Then: Should be redirected to login
+            expect(router.currentRoute.value.name).toBe('login');
+            expect(router.currentRoute.value.query.redirect).toBe('/');
+        });
+
+        it('should be able to access login page after logout', async () => {
+            // Given: User is authenticated
+            const store = authBootstrap.useStore();
+
+            // When: User logs out and navigates to login
+            store.logout();
+            expect(store.isAuthenticated).toBe(false);
+            await router.push('/login');
+
+            // Then: Should be able to access login page
+            expect(router.currentRoute.value.name).toBe('login');
         });
     });
 
