@@ -15,6 +15,13 @@ export const mockBootstrapAuth = () => {
           async getCurrentUser() {
             return new User('mock-user-1', 'test@example.com', 'Test User');
           },
+          async login() {
+            return {
+              access_token: 'mock-access-token',
+              refresh_token: 'mock-refresh-token',
+              token_type: 'bearer',
+            };
+          },
         };
         const service = new AuthService(mockRepository);
         const tokenRepository = new MockTokenRepository();

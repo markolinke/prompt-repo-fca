@@ -64,10 +64,11 @@ split the to-dos per phase, so we can execute the phase one at a time
 
 Proceed with implementation
 
-1. Have it implement the plan
-   1. Build
-   2. Test
-   3. Repeat
+1. Implement the plan
+   1. Implement yourself or by Agent
+   2. Run Build (you do it!)
+   3. Run Tests (you do it!)
+   4. Repeat until running
 2. Review process:
    1. Be very, very strict (YOU own the code)
    2. Review everything thoroughly

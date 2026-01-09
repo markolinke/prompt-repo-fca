@@ -13,6 +13,7 @@ interface AuthState {
 
 type AuthServiceShape = {
     getCurrentUser(): Promise<User>;
+    login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string }>;
 };
 
 type TokenServiceShape = {
@@ -92,6 +93,23 @@ export const createAuthStore = (
                     if (error instanceof Error && error.message.includes('401')) {
                         this.clearAuth();
                     }
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            async login(email: string, password: string): Promise<void> {
+                this.loading = true;
+                this.error = null;
+                try {
+                    const { accessToken, refreshToken } = await authService.login(email, password);
+                    this.setTokens(accessToken, refreshToken);
+                    // Automatically fetch user info after login
+                    await this.fetchCurrentUser();
+                } catch (error) {
+                    this.error = error instanceof Error ? error.message : 'Login failed';
+                    this.isAuthenticated = false;
+                    throw error; // Re-throw so component can handle
                 } finally {
                     this.loading = false;
                 }

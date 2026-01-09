@@ -1,4 +1,4 @@
-import { describe, it, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { mockBootstrapAuth, setupMockAppDependencies } from '../testHelpers';
 import {
@@ -8,6 +8,7 @@ import {
   getAuthStore,
   expectUserAuthenticated,
   expectUserMatches,
+  fillLoginForm,
 } from './LoginPageTestHelpers';
 
 mockBootstrapAuth();
@@ -18,25 +19,38 @@ describe('Login Flow', () => {
     setupMockAppDependencies();
   });
 
-  it('should fetch current user when login button is clicked', async () => {
-    // Note: This test will be fully implemented in Phase 4.2 when login() is added to AuthService
-    // For Phase 4.1, we're testing that the infrastructure is in place
-    
+  it('should login successfully with email and password', async () => {
     // Given: User navigates to login page
     const wrapper = await mountLoginPage();
+    const authStore = getAuthStore(); // Get store reference before actions
 
-    // Then: Login button is visible
-    expectLoginButtonVisible(wrapper);
+    // Then: Login form is visible
+    expect(wrapper.find('[data-testid="email-input"]').exists()).toBe(true);
+    expect(wrapper.find('[data-testid="password-input"]').exists()).toBe(true);
+    expectLoginButtonVisible(wrapper, 'Login');
 
-    // When: User clicks login button (currently just calls fetchCurrentUser)
-    await clickLoginButton(wrapper);
+    // When: User fills in credentials and submits form
+    await fillLoginForm(wrapper, 'test@example.com', 'password123');
+    
+    // Trigger form submit
+    const form = wrapper.find('form');
+    await form.trigger('submit');
+    await wrapper.vm.$nextTick();
+    
+    // Wait for login to complete (loading becomes false)
+    let attempts = 0;
+    while (authStore.loading && attempts < 50) {
+      await new Promise(resolve => setTimeout(resolve, 10));
+      attempts++;
+    }
 
-    // Then: Store should be updated with user data
-    const authStore = getAuthStore();
+    // Wait for async operations to complete
+    await wrapper.vm.$nextTick();
+
+    // Then: Store should be updated with tokens and user data
     expectUserAuthenticated(authStore);
     expectUserMatches(authStore, 'mock-user-1', 'test@example.com', 'Test User');
-    // Note: In Phase 4.1, tokens are managed via TokenStorageService
-    // fetchCurrentUser() doesn't set tokens - login() will be added in Phase 4.2
-    // For now, we just verify user data is fetched correctly
+    expect(authStore.accessToken).toBe('mock-access-token');
+    expect(authStore.refreshToken).toBe('mock-refresh-token');
   });
 });

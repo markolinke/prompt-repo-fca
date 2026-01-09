@@ -138,4 +138,78 @@ describe('AuthStore', () => {
         // clearAuth should be called
         expect(store.initializeAuth).toBeDefined();
     });
+
+    it('should login successfully and set tokens', async () => {
+        const mockService = {
+            async getCurrentUser() {
+                return new User('test-1', 'test@test.com', 'Test User');
+            },
+            async login() {
+                return { accessToken: 'test-access-token', refreshToken: 'test-refresh-token' };
+            },
+        };
+        
+        const useStore = createAuthStore(mockService, tokenService);
+        const store = useStore();
+        
+        await store.login('test@example.com', 'password123');
+        
+        expect(store.accessToken).toBe('test-access-token');
+        expect(store.refreshToken).toBe('test-refresh-token');
+        expect(store.isAuthenticated).toBe(true);
+        expect(store.user).not.toBeNull();
+        expect(store.user?.id).toBe('test-1');
+        expect(store.loading).toBe(false);
+        expect(store.error).toBeNull();
+    });
+
+    it('should handle login error', async () => {
+        const mockService = {
+            async getCurrentUser() {
+                return new User('test-1', 'test@test.com', 'Test User');
+            },
+            async login() {
+                throw new Error('Invalid credentials');
+            },
+        };
+        
+        const useStore = createAuthStore(mockService, tokenService);
+        const store = useStore();
+        
+        await expect(store.login('test@example.com', 'wrong')).rejects.toThrow('Invalid credentials');
+        
+        expect(store.accessToken).toBeNull();
+        expect(store.refreshToken).toBeNull();
+        expect(store.isAuthenticated).toBe(false);
+        expect(store.error).toBe('Invalid credentials');
+        expect(store.loading).toBe(false);
+    });
+
+    it('should set loading state during login', async () => {
+        let resolveLogin: (value: { accessToken: string; refreshToken: string }) => void;
+        const loginPromise = new Promise<{ accessToken: string; refreshToken: string }>((resolve) => {
+            resolveLogin = resolve;
+        });
+
+        const mockService = {
+            async getCurrentUser() {
+                return new User('test-1', 'test@test.com', 'Test User');
+            },
+            async login() {
+                return loginPromise;
+            },
+        };
+        
+        const useStore = createAuthStore(mockService, tokenService);
+        const store = useStore();
+        
+        const loginPromiseAction = store.login('test@example.com', 'password123');
+        
+        expect(store.loading).toBe(true);
+        
+        resolveLogin!({ accessToken: 'token', refreshToken: 'refresh' });
+        await loginPromiseAction;
+        
+        expect(store.loading).toBe(false);
+    });
 });

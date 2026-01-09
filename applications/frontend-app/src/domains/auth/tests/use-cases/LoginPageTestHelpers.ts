@@ -42,7 +42,7 @@ export const clickLoginButton = async (wrapper: VueWrapper): Promise<void> => {
 /**
  * Asserts that the login button is visible and contains the expected text.
  */
-export const expectLoginButtonVisible = (wrapper: VueWrapper, expectedText: string = 'Login with Google (Mock)'): void => {
+export const expectLoginButtonVisible = (wrapper: VueWrapper, expectedText: string = 'Login'): void => {
   const button = getLoginButton(wrapper);
   expect(button.exists()).toBe(true);
   expect(button.text()).toContain(expectedText);
@@ -114,5 +114,34 @@ export const expectUserMatches = (
   if (expectedUserName) {
     expect(store.user?.name).toBe(expectedUserName);
   }
+};
+
+/**
+ * Fills the login form with email and password.
+ */
+export const fillLoginForm = async (
+  wrapper: VueWrapper,
+  email: string,
+  password: string
+): Promise<void> => {
+  const emailInput = wrapper.find('[data-testid="email-input"]');
+  const passwordInput = wrapper.find('[data-testid="password-input"]');
+  
+  expect(emailInput.exists()).toBe(true);
+  expect(passwordInput.exists()).toBe(true);
+  
+  await emailInput.setValue(email);
+  await passwordInput.setValue(password);
+  await waitForLoginPageToLoad(wrapper);
+};
+
+/**
+ * Asserts that a login error message is displayed.
+ */
+export const expectLoginError = (
+  wrapper: VueWrapper,
+  errorMessage: string
+): void => {
+  expectTextVisible(wrapper, errorMessage);
 };
 
