@@ -23,10 +23,23 @@ We build components this way to:
 
 ## Component Structure and Placement
 
-- **Views** (page-level, routed components): `features/<feature>/views/`
-- **Feature-specific components**: `features/<feature>/components/`
-- **Reusable UI components**: `src/common/ui/` (e.g., Button.vue, Card.vue, Input.vue)
-- File naming: **PascalCase** for `.vue` files (e.g., `NotesListView.vue`)
+### Pages vs Components
+
+**This distinction has been created for clarity** to separate route-level components from reusable feature components.
+
+- **Pages** (`domains/<feature>/pages/`): Route-level components that are directly referenced in `routes.ts` files. These are top-level orchestration components that compose multiple smaller components together. Pages handle routing concerns and are the entry points for specific routes.
+  - Examples: `NotesPage.vue`, `LoginPage.vue`
+  - These are imported directly in route definitions: `component: () => import('@/domains/<feature>/pages/<PageName>.vue')`
+
+- **Components** (`domains/<feature>/components/`): Reusable, feature-specific components that are composed by pages or other components. These components are not directly referenced in routes but are imported and used within pages.
+  - Examples: `NotesList.vue`, `NoteDetails.vue`
+  - These are imported by pages or other components: `import NotesList from '../components/NotesList.vue'`
+
+- **Reusable UI components** (`src/common/ui/`): Shared UI components used across multiple features (e.g., `ButtonWithLoader.vue`, `Card.vue`, `Input.vue`)
+
+- File naming: **PascalCase** for `.vue` files (e.g., `NotesList.vue`, `NotesPage.vue`)
+
+**Rule of thumb**: If a component is directly referenced in `routes.ts`, it belongs in `pages/`. Otherwise, it belongs in `components/`.
 
 ## Rules for Writing Component Code
 
@@ -42,7 +55,7 @@ Order: **script** block first, then **template**, then (if ever needed) **style*
 
 Inside `<script setup>`:
 
-- Import from feature barrel only (`@/features/<feature>`)
+- Import from feature barrel only (`@/domains/<feature>`)
 - Use explicit property access (no object destructuring)
 - Call lifecycle hooks when needed (e.g., `onMounted`)
 - Prefer computed state in Pinia stores over local computed properties
@@ -50,7 +63,7 @@ Inside `<script setup>`:
 #### Store Integration (Mandatory Pattern)
 
 ```typescript
-import { bootstrapNotes } from '@/features/notes'
+import { bootstrapNotes } from '@/domains/notes'
 import { onMounted } from 'vue'
 
 const bootstrapResult = bootstrapNotes()
@@ -127,17 +140,17 @@ We rely exclusively on Tailwind utility classes applied directly in templates.
 
 ## Routing Integration
 
-Each feature defines its routes in `features/<feature>/routes.ts`:
+Each feature defines its routes in `domains/<feature>/routes.ts`:
 
 ```typescript
-// features/notes/routes.ts
+// domains/notes/routes.ts
 import { RouteRecordRaw } from 'vue-router'
 
 const routes: RouteRecordRaw[] = [
   {
     path: '/notes',
     name: 'notes-list',
-    component: () => import('./views/NotesListView.vue'),
+    component: () => import('./pages/NotesPage.vue'),
   },
 ]
 
@@ -147,7 +160,7 @@ export default routes
 ### Feature Bootstrap Returns Routes
 
 ```typescript
-// features/notes/bootstrap.ts (excerpt)
+// domains/notes/bootstrap.ts (excerpt)
 import notesRoutes from './routes'
 
 const bootstrapNotes = () => {
@@ -169,9 +182,9 @@ All feature routes are registered in a single dedicated file using an **arrow fu
 File: `src/app/bootstrap.ts`
 
 ```typescript
-// src/app/bootstrap.ts
+// src/app/bootstrap/bootstrapFeatures.ts
 import { Router } from 'vue-router'
-import { bootstrapNotes } from '@/features/notes'
+import { bootstrapNotes } from '@/domains/notes'
 
 export const bootstrapFeatures = (router: Router): void => {
   for (const route of bootstrapNotes().routes) {
@@ -202,7 +215,7 @@ app.use(router)
 - Route components should be lazy-loaded when appropriate:
 
   ```typescript
-  component: () => import('./views/NotesListView.vue')
+  component: () => import('./pages/NotesPage.vue')
   ```
 
 - Features may define flat or nested routes as needed. No global root layout route is required unless decided later.
@@ -246,7 +259,7 @@ Standard patterns for loading, error, empty states, global error handling, and t
 
 ```vue
 <script setup lang="ts">
-import { bootstrapNotes } from '@/features/notes'
+import { bootstrapNotes } from '@/domains/notes'
 import { onMounted } from 'vue'
 
 const bootstrapResult = bootstrapNotes()
@@ -278,7 +291,7 @@ onMounted(() => {
 ### Feature Barrel (index.ts)
 
 ```typescript
-// features/notes/index.ts
+// domains/notes/index.ts
 export { bootstrapNotes } from './bootstrap'
 ```
 

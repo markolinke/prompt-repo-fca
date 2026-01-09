@@ -4,7 +4,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/login',
     name: 'login',
-    component: () => import('@/domains/auth/components/LoginPage.vue'),
+    component: () => import('@/domains/auth/pages/LoginPage.vue'),
     meta: { isPublic: true },
   },
 ];

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { AuthService } from '../services/AuthService';
 import { User } from '../entities/User';
 import { MockAuthRepository } from '../repositories/MockAuthRepository';
@@ -43,13 +43,7 @@ describe('AuthService', () => {
         });
 
         it('should propagate repository errors', async () => {
-            const mockRepo = {
-                getCurrentUser: vi.fn(),
-                login: vi.fn().mockRejectedValue(new Error('Invalid credentials')),
-            };
-            const serviceWithMock = new AuthService(mockRepo);
-            
-            await expect(serviceWithMock.login('test@example.com', 'wrong')).rejects.toThrow('Invalid credentials');
+            await expect(service.login('test@example.com', 'wrong')).rejects.toThrow('Invalid credentials');
         });
     });
 });

@@ -1,6 +1,6 @@
 import { mount, VueWrapper, flushPromises } from '@vue/test-utils';
 import { expect } from 'vitest';
-import LoginPage from '../../components/LoginPage.vue';
+import LoginPage from '../../pages/LoginPage.vue';
 import { bootstrapAuth } from '../../bootstrap';
 
 /**

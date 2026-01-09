@@ -152,6 +152,9 @@ describe('AuthStore', () => {
             async login() {
                 return loginPromise;
             },
+            async refreshToken() {
+                return { access_token: 'token', refresh_token: 'refresh', token_type: 'bearer' };
+            },
         };
         const delayedService = new AuthService(delayedRepository);
         const useStore = createAuthStore(delayedService, tokenService);

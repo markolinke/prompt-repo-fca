@@ -1,6 +1,7 @@
 import { AuthRepositoryPort } from "./AuthRepositoryPort";
 import { User } from "../entities/User";
 import { LoginCredentials } from "../entities/LoginCredentials";
+import { UnauthorizedError, ValidationError } from "@/common/errors/DomainError";
 
 // Mock repository
 export class MockAuthRepository implements AuthRepositoryPort {
@@ -12,9 +13,13 @@ export class MockAuthRepository implements AuthRepositoryPort {
     async login(credentials: LoginCredentials): Promise<{ access_token: string; refresh_token: string; token_type: string }> {
         // Basic validation to match real behavior
         if (!credentials.email || !credentials.password) {
-            throw new Error('Invalid credentials');
+            throw new ValidationError('Invalid credentials', ['Email and password are required']);
         }
-        
+
+        if (credentials.email !== 'test@example.com' || credentials.password !== 'password123') {
+            throw new UnauthorizedError('Invalid credentials');
+        }
+
         return {
             access_token: 'mock-access-token',
             refresh_token: 'mock-refresh-token',

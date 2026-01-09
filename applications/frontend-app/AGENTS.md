@@ -184,7 +184,10 @@ NOTE: Do not validate on object constructor. We'll need empty object for manipul
 
 ### Adding a New Component
 
-1. Place in `domains/<feature>/components/` or `domains/<feature>/pages/`
+1. **Placement**:
+   - **Pages**: Place route-level components in `domains/<feature>/pages/` if they are directly referenced in `routes.ts`
+   - **Components**: Place reusable components in `domains/<feature>/components/` if they are imported and used by pages or other components
+   - See `docs/vue-application.md` for detailed explanation of the distinction
 2. Use PascalCase: `MyComponent.vue`
 3. Follow component pattern (bootstrap → store)
 4. Use Tailwind classes only (no `<style scoped>`)

@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
-import { mount, VueWrapper } from '@vue/test-utils';
 import { createAuthGuard } from '../../utils/routeGuards';
 import { mockBootstrapAuth, setupMockAppDependencies } from '../testHelpers';
 import { bootstrapAuth } from '../../bootstrap';
