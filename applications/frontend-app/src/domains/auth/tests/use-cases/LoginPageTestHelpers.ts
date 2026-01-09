@@ -1,14 +1,41 @@
 import { mount, VueWrapper, flushPromises } from '@vue/test-utils';
 import { expect } from 'vitest';
+import { createRouter, createWebHistory, type Router } from 'vue-router';
+import { defineComponent } from 'vue';
 import LoginPage from '../../pages/LoginPage.vue';
 import { bootstrapAuth } from '../../bootstrap';
+
+// Create simple test component for router
+const TestHomePage = defineComponent({
+  name: 'TestHomePage',
+  template: '<div>Home Page</div>',
+});
+
+/**
+ * Creates a test router with login route.
+ */
+const createTestRouter = (): Router => {
+  return createRouter({
+    history: createWebHistory(),
+    routes: [
+      { path: '/', name: 'home', component: TestHomePage },
+      { path: '/login', name: 'login', component: LoginPage, meta: { isPublic: true } },
+    ],
+  });
+};
 
 /**
  * Mounts LoginPage and waits for initial render.
  * Use this as the starting point for most tests.
+ * Provides a router instance so useRoute() works correctly.
  */
-export const mountLoginPage = async (): Promise<VueWrapper> => {
-  const wrapper = mount(LoginPage);
+export const mountLoginPage = async (router?: Router): Promise<VueWrapper> => {
+  const testRouter = router || createTestRouter();
+  const wrapper = mount(LoginPage, {
+    global: {
+      plugins: [testRouter],
+    },
+  });
   await waitForLoginPageToLoad(wrapper);
   return wrapper;
 };

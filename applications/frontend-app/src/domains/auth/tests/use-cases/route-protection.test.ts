@@ -2,10 +2,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
 import { createAuthGuard } from '../../utils/routeGuards';
-import { mockBootstrapAuth, setupMockAppDependencies } from '../testHelpers';
+import { mockBootstrapAuth, setupMockAppDependencies, navigateToRoute } from '../testHelpers';
 import { bootstrapAuth } from '../../bootstrap';
 import { defineComponent } from 'vue';
-import { logoutUsingMenuButton } from './AppTestHelpers';
 
 // Mock bootstrap before imports
 mockBootstrapAuth();
@@ -193,12 +192,12 @@ describe('Route Protection Integration', () => {
             await router.push('/notes');
             expect(router.currentRoute.value.name).toBe('notes-list');
 
-            // When: User logs out
-            await logoutUsingMenuButton();
+            // When: User logs out and tries to access protected route
+            store.logout();
             expect(store.isAuthenticated).toBe(false);
+            await navigateToRoute(router, '/notes');
 
-            // Then: User should be redirected to login when trying to access protected route
-            await router.push('/notes');
+            // Then: User should be redirected to login
             expect(router.currentRoute.value.name).toBe('login');
             expect(router.currentRoute.value.query.redirect).toBe('/notes');
         });
@@ -212,7 +211,7 @@ describe('Route Protection Integration', () => {
             // When: User logs out and tries to access home
             store.logout();
             expect(store.isAuthenticated).toBe(false);
-            await router.push('/');
+            await navigateToRoute(router, '/');
 
             // Then: Should be redirected to login
             expect(router.currentRoute.value.name).toBe('login');
