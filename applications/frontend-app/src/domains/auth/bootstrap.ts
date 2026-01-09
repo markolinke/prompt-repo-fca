@@ -21,15 +21,16 @@ const bootstrapAuth = () => {
     // Create token service (application layer) - wraps repository
     const tokenService = new TokenService(tokenRepository);
             
-    // Create a token getter function that will reference the store
-    let tokenGetter: (() => string | null) | undefined;
-    
     // Create authenticated HTTP client with token getter
     const authenticatedHttpClient = new AxiosHttpClient(
         appConfig.baseUrl,
         {},
         myRouter,
-        () => tokenGetter?.() || null
+        () => {
+            const store = useStore();
+            const getTokenFn = store.getToken;
+            return getTokenFn();
+        }
     );
     
     // Create repository and service
@@ -39,18 +40,11 @@ const bootstrapAuth = () => {
     // Create store with token repository
     const useStore = createAuthStore(authenticatedService, tokenService);
     
-    // Set the token getter after store is created
-    // getToken is a getter that returns a function, so we access it directly
-    const store = useStore();
-    tokenGetter = () => {
-        const getTokenFn = store.getToken;
-        return getTokenFn();
-    };
-    
     return {
         useStore,
         routes: authRoutes,
         initializeAuth: () => {
+            const store = useStore();
             store.initializeAuth();
         },
     };

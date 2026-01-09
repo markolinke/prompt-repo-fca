@@ -144,6 +144,8 @@ Please review the work done, how it complies to the standards and practices desc
    4. Information how to test, and how to learn more 
    5. Any other relevant information specific to implementation...
 
+> NOTE: Use ASK mode, so it actually writes to the prepared markdown file
+
 For example:
 
 ```text
