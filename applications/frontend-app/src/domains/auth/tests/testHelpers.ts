@@ -3,7 +3,7 @@ import { AuthService } from '../services/AuthService';
 import { TokenService } from '../services/TokenService';
 import { createAuthStore } from '../store/AuthStore';
 import { MockTokenRepository } from '../repositories/MockTokenRepository';
-import { User } from '../entities/User';
+import { MockAuthRepository } from '../repositories/MockAuthRepository';
 import { appDependencies } from '@/common/env/AppDependencies';
 import type { MyRouterPort } from '@/common/routing/MyRouterPort';
 
@@ -11,19 +11,9 @@ export const mockBootstrapAuth = () => {
   vi.mock('../bootstrap', () => {
     return {
       bootstrapAuth: () => {
-        const mockRepository = {
-          async getCurrentUser() {
-            return new User('mock-user-1', 'test@example.com', 'Test User');
-          },
-          async login() {
-            return {
-              access_token: 'mock-access-token',
-              refresh_token: 'mock-refresh-token',
-              token_type: 'bearer',
-            };
-          },
-        };
-        const service = new AuthService(mockRepository);
+        // Real service with mock repository (following guidelines)
+        const repository = new MockAuthRepository();
+        const service = new AuthService(repository);
         const tokenRepository = new MockTokenRepository();
         const tokenService = new TokenService(tokenRepository);
         const useStore = createAuthStore(service, tokenService); 

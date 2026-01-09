@@ -67,7 +67,9 @@ Proceed with implementation
 1. Implement the plan
    1. Implement yourself or by Agent
    2. Run Build (you do it!)
+      1. HINT: It's useful to try to fix errors yourself, as a learning process
    3. Run Tests (you do it!)
+      1. HINT: See above
    4. Repeat until running
 2. Review process:
    1. Be very, very strict (YOU own the code)

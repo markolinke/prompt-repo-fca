@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import { User } from '../entities/User';
 import { isTokenExpired } from '../utils/tokenUtils';
+import { AuthService } from '../services/AuthService';
+import { TokenService } from '../services/TokenService';
 
 interface AuthState {
     user: User | null;
@@ -11,23 +13,9 @@ interface AuthState {
     error: string | null;
 }
 
-type AuthServiceShape = {
-    getCurrentUser(): Promise<User>;
-    login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string }>;
-};
-
-type TokenServiceShape = {
-    setAccessToken(token: string): void;
-    getAccessToken(): string | null;
-    setRefreshToken(token: string): void;
-    getRefreshToken(): string | null;
-    clearTokens(): void;
-    hasTokens(): boolean;
-};
-
 export const createAuthStore = (
-    authService: AuthServiceShape,
-    tokenService: TokenServiceShape
+    authService: AuthService,
+    tokenService: TokenService
 ) => {
     return defineStore('auth', {
         state: (): AuthState => ({

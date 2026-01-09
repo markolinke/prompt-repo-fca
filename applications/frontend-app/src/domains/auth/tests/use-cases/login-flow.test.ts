@@ -3,7 +3,6 @@ import { createPinia, setActivePinia } from 'pinia';
 import { mockBootstrapAuth, setupMockAppDependencies } from '../testHelpers';
 import {
   mountLoginPage,
-  clickLoginButton,
   expectLoginButtonVisible,
   getAuthStore,
   expectUserAuthenticated,
