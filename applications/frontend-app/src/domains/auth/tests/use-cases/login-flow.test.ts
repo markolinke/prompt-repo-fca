@@ -34,9 +34,9 @@ describe('Login Flow', () => {
     await submitLoginForm(wrapper);
     await waitForLoginToComplete(authStore);
 
-    // Then: Store should be updated with tokens and user data
+    // Then: Store should be updated with access token and user data
     expectUserAuthenticated(authStore);
     expectUserMatches(authStore, 'mock-user-1', 'mock@ancorit.com', 'Test User');
-    expectUserTokens(authStore, 'mock-access-token', 'mock-refresh-token');
+    expectUserTokens(authStore, 'mock-access-token');
   });
 });

@@ -6,16 +6,16 @@ import { bootstrapAuth } from '@/domains/auth'
 export const bootstrapFeatures = (router: Router) => {   
     console.log('Bootstrapping features...')
     
-    // Bootstrap notes
-    for (const route of bootstrapNotes().routes) {
-        console.log('bootstrapFeatures, adding route: ', route.name);
-        router.addRoute(route);
-    }
-    
     // Bootstrap auth
     const authBootstrap = bootstrapAuth();
     for (const route of authBootstrap.routes) {
         console.log('bootstrapFeatures, adding auth route: ', route.name);
+        router.addRoute(route);
+    }
+    
+    // Bootstrap notes
+    for (const route of bootstrapNotes().routes) {
+        console.log('bootstrapFeatures, adding route: ', route.name);
         router.addRoute(route);
     }
     

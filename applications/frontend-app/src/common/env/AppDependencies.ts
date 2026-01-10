@@ -10,6 +10,7 @@ export interface AppConfig {
 class AppDependencies {
     private myRouter: MyRouterPort | null = null
     private httpClient: HttpClientPort | null = null
+    private authenticatedHttpClient: HttpClientPort | null = null
     private timeoutClient: TimeoutPort | null = null
     private appConfig: AppConfig | null = null
 
@@ -57,12 +58,33 @@ class AppDependencies {
         return this.myRouter
     }
 
+    registerAuthenticatedHttpClient(httpClient: HttpClientPort): void {
+        this.authenticatedHttpClient = httpClient
+    }
+
+    getAuthenticatedHttpClient(): HttpClientPort {
+        const appConfig = this.getAppConfig()
+        
+        // In mock mode, return base client (no auth needed)
+        if (appConfig.repositoryType === 'mock') {
+            return this.getHttpClient()
+        }
+        
+        // In http mode, require authenticated client to be registered
+        if (!this.authenticatedHttpClient) {
+            throw new Error('AuthenticatedHttpClient has not been registered. Make sure auth domain boots first.')
+        }
+        
+        return this.authenticatedHttpClient
+    }
+
     /**
      * Resets all registered dependencies (ONLY for testing). 
      */
     resetForTesting(): void {
         this.myRouter = null;
         this.httpClient = null;
+        this.authenticatedHttpClient = null;
         this.timeoutClient = null;
         this.appConfig = null;
     }

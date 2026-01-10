@@ -24,28 +24,14 @@ export class TokenService {
     }
 
     /**
-     * Store refresh token
-     */
-    setRefreshToken(token: string): void {
-        this.tokenRepository.setRefreshToken(token);
-    }
-
-    /**
-     * Get refresh token
-     */
-    getRefreshToken(): string | null {
-        return this.tokenRepository.getRefreshToken();
-    }
-
-    /**
-     * Clear all tokens
+     * Clear access token
      */
     clearTokens(): void {
         this.tokenRepository.clearTokens();
     }
 
     /**
-     * Check if tokens exist
+     * Check if access token exists
      */
     hasTokens(): boolean {
         return this.tokenRepository.hasTokens();

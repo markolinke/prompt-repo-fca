@@ -210,14 +210,12 @@ export const waitForLoginToComplete = async (
 };
 
 /**
- * Asserts that user tokens are set correctly after login.
+ * Asserts that user access token is set correctly after login.
  */
 export const expectUserTokens = (
   store: ReturnType<ReturnType<typeof bootstrapAuth>['useStore']>,
-  expectedAccessToken: string,
-  expectedRefreshToken: string
+  expectedAccessToken: string
 ): void => {
   expect(store.accessToken).toBe(expectedAccessToken);
-  expect(store.refreshToken).toBe(expectedRefreshToken);
 };
 

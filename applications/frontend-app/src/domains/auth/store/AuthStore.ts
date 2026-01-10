@@ -7,7 +7,6 @@ import { TokenService } from '../services/TokenService';
 interface AuthState {
     user: User | null;
     accessToken: string | null;
-    refreshToken: string | null;
     isAuthenticated: boolean;
     loading: boolean;
     error: string | null;
@@ -21,7 +20,6 @@ export const createAuthStore = (
         state: (): AuthState => ({
             user: null,
             accessToken: null,
-            refreshToken: null,
             isAuthenticated: false,
             loading: false,
             error: null,
@@ -33,11 +31,9 @@ export const createAuthStore = (
              */
             initializeAuth(): void {
                 const accessToken = tokenService.getAccessToken();
-                const refreshToken = tokenService.getRefreshToken();
                 
-                if (accessToken && refreshToken && !isTokenExpired(accessToken)) {
+                if (accessToken && !isTokenExpired(accessToken)) {
                     this.accessToken = accessToken;
-                    this.refreshToken = refreshToken;
                     this.isAuthenticated = true;
                     // Optionally fetch user on init (Phase 4.2)
                 } else if (accessToken && isTokenExpired(accessToken)) {
@@ -47,13 +43,11 @@ export const createAuthStore = (
             },
 
             /**
-             * Set tokens and persist to storage
+             * Set access token and persist to storage
              */
-            setTokens(accessToken: string, refreshToken: string): void {
+            setAccessToken(accessToken: string): void {
                 this.accessToken = accessToken;
-                this.refreshToken = refreshToken;
                 tokenService.setAccessToken(accessToken);
-                tokenService.setRefreshToken(refreshToken);
                 this.isAuthenticated = true;
             },
 
@@ -63,7 +57,6 @@ export const createAuthStore = (
             clearAuth(): void {
                 this.user = null;
                 this.accessToken = null;
-                this.refreshToken = null;
                 this.isAuthenticated = false;
                 tokenService.clearTokens();
             },
@@ -77,8 +70,6 @@ export const createAuthStore = (
                 } catch (error) {
                     this.error = error instanceof Error ? error.message : 'Failed to fetch user';
                     this.isAuthenticated = false;
-                    // AuthenticatedHttpClient handles 401 and refresh automatically
-                    // If we get here after refresh fails, the auth state will be cleared
                 } finally {
                     this.loading = false;
                 }
@@ -88,8 +79,8 @@ export const createAuthStore = (
                 this.loading = true;
                 this.error = null;
                 try {
-                    const { accessToken, refreshToken } = await authService.login(email, password);
-                    this.setTokens(accessToken, refreshToken);
+                    const { accessToken } = await authService.login(email, password);
+                    this.setAccessToken(accessToken);
                     // Automatically fetch user info after login
                     await this.fetchCurrentUser();
                 } catch (error) {
@@ -103,27 +94,6 @@ export const createAuthStore = (
 
             logout(): void {
                 this.clearAuth();
-            },
-
-            async refreshTokens(): Promise<boolean> {
-                if (!this.refreshToken) {
-                    this.clearAuth();
-                    return false;
-                }
-                
-                if (isTokenExpired(this.refreshToken)) {
-                    this.clearAuth();
-                    return false;
-                }
-                
-                try {
-                    const { accessToken, refreshToken } = await authService.refreshToken(this.refreshToken);
-                    this.setTokens(accessToken, refreshToken);
-                    return true;
-                } catch (error) {
-                    this.clearAuth();
-                    return false;
-                }
             },
         },
 
@@ -141,14 +111,6 @@ export const createAuthStore = (
             isAccessTokenExpired(): boolean {
                 if (!this.accessToken) return true;
                 return isTokenExpired(this.accessToken);
-            },
-
-            /**
-             * Check if refresh token is expired
-             */
-            isRefreshTokenExpired(): boolean {
-                if (!this.refreshToken) return true;
-                return isTokenExpired(this.refreshToken);
             },
         },
     });
