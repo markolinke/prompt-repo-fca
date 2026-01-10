@@ -9,7 +9,7 @@ export class AuthService {
         return this.repository.getCurrentUser();
     }
 
-    async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string }> {
+    async login(email: string, password: string): Promise<{ accessToken: string }> {
         // Create credentials entity (validation happens here)
         const credentials = new LoginCredentials(email, password);
         
@@ -19,15 +19,6 @@ export class AuthService {
         // Transform response from snake_case to camelCase
         return {
             accessToken: response.access_token,
-            refreshToken: response.refresh_token,
-        };
-    }
-
-    async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
-        const response = await this.repository.refreshToken(refreshToken);
-        return {
-            accessToken: response.access_token,
-            refreshToken: response.refresh_token,
         };
     }
 }

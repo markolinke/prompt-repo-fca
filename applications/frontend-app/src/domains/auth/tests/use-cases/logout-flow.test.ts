@@ -77,7 +77,7 @@ describe('Logout Flow', () => {
       const authStore = getAuthStore();
       await authStore.login('mock@ancorit.com', 'LetMeIn!');
       expectUserAuthenticated(authStore);
-      expectUserTokens(authStore, 'mock-access-token', 'mock-refresh-token');
+      expectUserTokens(authStore, 'mock-access-token');
 
       const wrapper = await mountApp();
       await openMenu(wrapper);
@@ -89,7 +89,6 @@ describe('Logout Flow', () => {
       // Then: Auth state should be cleared
       expectUserNotAuthenticated(authStore);
       expect(authStore.accessToken).toBeNull();
-      expect(authStore.refreshToken).toBeNull();
       expect(authStore.user).toBeNull();
     });
 

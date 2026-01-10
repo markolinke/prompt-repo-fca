@@ -9,7 +9,7 @@ import { createDebouncer, createCurrentTimeProvider } from '@/common/time';
 const bootstrapNotes = () => {
     const repoType = appDependencies.getAppConfig().repositoryType
 
-    const apiClient = appDependencies.getHttpClient();
+    const apiClient = appDependencies.getAuthenticatedHttpClient();
     const timeoutClient = appDependencies.getTimeoutClient();
     const repository = repoType === 'mock'
         ? new MockNoteRepository()

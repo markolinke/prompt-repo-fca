@@ -4,7 +4,6 @@ import type { MyRouterPort } from "@/common/routing/MyRouterPort";
 import type { HttpClientPort } from "./HttpClientPort";
 
 export class AxiosHttpClient implements HttpClientPort {
-
     constructor(
         private readonly baseUrl: string,
         private readonly headers: Record<string, string> = {},
@@ -82,10 +81,9 @@ export class AxiosHttpClient implements HttpClientPort {
 
     private navigateToError(error: Error): void {
         this.router.navigateTo({ name: 'Error', params: { error } });
-      }
+    }
     
     private handleError(error: any): never {
-    
         if (error.response) {
             const status = error.response.status;
 

@@ -15,22 +15,12 @@ export interface TokenRepositoryPort {
     getAccessToken(): string | null;
 
     /**
-     * Store refresh token
-     */
-    setRefreshToken(token: string): void;
-
-    /**
-     * Get refresh token
-     */
-    getRefreshToken(): string | null;
-
-    /**
-     * Clear all tokens
+     * Clear access token
      */
     clearTokens(): void;
 
     /**
-     * Check if tokens exist
+     * Check if access token exists
      */
     hasTokens(): boolean;
 }

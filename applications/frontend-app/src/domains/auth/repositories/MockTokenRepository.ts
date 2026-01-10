@@ -6,7 +6,6 @@ import type { TokenRepositoryPort } from './TokenRepositoryPort';
  */
 export class MockTokenRepository implements TokenRepositoryPort {
     private accessToken: string | null = null;
-    private refreshToken: string | null = null;
 
     setAccessToken(token: string): void {
         this.accessToken = token;
@@ -16,21 +15,12 @@ export class MockTokenRepository implements TokenRepositoryPort {
         return this.accessToken;
     }
 
-    setRefreshToken(token: string): void {
-        this.refreshToken = token;
-    }
-
-    getRefreshToken(): string | null {
-        return this.refreshToken;
-    }
-
     clearTokens(): void {
         this.accessToken = null;
-        this.refreshToken = null;
     }
 
     hasTokens(): boolean {
-        return !!this.accessToken && !!this.refreshToken;
+        return !!this.accessToken;
     }
 }
 

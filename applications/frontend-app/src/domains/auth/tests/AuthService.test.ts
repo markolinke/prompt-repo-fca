@@ -25,13 +25,11 @@ describe('AuthService', () => {
     });
 
     describe('login', () => {
-        it('should login successfully and return tokens', async () => {
+        it('should login successfully and return access token', async () => {
             const result = await service.login('mock@ancorit.com', 'LetMeIn!');
             
             expect(result).toHaveProperty('accessToken');
-            expect(result).toHaveProperty('refreshToken');
             expect(result.accessToken).toBe('mock-access-token');
-            expect(result.refreshToken).toBe('mock-refresh-token');
         });
 
         it('should throw ValidationError for invalid email', async () => {
